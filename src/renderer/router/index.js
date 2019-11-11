@@ -4,26 +4,32 @@ import Router from 'vue-router'
 Vue.use(Router)
 
 import Home from '../components/Home.vue'
-import News from '../components/News.vue'
+import Problems from '../components/Problems.vue'
+import Content from '../components/Content.vue'
+import userHome from '../components/userHome.vue'
+
 
 export default new Router({
   routes: [
-    // {
-    //   path: '/',
-    //   name: 'landing-page',
-    //   component: require('@/components/LandingPage').default
-    // },
     {
-      path: '/',
+      path: '/home',
       component: Home
     },
     {
-      path: '/news',
-      component: News
+      path: '/problems',
+      component: Problems
+    },
+    {
+      path: '/problem/:problemID',
+      component: Content
+    },
+    {
+      path: '/user-home',
+      component: userHome
     },
     {
       path: '*',
-      redirect: '/'
+      redirect: '/home'
     }
   ]
 })

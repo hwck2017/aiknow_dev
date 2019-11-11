@@ -1,14 +1,18 @@
 <template>
   <div id="app">
-    <router-link to="home">首页</router-link>
-    <router-link to="news">新闻</router-link>
+    <router-link to="/home">题目</router-link>
     <router-view></router-view>
+    <!-- <home></home> -->
   </div>
 </template>
 
 <script>
+  // import Home from '../components/Home.vue'
   export default {
     name: 'y'
+    // components: {
+    //   "home": Home
+    // }
   }
 </script>
 

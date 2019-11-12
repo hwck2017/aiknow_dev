@@ -1,6 +1,5 @@
 <template>
   <div id="app">
-    <router-link to="/home">题目</router-link>
     <router-view></router-view>
     <!-- <home></home> -->
   </div>
@@ -9,7 +8,7 @@
 <script>
   // import Home from '../components/Home.vue'
   export default {
-    name: 'y'
+    name: 'aiknow-dev'
     // components: {
     //   "home": Home
     // }

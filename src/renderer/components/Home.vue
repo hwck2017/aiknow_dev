@@ -19,19 +19,40 @@
       </el-header>
 
       <el-container>
+        <div>
+        <el-avatar class="avatar-style" :size="30" :src="circleUrl"></el-avatar>
+        <el-dropdown trigger="click" >
+          <span class="el-dropdown-link">
+            <i class="el-icon-arrow-down el-icon--right"></i>
+          </span>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item>个人中心</el-dropdown-item>
+            <el-dropdown-item @click="layout()">退出</el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
+        </div>
+        <br>
         <!-- 侧边栏 -->
-        <el-radio-group v-model="isCollapse" style="margin-bottom: 20px;">
+        <div>
+        <el-radio-group v-model="isCollapse" style="margin-bottom: 20px;" text-color="#f11c40" fill="#fff" border size="small">
           <el-radio-button :label="false">展开</el-radio-button>
           <el-radio-button :label="true">收起</el-radio-button>
         </el-radio-group>
-        <el-menu default-active="1-4-1" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose" :collapse="isCollapse" background-color='#f11c40'>
-          <el-menu-item index="1">
+        </div>
+        <el-menu 
+          default-active="1-4-1" 
+          class="el-menu-style" 
+          @open="handleOpen" 
+          @close="handleClose" 
+          :collapse="isCollapse" 
+          active-text-color="#f11c40">
+          <el-menu-item index="dashboard">
             <template slot="title">
               <i class="el-icon-location"></i>
               <span slot="title">主页</span>
             </template>
           </el-menu-item>
-          <el-menu-item index="2">
+          <el-menu-item index="problems">
             <i class="el-icon-menu"></i>
             <span slot="title">题目</span>
           </el-menu-item>
@@ -61,6 +82,12 @@ export default {
   methods: {
     layout() {
       console.log("layout");
+    },
+    handleOpen(key, keyPath) {
+      console.log(key, keyPath);
+    },
+    handleClose(key, keyPath) {
+      console.log(key, keyPath);
     }
   }
 }
@@ -88,8 +115,8 @@ export default {
     }
   }
 
-  .el-menu-vertical-demo:not(.el-menu--collapse) {
-    width: 200px;
+  .el-menu-styleo:not(.el-menu--collapse) {
+    width: 80px;
     min-height: 400px;
   }
 

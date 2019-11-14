@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" class="app-style">
     <router-view></router-view>
     <!-- <home></home> -->
   </div>
@@ -17,4 +17,7 @@
 
 <style>
   /* CSS */
+  .app-style {
+    height: 100%;
+  }
 </style>

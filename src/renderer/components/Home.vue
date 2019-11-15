@@ -26,14 +26,15 @@
         </el-menu>
 
         <div>
-          <el-avatar class="avatar-style" :size="30" :src="circleUrl"></el-avatar>
-          <el-dropdown trigger="click">
-            <span class="el-dropdown-link">
+          <!-- <el-avatar class="avatar-style" :size="30" :src="circleUrl"></el-avatar> -->
+          <el-dropdown @command="handleCommand">
+            <el-avatar class="avatar-style" :size="30" :src="circleUrl"></el-avatar>
+            <!-- <span class="el-dropdown-link">
               <i class="el-icon-arrow-down el-icon--right"></i>
-            </span>
+            </span>-->
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item>个人中心</el-dropdown-item>
-              <el-dropdown-item @click="layout()">退出</el-dropdown-item>
+              <el-dropdown-item command="userHome">个人中心</el-dropdown-item>
+              <el-dropdown-item command="logout">退出</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
         </div>
@@ -93,11 +94,23 @@ export default {
     };
   },
   methods: {
-    layout() {
-      console.log("layout");
+    handleCommand(command) {
+      this.$message("click on item " + command);
+      if (command === "logout") {
+        this.logout();
+      } else if (command === "userHome") {
+        this.goUserHome();
+      }
+    },
+    logout() {
+      window.sessionStorage.clear();
+      this.$router.push("/login");
     },
     handleSelect(key, keyPath) {
       console.log(key, keyPath);
+    },
+    goUserHome() {
+      this.$router.push({ path: "/user-home" });
     }
   }
 };

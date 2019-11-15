@@ -1,23 +1,14 @@
 <template>
-  <div id="app" class="app-style">
+  <div id="app">
     <router-view></router-view>
-    <!-- <home></home> -->
   </div>
 </template>
 
 <script>
-  // import Home from '../components/Home.vue'
-  export default {
-    name: 'aiknow-dev'
-    // components: {
-    //   "home": Home
-    // }
-  }
+export default {
+  name: "aiknow-dev"
+};
 </script>
 
 <style>
-  /* CSS */
-  .app-style {
-    height: 100%;
-  }
 </style>

@@ -52,12 +52,15 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
+    "codemirror": "^5.49.2",
     "element-ui": "^2.12.0",
     "vue": "^2.5.16",
+    "vue-codemirror": "^4.0.6",
     "vue-electron": "^1.0.6",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1",
-    "vuex-electron": "^1.0.0"
+    "vuex-electron": "^1.0.0",
+    "wandbox-api": "0.0.0"
   },
   "devDependencies": {
     "ajv": "^6.5.0",

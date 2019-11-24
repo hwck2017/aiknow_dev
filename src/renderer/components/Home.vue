@@ -1,87 +1,60 @@
 <template>
-  <div>
-    <el-container class="home-container">
-      <el-header>
-        <div>
-          <!-- <img src="../assets/heima.png" alt=""> -->
-          <span>test</span>
-        </div>
+  <el-container class="home-container">
+    <el-header>
+      <div>
+        <!-- <img src="../assets/aiknow.png" alt=""> -->
+        <span class="title-style">爱知部落</span>
+      </div>
 
-        <el-menu
-          :default-active="home"
-          mode="horizontal"
-          @select="handleSelect"
-          background-color="#f11c40"
-          text-color="#fff"
-          router
-        >
-          <el-menu-item index="home">
-            <i class="el-icon-location"></i>
-            <span slot="title">主页</span>
-          </el-menu-item>
-          <el-menu-item index="problems">
-            <i class="el-icon-menu"></i>
-            <span slot="title">题目</span>
-          </el-menu-item>
-        </el-menu>
+      <el-menu
+        :default-active="$route.path"
+        mode="horizontal"
+        @select="handleSelect"
+        background-color="#000"
+        text-color="#fff"
+        active-text-color="#f11c40"
+        router
+      >
+        <el-menu-item index="/dashboard">
+          <i class="el-icon-s-home"></i>
+          <span slot="title">主页</span>
+        </el-menu-item>
+        <el-menu-item index="/problems">
+          <i class="el-icon-menu"></i>
+          <span slot="title">题目</span>
+        </el-menu-item>
+        <el-menu-item index="/contest" disabled>
+          <i class="el-icon-s-flag"></i>
+          <span slot="title">比赛</span>
+        </el-menu-item>
+        <el-menu-item index="/groups" disabled>
+          <i class="el-icon-user"></i>
+          <span slot="title">小组</span>
+        </el-menu-item>
+        <el-menu-item index="/ranklist" disabled>
+          <i class="el-icon-trophy"></i>
+          <span slot="title">排行榜</span>
+        </el-menu-item>
+      </el-menu>
 
-        <div>
-          <!-- <el-avatar class="avatar-style" :size="30" :src="circleUrl"></el-avatar> -->
-          <el-dropdown @command="handleCommand">
-            <el-avatar class="avatar-style" :size="30" :src="circleUrl"></el-avatar>
-            <!-- <span class="el-dropdown-link">
-              <i class="el-icon-arrow-down el-icon--right"></i>
-            </span>-->
-            <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item command="userHome">个人中心</el-dropdown-item>
-              <el-dropdown-item command="logout">退出</el-dropdown-item>
-            </el-dropdown-menu>
-          </el-dropdown>
-        </div>
-      </el-header>
+      <div>
+        <el-dropdown @command="handleCommand" class="avatar-style">
+          <el-avatar :size="30" :src="circleUrl"></el-avatar>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item command="userHome">个人中心</el-dropdown-item>
+            <el-dropdown-item command="logout">退出</el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
+      </div>
+    </el-header>
 
-      <el-container>
-        <el-aside width="200px">
-          <!-- 侧边栏 -->
-          <!-- 展开 or 收起 -->
-          <!-- <el-radio-group 
-                v-model="isCollapse" 
-                style="margin-bottom: 20px;" 
-                text-color="#f11c40" 
-                fill="#fff" 
-                size="medium">
-            <el-radio-button :label="false">展开</el-radio-button>
-            <el-radio-button :label="true">收起</el-radio-button>
-          </el-radio-group>-->
-
-          <!-- <el-menu 
-            default-active="home" 
-            class="el-menu-style" 
-            @open="handleOpen" 
-            @close="handleClose" 
-            :collapse="isCollapse" 
-            active-text-color="#f11c40"
-            :collapse-transition="false"
-            router>
-            <el-menu-item index="home">
-                <i class="el-icon-location"></i>
-                <span slot="title">主页</span>
-            </el-menu-item>
-            <el-menu-item index="problems">
-                <i class="el-icon-menu"></i>
-                <span slot="title">题目</span>
-            </el-menu-item>
-          </el-menu>-->
-        </el-aside>
-        <el-container>
-          <el-main>
-            <router-view></router-view>
-          </el-main>
-          <el-footer>Footer</el-footer>
-        </el-container>
-      </el-container>
+    <el-container>
+      <el-main>
+        <router-view></router-view>
+      </el-main>
+      <el-footer height="40px">aiknow-dev 2019-2020</el-footer>
     </el-container>
-  </div>
+  </el-container>
 </template>
 
 <script>
@@ -95,7 +68,7 @@ export default {
   },
   methods: {
     handleCommand(command) {
-      this.$message("click on item " + command);
+      // this.$message("click on item " + command);
       if (command === "logout") {
         this.logout();
       } else if (command === "userHome") {
@@ -110,7 +83,7 @@ export default {
       console.log(key, keyPath);
     },
     goUserHome() {
-      this.$router.push({ path: "/user-home" });
+      this.$router.push({ path: "/user" });
     }
   }
 };
@@ -122,7 +95,8 @@ export default {
 }
 
 .el-header {
-  background-color: #f11c40;
+  /* background-color: #f11c40; */
+  background-color: #000;
   display: flex;
   justify-content: space-between;
   padding-left: 0;
@@ -138,14 +112,23 @@ export default {
   }
 }
 
-.el-menu-style:not(.el-menu--collapse) {
-  /* width: 200px; */
-  min-height: 400px;
-}
-
 .el-radio-group {
   line-height: 2px;
   font-size: 1em;
+}
+
+.title-style {
+  color: #f11c40;
+  font-size: 20px;
+  float: left;
+  padding: 3px 20px;
+  /* margin-left: 20px;
+  margin-right: 30px; */
+}
+
+.avatar-style {
+  float: right;
+  padding: 3px 20px;
 }
 </style>
 

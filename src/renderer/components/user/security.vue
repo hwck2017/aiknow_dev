@@ -31,7 +31,6 @@
 export default {
   data() {
     return {
-      userInfo: {},
       password: {
         form: {
           originPassword: "",
@@ -61,16 +60,12 @@ export default {
     };
   },
   methods: {
-    init() {
-      this.userInfo = JSON.parse(window.sessionStorage.getItem("user"));
-    },
     submitPassword() {
       this.$refs["password"].validate(valid => {
         if (valid) {
-          console.log(this.userInfo);
           this.$http
             .post("http://47.92.228.153/study/account/change/password", {
-              username: this.userInfo.username,
+              username: this.$store.state.userInfo.username,
               password: this.password.form.newPassword,
               code: "888888"
             })
@@ -88,14 +83,11 @@ export default {
       });
     },
     doChangeEmail() {
-      console.log("修改邮箱")
+      console.log("修改邮箱");
     },
     doVerify() {
-      console.log("验证邮箱")
+      console.log("验证邮箱");
     }
-  },
-  created() {
-    this.init();
   }
 };
 </script>

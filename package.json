@@ -1,5 +1,5 @@
 {
-  "name": "y",
+  "name": "aiknow-dev",
   "version": "0.0.1",
   "author": "ck",
   "description": "An electron-vue project",
@@ -17,7 +17,7 @@
     "postinstall": ""
   },
   "build": {
-    "productName": "y",
+    "productName": "aiknow-dev",
     "appId": "com.example.yourapp",
     "directories": {
       "output": "build"
@@ -52,11 +52,14 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
-    "codemirror": "^5.49.2",
+    "chart.js": "^2.9.3",
+    "date-fns": "^2.8.1",
     "element-ui": "^2.12.0",
+    "quill": "^1.3.7",
     "vue": "^2.5.16",
     "vue-codemirror": "^4.0.6",
     "vue-electron": "^1.0.6",
+    "vue-quill-editor": "^3.0.6",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1",
     "vuex-electron": "^1.0.0",

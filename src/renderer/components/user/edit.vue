@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="avatar">
-      <!-- <img :src="$getAvatar($store.state.userInfo.avatar)" /> -->
+      <img :src="$getAvatar($store.state.userInfo.uid)" />
       <!-- action 表示图片要上传到的后台API地址 -->
       <el-upload
         :action="uploadURL"
@@ -50,7 +50,7 @@ export default {
       },
       genderOpt: ["保密", "男", "女"],
       loading: false,
-      uploadURL: "http://39.104.86.118:8001/passport/profile/avatar",
+      uploadURL: "http://passport.aiknow.cn/passport/profile/avatar",
       previewPath: "",
       previewVisible: false,
       headerObj: {
@@ -65,10 +65,16 @@ export default {
       }
     };
   },
+  created() {
+    this.init();
+  },
   methods: {
-    // handleChange() {
-    //   console.log(this.userInfo.gender);
-    // }
+    init() {
+      let temp = this.$store.state.userInfo;
+      this.userInfo.headimgurl = temp.headimgurl;
+      this.userInfo.nickname = temp.nickname;
+      this.userInfo.sex = temp.sex;
+    },
     saveEdit() {
       this.$refs["edit"].validate(valid => {
         if (valid) {
@@ -78,10 +84,10 @@ export default {
           //     .post("/user/profile/edit", {
           //       nickname: this.user.nickname,
           //       motto: this.user.motto,
-          //       gender: this.user.gender
+          //       sex: this.user.sex
           //     })
           //     .then(res => {
-          //       this.$Message.success(res.message);
+          //       this.$message.success(res.message);
           //       this.$store.dispatch("getUserInfo");
           //       this.loading = false;
           //     })
@@ -89,7 +95,7 @@ export default {
           //       this.loading = false;
           //     });
         } else {
-          this.$Message.error("请按照规则填写");
+          this.$message.error("请按照规则填写");
         }
       });
     },

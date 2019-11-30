@@ -4,10 +4,11 @@ import Router from 'vue-router'
 Vue.use(Router)
 
 import Login from '../components/Login.vue'
-// import Register from '../components/Register.vue'
 import Home from '../components/Home.vue'
 import Problems from '../components/Problems.vue'
-import Content from '../components/Content.vue'
+import problemDetail from '../components/problemDetail.vue'
+import Submission from '../components/Submission.vue'
+import submissionDetail from '../components/submissionDetail.vue'
 
 import DashBoard from '../components/DashBoard.vue'
 import user from '../components/user/user.vue'
@@ -27,13 +28,10 @@ const router = new Router({
       path: '/login',
       component: Login
     },
-    // {
-    //   path: '/register',
-    //   component: Register
-    // },
     {
       path: '/home',
       component: Home,
+      redirect: '/dashboard',
       children: [{
         path: '/dashboard',
         component: DashBoard
@@ -43,9 +41,16 @@ const router = new Router({
         component: Problems
       },
       {
-        path: '/problem/:problemID',
-        component: Content,
-        name: 'problem'
+        path: '/problem/:pid',
+        component: problemDetail
+      },
+      {
+        path: '/submission/:id',
+        component: submissionDetail
+      },
+      {
+        path: '/submission',
+        component: Submission
       },
       {
         path: '/user',
@@ -70,13 +75,12 @@ const router = new Router({
         {
           path: '/user/group',
           component: group
-        },
-        {
-          path: '/profile/:userID',
-          component: profile,
-          name: "profile"
         }
         ]
+      },
+      {
+        path: '/profile/:uid',
+        component: profile
       }]
     },
     {

@@ -188,9 +188,7 @@ export default {
   methods: {
     // 点击重置按钮，重置登录表单
     resetLoginForm() {
-      // console.log(this.loginInfo.username);
       this.$refs.loginFormRef.resetFields();
-      // console.log(this.loginInfo.username);
     },
     login() {
       this.$refs.loginFormRef.validate(async valid => {
@@ -204,14 +202,20 @@ export default {
         );
         console.log(res);
         if (res.errno !== 200) return this.$message.error(res.errmsg);
-        this.$message.success("登录成功");
+
         // 1. 将登录成功之后的 token，保存到客户端的 sessionStorage 中
         //   1.1 项目中出了登录之外的其他API接口，必须在登录之后才能访问
         //   1.2 token 只应在当前网站打开期间生效，所以将 token 保存在 sessionStorage 中
         window.sessionStorage.setItem("token", res.data.token);
-        window.sessionStorage.setItem("user", JSON.stringify(res.data));
-        // 2. 通过编程式导航跳转到后台主页，路由地址是 /home
-        this.$router.push("/home");
+        this.$store.dispatch("getUserInfo");
+        // 判断是否有redirect，无跳转到home
+        let redirect = this.$route.query.redirect;
+        if (redirect) {
+          this.$router.push(redirect);
+        } else {
+          this.$router.push("/home");
+        }
+        this.$message.success("登录成功");
       });
     },
     // 监听添加用户对话框的关闭事件
@@ -229,14 +233,15 @@ export default {
         );
 
         if (res.errno !== 200) {
-          this.$message.error("注册失败！");
+          this.$message.error(res.errmsg);
         }
 
         this.$message.success("注册成功！");
         // 隐藏添加用户的对话框
         this.addDialogVisible = false;
-        this.loginInfo.username = this.addForm.username;
-        this.loginInfo.password = this.addForm.password;
+        // this.loginInfo.username = this.addForm.username;
+        // this.loginInfo.password = this.addForm.password;
+        this.$router.push("/login");
       });
     }
   }

@@ -20,7 +20,7 @@
               <el-dropdown @command="handleCommand">
                 <span class="el-dropdown-link">
                   难度
-                  <i class="el-icon-arrow-down el-icon--right"></i>
+                  <i class="el-icon-caret-bottom el-icon--right"></i>
                 </span>
                 <el-dropdown-menu slot="dropdown">
                   <el-dropdown-item command="-1">不限</el-dropdown-item>
@@ -47,10 +47,11 @@
             </el-table-column>
             <el-table-column label="提交" prop="submit_times"></el-table-column>
             <el-table-column label="通过率" prop="ac_percent">
-              <template slot-scope="scope">
-                {{Math.round(scope.row.ac_times/scope.row.submit_times*10000)/100}}%</template>
+              <template
+                slot-scope="scope"
+              >{{scope.row.submit_times?(((scope.row.ac_times / scope.row.submit_times)*100).toFixed(2)+'%'):'0.00%'}}</template>
             </el-table-column>
-            <el-table-column label="状态"></el-table-column>
+            <el-table-column label="状态" prop="status"></el-table-column>
           </el-table>
 
           <!-- 分页区域 -->
@@ -65,18 +66,26 @@
           ></el-pagination>
         </el-card>
       </el-main>
-      <el-aside width="100px">
-        <!-- <el-tabs v-model="activeName" @tab-click="handleClick">
-          <el-tab-pane label="标签" name="tag"></el-tab-pane>
-          <el-tab-pane label="难度" name="difficult">
-            <el-row>
-              <el-button type="success">简单</el-button>
-              <el-button type="info">中等</el-button>
-              <el-button type="warning">困难</el-button>
-              <el-button type="danger">专家</el-button>
-            </el-row>
-          </el-tab-pane>
-        </el-tabs>-->
+      <el-aside width="25%">
+        <el-button
+          icon="el-icon-search"
+          style="width: 100%; margin-top: 20px; margin-bottom: 20px;"
+          @click="randomDoProblem()"
+        >随机做题</el-button>
+
+        <el-card>
+          <i class="el-icon-collection-tag" style="margin-bottom: 10px">标签云</i>
+          <!-- <el-tabs v-model="queryInfo.tag" @tab-click="getProblemList"></el-tabs> -->
+          <div class="tag-group">
+            <el-tag effect="plain" @click="getProblemsByTag('')">不限</el-tag>
+            <el-tag
+              v-for="item in tags"
+              :key="item.tid"
+              effect="plain"
+              @click="getProblemsByTag(item.name)"
+            >{{item.name}} {{item.used}}</el-tag>
+          </div>
+        </el-card>
       </el-aside>
     </el-container>
   </div>
@@ -106,24 +115,45 @@ export default {
         difficult: -1
       },
       problemlist: [],
+      tags: [],
       total: 0
     };
   },
   created() {
     this.getProblemList();
+    this.getTags();
   },
   methods: {
     async getProblemList() {
+      if (this.$store.state.userInfo.isLogin) {
+        this.queryInfo.uid = this.$store.state.userInfo.uid;
+      }
       const { data: res } = await this.$http.get("/problems/opened", {
         params: this.queryInfo
       });
       if (res.status !== 200) {
         return this.$message.error("获取题目列表失败！");
       }
-
+      console.log(res);
       this.problemlist = res.data.data;
       this.total = res.data.total;
       console.log(this.problemlist);
+    },
+    async getTags() {
+      const { data: res } = await this.$http.get("/tags");
+      if (res.status !== 200) {
+        return this.$message.error("获取标签失败！");
+      }
+
+      this.tags = res.data;
+      console.log(this.tags);
+    },
+    randomDoProblem() {
+      this.$http.get("/problem/random").then(res => {
+        console.log(res);
+        this.$message.success("祝你好运");
+        this.$router.push({ path: `/problem/${res.data.data}` });
+      });
     },
     // 监听 pagesize 改变的事件
     handleSizeChange(newSize) {
@@ -141,15 +171,14 @@ export default {
       this.queryInfo.difficult = command;
       this.getProblemList();
     },
-    async getDetails(row) {
+    getDetails(row) {
       // console.log(row); //此时就能拿到整行的信息
 
-      this.$router.push({
-        name: "problem",
-        params: {
-          problemID: row.pid
-        }
-      });
+      this.$router.push({ path: `/problem/${row.pid}` });
+    },
+    getProblemsByTag(tag) {
+      this.queryInfo.tag = tag;
+      this.getProblemList();
     }
   }
 };

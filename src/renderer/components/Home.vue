@@ -9,7 +9,6 @@
       <el-menu
         :default-active="$route.path"
         mode="horizontal"
-        @select="handleSelect"
         background-color="#000"
         text-color="#fff"
         active-text-color="#f11c40"
@@ -39,12 +38,16 @@
 
       <div>
         <el-dropdown @command="handleCommand" class="avatar-style">
-          <el-avatar :size="30" :src="circleUrl"></el-avatar>
+          <span class="el-dropdown-link">
+            {{$store.state.userInfo.nickname}}
+            <i class="el-icon-caret-bottom el-icon--right"></i>
+          </span>
           <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item command="userHome">个人中心</el-dropdown-item>
+            <el-dropdown-item command="/user">个人中心</el-dropdown-item>
             <el-dropdown-item command="logout">退出</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
+        <el-avatar :size="30" :src="$getAvatar($store.state.userInfo.uid)"></el-avatar>
       </div>
     </el-header>
 
@@ -52,7 +55,9 @@
       <el-main>
         <router-view></router-view>
       </el-main>
-      <el-footer height="40px">aiknow-dev 2019-2020</el-footer>
+      <el-footer height="20px">
+        <div class="footer">2019-2020 &copy; aiknow</div>
+      </el-footer>
     </el-container>
   </el-container>
 </template>
@@ -61,29 +66,16 @@
 export default {
   data() {
     return {
-      circleUrl:
-        "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png",
       isCollapse: false
     };
   },
   methods: {
     handleCommand(command) {
-      // this.$message("click on item " + command);
       if (command === "logout") {
-        this.logout();
-      } else if (command === "userHome") {
-        this.goUserHome();
+        this.$store.commit("logout");
+      } else {
+        this.$router.push(command);
       }
-    },
-    logout() {
-      window.sessionStorage.clear();
-      this.$router.push("/login");
-    },
-    handleSelect(key, keyPath) {
-      console.log(key, keyPath);
-    },
-    goUserHome() {
-      this.$router.push({ path: "/user" });
     }
   }
 };
@@ -129,6 +121,22 @@ export default {
 .avatar-style {
   float: right;
   padding: 3px 20px;
+}
+
+.el-dropdown-link {
+  cursor: pointer;
+  color: #fff;
+  font-size: 20px;
+}
+.el-icon-arrow-down {
+  font-size: 20px;
+}
+
+.footer {
+  text-align: center;
+  height: 20px;
+  line-height: 20px;
+  color: #9ea7b4;
 }
 </style>
 

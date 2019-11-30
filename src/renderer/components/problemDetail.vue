@@ -7,30 +7,32 @@
             <b>{{problem.title}}</b>
           </div>
           <div>
-            <h3>题目描述</h3>
-            <div
-              v-for="(item, idx) in problem.description.ops"
-              v-bind:key="'desc'+idx"
-            >{{item.insert}}</div>
-            <br />
-            <h3>输入格式</h3>
-            <div
-              v-for="(item, idx) in problem.input_format.ops"
-              v-bind:key="'input'+idx"
-            >{{item.insert}}</div>
-            <br />
-            <h3>输出格式</h3>
-            <div
-              v-for="(item, idx) in problem.output_format.ops"
-              v-bind:key="'output'+idx"
-            >{{item.insert}}</div>
-            <br />
-            <h3>样例</h3>
-            <div v-for="(item, idx) in problem.samples" v-bind:key="'sample'+idx">
-              <div>输入: {{item.input}}</div>
-              <div>输出: {{item.output}}</div>
+            <h2>题目描述</h2>
+            <div id="description" v-if="problem.description">
+              <div
+                v-for="(item, idx) in problem.description.ops"
+                v-bind:key="'desc'+idx"
+                v-html="item.insert"
+              ></div>
             </div>
-            <br />
+            <h2>输入格式</h2>
+            <div id="input_format" v-if="problem.input_format">
+              <div
+                v-for="(item, idx) in problem.input_format.ops"
+                v-bind:key="'input'+idx"
+                v-html="item.insert"
+              >{{item.insert}}</div>
+            </div>
+
+            <h2>输出格式</h2>
+            <div id="output_format" v-if="problem.output_format"></div>
+            <h2>样例</h2>
+            <div v-for="(item, idx) in problem.samples" v-bind:key="'sample'+idx">
+              <h5>输入</h5>
+              <pre>{{item.input}}</pre>
+              <h5>输出</h5>
+              <pre>{{item.output}}</pre>
+            </div>
           </div>
         </el-card>
 
@@ -49,7 +51,7 @@
         <codemirror v-model="commitInfo.source_code" :options="cmOptions"></codemirror>
         <div style="margin: 20px 0;">
           <el-button @click="compile">本地编译</el-button>
-          <el-button @click="commitCode">提交</el-button>
+          <el-button @click="submitCode">提交</el-button>
         </div>本地编译结果
         <el-input type="textarea" :autosize="{ minRows: 1, maxRows: 10}" v-model="compileResult"></el-input>
       </el-main>
@@ -77,6 +79,9 @@
 </template>
 
 <script>
+import Quill from "quill";
+import "quill/themes/snow.js";
+
 import { codemirror } from "vue-codemirror";
 import "codemirror/lib/codemirror.css";
 import "codemirror/addon/edit/matchbrackets.js";
@@ -104,7 +109,11 @@ export default {
       //出题人信息
       author: {},
       // 题目详情
-      problem: {},
+      problem: {
+        description: null,
+        input_format: null,
+        output_format: null
+      },
       // 本地编译结果
       compileResult: "",
       // 代码提交
@@ -116,6 +125,11 @@ export default {
         source_code: "",
         contest_id: 0
       },
+      quill: {
+        description: null,
+        inputFormat: null,
+        outputFormat: null
+      },
       // 提交代码到题库后返回的ID
       commitID: "",
       results: {},
@@ -123,7 +137,8 @@ export default {
       resultTimer: {},
       // 查询判题结果超时定时器
       resultTimeout: {},
-      count: 0
+      count: 0,
+      isSubmit: false
     };
   },
   created() {
@@ -131,14 +146,14 @@ export default {
   },
   methods: {
     async getProblemContent() {
-      this.commitInfo.problem_id = this.$route.params.problemID;
+      this.commitInfo.problem_id = this.$route.params.pid;
       const { data: res } = await this.$http.get(
         "/problem/" + this.commitInfo.problem_id
       );
       if (res.status !== 200) {
         return this.$message.error("获取题目详情失败！");
       }
-      //   console.log(res);
+      console.log(res);
       this.author = res.data.author;
       this.problem = res.data.problem;
     },
@@ -160,19 +175,63 @@ export default {
       });
     },
     //提交代码到题库
-    async commitCode() {
-      const { data: res } = await this.$http.post(
-        "/code/user",
-        this.commitInfo
-      );
-      //   console.log(this.commitInfo);
-      if (res.status !== 200) {
-        return this.$message.error("提交代码失败！");
+    //提交代码到题库
+    submitCode() {
+      if (this.commitInfo.lang == null) {
+        this.$message.warning("选择编程语言");
+        return;
       }
-      console.log(res);
-      this.commitID = res.data;
-      // 1s查询一次判题结果
-      this.resultTimer = window.setInterval(this.getResult(), 1000);
+      if (this.commitInfo.source_code.length == 0) {
+        this.$message.warning("请输入代码");
+        return;
+      }
+      let path = this.$route.fullPath;
+      let title = this.problem.title;
+      // if (isTestMode) {
+      //   // test mode
+      //   if (this.testCases.data.length == 0) {
+      //     this.$Message.warning("请输入测试数据");
+      //     return;
+      //   }
+      //   this.isSubmit = true;
+      //   this.$http
+      //     .post("/code", {
+      //       lang: this.lang,
+      //       source_code: code,
+      //       test_cases: this.testCases.data
+      //     })
+      //     .then(res => {
+      //       this.$store.commit("addSubmission", {
+      //         title: title,
+      //         url: path,
+      //         id: res.data
+      //       });
+      //       this.isSubmit = false;
+      //       this.testCases.isOpen = false;
+      //     })
+      //     .catch(res => {
+      //       this.isSubmit = false;
+      //     });
+      // } else {
+      if (!this.$store.state.userInfo.isLogin) {
+        this.$message.warning("请先登入");
+        return;
+      }
+      this.isSubmit = true;
+      this.$http
+        .post("/code/user", this.commitInfo)
+        .then(res => {
+          this.$store.commit("addSubmission", {
+            title: title,
+            url: path,
+            id: res.data.data
+          });
+          this.isSubmit = false;
+        })
+        .catch(res => {
+          this.isSubmit = false;
+        });
+      // }
     },
     async getResult() {
       const { data: res } = await this.$http.get("/code/" + this.commitID);
@@ -220,14 +279,14 @@ export default {
             h(
               "el-tag",
               { props: { type: "success" } },
-              this.results.response.memory + "MB"
+              "内存" + this.results.response.memory + "MB"
             )
           ]),
           h("el-col", { props: { span: 6 } }, [
             h(
               "el-tag",
               { props: { type: "success" } },
-              this.results.response.time + "s"
+              "用时: " + this.results.response.time + "s"
             )
           ]),
           h("el-col", { props: { span: 24 } }, [
@@ -251,10 +310,41 @@ export default {
     stopTimer() {
       clearInterval(this.resultTimer);
     },
-    clickBtn() {
-      console.log("查看详情");
-      //   this.$http.get("/submission/" + this.commitID)
+    async clickBtn() {
+      this.$router.push({ path: `/submission/${this.commitID}` });
+    },
+    mountQuill() {
+      let config = {
+        theme: "snow",
+        modules: {
+          toolbar: false,
+          formula: true
+        }
+      };
+      this.quill.description = new Quill(
+        document.getElementById("description"),
+        config
+      );
+      this.quill.description.enable(false);
+      this.quill.description.setContents(this.problem.description);
+
+      this.quill.inputFormat = new Quill(
+        document.getElementById("input_format"),
+        config
+      );
+      this.quill.inputFormat.enable(false);
+      this.quill.inputFormat.setContents(this.problem.input_format);
+
+      this.quill.outputFormat = new Quill(
+        document.getElementById("output_format"),
+        config
+      );
+      this.quill.outputFormat.enable(false);
+      this.quill.outputFormat.setContents(this.problem.output_format);
     }
+  },
+  mounted() {
+    this.mountQuill();
   },
   components: {
     codemirror

@@ -101,7 +101,7 @@ export default {
     },
     // 处理图片预览效果
     handlePreview(file) {
-      console.log(file);
+      // console.log(file);
       this.previewPath = file.response.data.url;
       this.previewVisible = true;
     },
@@ -114,16 +114,16 @@ export default {
       const i = this.addForm.pics.findIndex(x => x.pic === filePath);
       // 3. 调用数组的 splice 方法，把图片信息对象，从 pics 数组中移除
       this.addForm.pics.splice(i, 1);
-      console.log(this.addForm);
+      // console.log(this.addForm);
     },
     // 监听图片上传成功的事件
     handleSuccess(response) {
-      console.log(response);
+      // console.log(response);
       // 1. 拼接得到一个图片信息对象
       const picInfo = { pic: response.data.tmp_path };
       // 2. 将图片信息对象，push 到pics数组中
       this.addForm.pics.push(picInfo);
-      console.log(this.addForm);
+      // console.log(this.addForm);
     }
   }
 };

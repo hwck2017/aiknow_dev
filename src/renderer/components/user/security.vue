@@ -74,7 +74,7 @@ export default {
                 return this.$message.error(res.data.errmsg);
               }
               // this.$message.success(res.data);
-              console.log(res);
+              // console.log(res);
               // this.$store.commit("logout");
             });
         } else {

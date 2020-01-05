@@ -30,7 +30,7 @@ function createWindow () {
     mainWindow = null
   })
 
-  require('./ipcMain.js');
+  // require('./ipcMain.js');
 }
 
 app.on('ready', createWindow)

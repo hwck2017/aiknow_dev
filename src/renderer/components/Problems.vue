@@ -51,7 +51,15 @@
                 slot-scope="scope"
               >{{scope.row.submit_times?(((scope.row.ac_times / scope.row.submit_times)*100).toFixed(2)+'%'):'0.00%'}}</template>
             </el-table-column>
-            <el-table-column label="状态" prop="status"></el-table-column>
+            <el-table-column label="状态" prop="status">
+              <template slot-scope="scope">
+                <el-tag effect="plain" type="success" v-if="scope.row.status === 'AC'">通过</el-tag>
+                <el-tag effect="plain" type="warning" v-if="scope.row.status === 'WA'">答案错误</el-tag>
+                <el-tag effect="plain" v-if="scope.row.status === 'RTE'">运行错误</el-tag>
+                <el-tag effect="plain" type="info" v-if="scope.row.status === 'RTE'">运行超时</el-tag>
+                <el-tag effect="plain" type="danger" v-if="scope.row.status === 'CE'">编译错误</el-tag>
+              </template>
+            </el-table-column>
           </el-table>
 
           <!-- 分页区域 -->
@@ -134,10 +142,9 @@ export default {
       if (res.status !== 200) {
         return this.$message.error("获取题目列表失败！");
       }
-      console.log(res);
+      // console.log(res);
       this.problemlist = res.data.data;
       this.total = res.data.total;
-      console.log(this.problemlist);
     },
     async getTags() {
       const { data: res } = await this.$http.get("/tags");
@@ -146,11 +153,11 @@ export default {
       }
 
       this.tags = res.data;
-      console.log(this.tags);
+      // console.log(this.tags);
     },
     randomDoProblem() {
       this.$http.get("/problem/random").then(res => {
-        console.log(res);
+        // console.log(res);
         this.$message.success("祝你好运");
         this.$router.push({ path: `/problem/${res.data.data}` });
       });

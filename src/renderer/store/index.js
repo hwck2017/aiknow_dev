@@ -28,7 +28,7 @@ export default new Vuex.Store({
     login(state, payload) {
       state.userInfo = payload
       state.userInfo.isLogin = true
-      console.log(state.userInfo)
+      // console.log(state.userInfo)
     },
     logout(state) {
       state.userInfo = {}
@@ -40,11 +40,13 @@ export default new Vuex.Store({
       let title = data.title
       let path = data.url
       let id = data.id
+      let nid = data.nodeid
       state.submissions.push({
         path: path,
         title: title,
         id: id,
-        status: '队列中',
+        nodeid: nid,
+        status: '判题中',
         response: null
       })
       this.commit('getSubmission', id)
@@ -53,26 +55,37 @@ export default new Vuex.Store({
       let clock = setInterval(() => {
         axios.get('/code/' + id).then(res => {
           let data = res.data.data
-          let index = 0
+          // let index = 0
+          let obj;
           for (let i = 0; i < state.submissions.length; i++) {
             if (state.submissions[i].id == id) {
-              index = i
-            }
-          }
-          let newArray = []
-          for (let i = 0; i < state.submissions.length; i++) {
-            let obj = state.submissions[i]
-            if (index == i) {
+              // index = i
+              obj = state.submissions[i]
               obj.status = data.status
               obj.response = data.response
             }
-            newArray.push(obj)
           }
-          state.submissions = newArray
+          // let newArray = []
+          // for (let i = 0; i < state.submissions.length; i++) {
+          //   let obj = state.submissions[i]
+          //   if (index == i) {
+          //     obj.status = data.status
+          //     obj.response = data.response
+          //   }
+          //   newArray.push(obj)
+          // }
+          // state.submissions = newArray
+
           // 判卷完成
           if (data.status == '完成' || data.status == '错误') {
             // Cookie.remove()
             clearInterval(clock)
+          }
+
+          if (data.status === '完成' && data.response.result === 'AC' && obj.nodeid !== "") {
+            axios.post('http://study.aiknow.cn/study/studyProcess/updateProcess', {
+              "nodeid": obj.nodeid
+            })
           }
         }).catch((res) => {
           let index = 0
@@ -93,7 +106,7 @@ export default new Vuex.Store({
   actions: {
     getUserInfo() {
       axios.get('/user').then(res => {
-        console.log(res)
+        // console.log(res)
         this.commit('login', res.data.data)
       })
     },

@@ -1,25 +1,24 @@
 <template>
   <div>
     <el-container>
-      <el-header>
-        <el-card v-if="profile!=null">
-          <el-row :gutter="20">
-            <el-col :span="12">
-              <!-- <div class="avatar">
-                <img :src="$getAvatar(this.profile.uid)" />
-                <h2>{{profile.nickname}}</h2>
-              </div> -->
-            </el-col>
-            <el-col :span="12">
-              <el-row>
-                <el-col :span="12">通过率: {{util.getACRate(profile.ac_times, profile.submit_times)}}</el-col>
-                <el-col :span="12">
-                  <el-icon type="el-icon-timer" style="color: #2d8cf0;"></el-icon>
-                  比赛次数: {{profile.contest_times}}次
-                </el-col>
-              </el-row>
-            </el-col>
-          </el-row>
+      <el-header height="100px">
+        <el-card class="user-info" v-if="profile!=null">
+          <div class="avatar">
+            <!-- <img :src="$getAvatar(this.profile.uid)" /> -->
+            {{profile.nickname}}
+          </div>
+          <div class="user-detail">
+            <el-row>
+              <el-col :span="12">
+                <i class="el-icon-circle-check" style="color: green;" />
+                通过率: {{util.getACRate(profile.ac_times, profile.submit_times)}}
+              </el-col>
+              <el-col :span="12">
+                <i class="el-icon-timer" style="color: #2d8cf0;" />
+                比赛次数: {{profile.contest_times}}次
+              </el-col>
+            </el-row>
+          </div>
         </el-card>
       </el-header>
       <el-main>
@@ -310,25 +309,40 @@ export default {
 </script>
 
 <style scoped>
-.el-card__header {
+/* .el-card__header {
   padding: 10px, 20px;
+} */
+
+.user_info {
+  width: 100%;
+  font-size: 24px;
+  text-align: center;
+  padding-top: 80px;
+  position: relative;
+  overflow: visible;
+  margin-bottom: 20px;
+}
+
+.user-detail {
+  position: absolute;
+  width: 300px;
+  right: 20px;
+  /* bottom: 16px; */
+  font-size: 15px;
+  text-align: left;
 }
 
 .avatar {
-  height: 60px;
-  width: 60px;
-  /* border: 1px solid #eee;
-  border-radius: 50%; */
-  padding: 10px;
-  box-shadow: 0 0 10px #ddd;
-  position: absolute;
+  /* position: absolute;
+  border: black 2px solid;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
-  /* img {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background-color: #eee;
-  } */
+  margin-left: -65px;
+  top: -50px;
+  transition: transform 0.9s; */
+  text-align: center;
+  font-size: 30px;
 }
 </style>

@@ -9,23 +9,32 @@
           <div>
             <h2>题目描述</h2>
             <div id="description" v-if="problem.description">
-              <div
-                v-for="(item, idx) in problem.description.ops"
-                v-bind:key="'desc'+idx"
-                v-html="item.insert"
-              ></div>
+              <div v-for="(item, idx) in problem.description.ops" v-bind:key="'desc'+idx">
+                <div v-if="item.insert.image">
+                  <img v-bind:src="item.insert.image" />
+                </div>
+                <div v-else>{{item.insert}}</div>
+              </div>
             </div>
             <h2>输入格式</h2>
             <div id="input_format" v-if="problem.input_format">
-              <div
-                v-for="(item, idx) in problem.input_format.ops"
-                v-bind:key="'input'+idx"
-                v-html="item.insert"
-              >{{item.insert}}</div>
+              <div v-for="(item, idx) in problem.input_format.ops" v-bind:key="'input'+idx">
+                <div v-if="item.insert.image">
+                  <img v-bind:src="item.insert.image" />
+                </div>
+                <div v-else>{{item.insert}}</div>
+              </div>
             </div>
 
             <h2>输出格式</h2>
-            <div id="output_format" v-if="problem.output_format"></div>
+            <div id="output_format" v-if="problem.output_format">
+              <div v-for="(item, idx) in problem.output_format.ops" v-bind:key="'output'+idx">
+                <div v-if="item.insert.image">
+                  <img v-bind:src="item.insert.image" />
+                </div>
+                <div v-else>{{item.insert}}</div>
+              </div>
+            </div>
             <h2>样例</h2>
             <div v-for="(item, idx) in problem.samples" v-bind:key="'sample'+idx">
               <h5>输入</h5>
@@ -36,24 +45,15 @@
           </div>
         </el-card>
 
-        <!-- 编程语言选择 -->
-        <div style="margin: 20px 0;">
-          <el-select v-model="commitInfo.lang">
-            <el-option
-              v-for="(item, idx) in problem.lang"
-              v-bind:key="'lang'+idx"
-              :label="item"
-              :value="item"
-            ></el-option>
-          </el-select>
-        </div>
-        <!-- 代码输入框 -->
-        <codemirror v-model="commitInfo.source_code" :options="cmOptions"></codemirror>
+        <aceEditor @input="getSourceCode" @switchLanguage="getNewLang"></aceEditor>
         <div style="margin: 20px 0;">
           <el-button @click="compile">本地编译</el-button>
           <el-button @click="submitCode">提交</el-button>
         </div>本地编译结果
         <el-input type="textarea" :autosize="{ minRows: 1, maxRows: 10}" v-model="compileResult"></el-input>
+        <div>
+          <judgeResult></judgeResult>
+        </div>
       </el-main>
       <el-aside width="250px" style="margin-top: 20px">
         <el-card>
@@ -79,33 +79,12 @@
 </template>
 
 <script>
-import Quill from "quill";
-import "quill/themes/snow.js";
-
-import { codemirror } from "vue-codemirror";
-import "codemirror/lib/codemirror.css";
-import "codemirror/addon/edit/matchbrackets.js";
-import "codemirror/lib/codemirror.js";
-import "codemirror/addon/hint/show-hint.css";
-import "codemirror/addon/hint/show-hint.js";
-import "codemirror/mode/clike/clike.js";
+import aceEditor from "./Edit.vue";
+import judgeResult from "./problem/judgeResult.vue";
 
 export default {
   data() {
     return {
-      cmOptions: {
-        // codemirror options
-        lineNumbers: true,
-        matchBrackets: true,
-        lineWrapping: true,
-        showCursorWhenSelecting: true,
-        indentWithTabs: true,
-        indentUnit: 4,
-        mode: "text/x-c++src",
-        extraKeys: {
-          "Ctrl-Space": "autocomplete"
-        }
-      },
       //出题人信息
       author: {},
       // 题目详情
@@ -116,6 +95,7 @@ export default {
       },
       // 本地编译结果
       compileResult: "",
+      compilePass: false,
       // 代码提交
       commitInfo: {
         group_id: 0,
@@ -125,24 +105,14 @@ export default {
         source_code: "",
         contest_id: 0
       },
-      quill: {
-        description: null,
-        inputFormat: null,
-        outputFormat: null
-      },
-      // 提交代码到题库后返回的ID
-      commitID: "",
       results: {},
-      // 查询判题结果定时器
-      resultTimer: {},
-      // 查询判题结果超时定时器
-      resultTimeout: {},
-      count: 0,
-      isSubmit: false
+      isSubmit: false,
+      nodeID: ""
     };
   },
   created() {
     this.getProblemContent();
+    this.getNodeID();
   },
   methods: {
     async getProblemContent() {
@@ -153,13 +123,26 @@ export default {
       if (res.status !== 200) {
         return this.$message.error("获取题目详情失败！");
       }
-      console.log(res);
+      // console.log(res);
       this.author = res.data.author;
       this.problem = res.data.problem;
+    },
+    async getNodeID() {
+      const { data: res } = await this.$http.get(
+        "http://study.aiknow.cn/study/api/studyCourseNode/" +
+          this.commitInfo.problem_id
+      );
+
+      if (res.errno !== 200) {
+        return this.$message.warning("获取课程节点信息失败");
+      }
+      // console.log(res);
+      this.nodeID = res.data;
     },
     // 本地编译
     compile() {
       var runWandbox = require("wandbox-api");
+      // TODO:: 编程语言变化
       runWandbox.fromString(this.commitInfo.source_code, (error, results) => {
         if (error) {
           throw new Error(error.message);
@@ -169,24 +152,27 @@ export default {
 
         if (results.status === "0") {
           this.compileResult = "编译成功";
+          this.compilePass = true;
         } else {
           this.compileResult = results.compiler_message;
         }
       });
     },
-    //提交代码到题库
+
     //提交代码到题库
     submitCode() {
+      if (this.compilePass !== true) {
+        return this.$message.warning("请先做本地编译，通过之后再提交");
+      }
       if (this.commitInfo.lang == null) {
-        this.$message.warning("选择编程语言");
-        return;
+        return this.$message.warning("选择编程语言");
       }
       if (this.commitInfo.source_code.length == 0) {
-        this.$message.warning("请输入代码");
-        return;
+        return this.$message.warning("请输入代码");
       }
       let path = this.$route.fullPath;
       let title = this.problem.title;
+      let nodeid = this.nodeID;
       // if (isTestMode) {
       //   // test mode
       //   if (this.testCases.data.length == 0) {
@@ -224,7 +210,8 @@ export default {
           this.$store.commit("addSubmission", {
             title: title,
             url: path,
-            id: res.data.data
+            id: res.data.data,
+            nodeid: nodeid
           });
           this.isSubmit = false;
         })
@@ -233,121 +220,16 @@ export default {
         });
       // }
     },
-    async getResult() {
-      const { data: res } = await this.$http.get("/code/" + this.commitID);
-      if (res === undefined) {
-        this.count++;
-        if (this.count === 5) {
-          this.stopTimer();
-          this.$message.error("获取判题结果超时！");
-        }
-        return;
-      }
-      //获取到判题结果
-      console.log(res);
-      this.count++;
-
-      if (res.status !== 200) {
-        this.stopTimer();
-        return this.$message.error("获取判题结果失败！");
-      }
-
-      this.results = res.data;
-      const h = this.$createElement;
-
-      let tagMsg, tagType;
-      if (this.results.response.result === "CE") {
-        tagMsg = "编译错误";
-        tagType = "danger";
-      } else if (this.results.response.result === "WA") {
-        tagMsg = "答案错误";
-        tagType = "warning";
-      } else {
-        tagMsg = "通过";
-        tagType = "success";
-      }
-      // TODO: status怎么处理？
-      this.stopTimer();
-      this.$notify({
-        title: this.problem.title,
-        dangerouslyUseHTMLString: true,
-        message: h("el-row", { props: { gutter: 10 } }, [
-          h("el-col", { props: { span: 8 } }, [
-            h("el-tag", { props: { type: tagType } }, tagMsg)
-          ]),
-          h("el-col", { props: { span: 6 } }, [
-            h(
-              "el-tag",
-              { props: { type: "success" } },
-              "内存" + this.results.response.memory + "MB"
-            )
-          ]),
-          h("el-col", { props: { span: 6 } }, [
-            h(
-              "el-tag",
-              { props: { type: "success" } },
-              "用时: " + this.results.response.time + "s"
-            )
-          ]),
-          h("el-col", { props: { span: 24 } }, [
-            h(
-              "el-button",
-              {
-                props: { size: "small" },
-                on: {
-                  click: this.clickBtn
-                }
-              },
-              "查看详情"
-            )
-          ])
-        ]),
-
-        duration: 0,
-        position: "top-right"
-      });
+    getSourceCode(msg) {
+      this.commitInfo.source_code = msg;
     },
-    stopTimer() {
-      clearInterval(this.resultTimer);
-    },
-    async clickBtn() {
-      this.$router.push({ path: `/submission/${this.commitID}` });
-    },
-    mountQuill() {
-      let config = {
-        theme: "snow",
-        modules: {
-          toolbar: false,
-          formula: true
-        }
-      };
-      this.quill.description = new Quill(
-        document.getElementById("description"),
-        config
-      );
-      this.quill.description.enable(false);
-      this.quill.description.setContents(this.problem.description);
-
-      this.quill.inputFormat = new Quill(
-        document.getElementById("input_format"),
-        config
-      );
-      this.quill.inputFormat.enable(false);
-      this.quill.inputFormat.setContents(this.problem.input_format);
-
-      this.quill.outputFormat = new Quill(
-        document.getElementById("output_format"),
-        config
-      );
-      this.quill.outputFormat.enable(false);
-      this.quill.outputFormat.setContents(this.problem.output_format);
+    getNewLang(lang) {
+      this.commitInfo.lang = lang;
     }
   },
-  mounted() {
-    this.mountQuill();
-  },
   components: {
-    codemirror
+    aceEditor,
+    judgeResult
   }
 };
 </script>

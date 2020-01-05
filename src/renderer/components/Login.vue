@@ -118,8 +118,8 @@ export default {
     return {
       loginMode: "passwd",
       loginInfo: {
-        username: "chenkai",
-        password: "ck316900922",
+        username: "",
+        password: "",
         phoneNumber: "",
         verifyCode: ""
       },
@@ -194,13 +194,13 @@ export default {
       this.$refs.loginFormRef.validate(async valid => {
         if (!valid) return;
         const { data: res } = await this.$http.post(
-          "http://47.92.228.153/study/account/login",
+          "http://study.aiknow.cn/study/account/login",
           {
             username: this.loginInfo.username,
             password: this.loginInfo.password
           }
         );
-        console.log(res);
+        // console.log(res);
         if (res.errno !== 200) return this.$message.error(res.errmsg);
 
         // 1. 将登录成功之后的 token，保存到客户端的 sessionStorage 中
@@ -243,7 +243,10 @@ export default {
         // this.loginInfo.password = this.addForm.password;
         this.$router.push("/login");
       });
-    }
+    },
+    // openEditor() {
+    //   this.$router.push("/editor");
+    // }
   }
 };
 </script>

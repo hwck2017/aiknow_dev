@@ -11,12 +11,16 @@ import Submission from '../components/Submission.vue'
 import submissionDetail from '../components/submissionDetail.vue'
 
 import DashBoard from '../components/DashBoard.vue'
+import Contest from '../components/Contest.vue'
+import contestDetail from '../components/contest/contestDetail.vue'
+import contestProblems from '../components/contest/contestProblems.vue'
 import user from '../components/user/user.vue'
 import edit from '../components/user/edit.vue'
+import Editor from '../components/Editor.vue'
 import security from '../components/user/security.vue'
 
 import problem from '../components/user/problem.vue'
-import contest from '../components/user/contest.vue'
+import userContest from '../components/user/contest.vue'
 import group from '../components/user/group.vue'
 import profile from '../components/user/profile.vue'
 
@@ -35,6 +39,18 @@ const router = new Router({
       children: [{
         path: '/dashboard',
         component: DashBoard
+      },
+      {
+        path: '/contest',
+        component: Contest
+      },
+      {
+        path: "/contest/:cid/problems",
+        component: contestProblems
+      },
+      {
+        path: "/contest/:cid",
+        component: contestDetail
       },
       {
         path: '/problems',
@@ -70,7 +86,7 @@ const router = new Router({
         },
         {
           path: '/user/contest',
-          component: contest
+          component: userContest
         },
         {
           path: '/user/group',
@@ -81,6 +97,10 @@ const router = new Router({
       {
         path: '/profile/:uid',
         component: profile
+      },
+      {
+        path: '/editor',
+        component: Editor
       }]
     },
     {

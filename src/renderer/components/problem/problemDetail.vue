@@ -79,8 +79,8 @@
 </template>
 
 <script>
-import aceEditor from "./Edit.vue";
-import judgeResult from "./problem/judgeResult.vue";
+import aceEditor from "../Edit.vue";
+import judgeResult from "./judgeResult.vue";
 
 export default {
   data() {

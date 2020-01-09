@@ -4,9 +4,10 @@ import Router from 'vue-router'
 Vue.use(Router)
 
 import Login from '../components/Login.vue'
+import Register from '../components/Register.vue'
 import Home from '../components/Home.vue'
 import Problems from '../components/Problems.vue'
-import problemDetail from '../components/problemDetail.vue'
+import problemDetail from '../components/problem/problemDetail.vue'
 import Submission from '../components/Submission.vue'
 import submissionDetail from '../components/submissionDetail.vue'
 
@@ -29,83 +30,88 @@ Vue.use(Router)
 const router = new Router({
   routes: [
     {
-      path: '/login',
-      component: Login
-    },
-    {
       path: '/home',
       component: Home,
-      redirect: '/dashboard',
-      children: [{
-        path: '/dashboard',
-        component: DashBoard
-      },
-      {
-        path: '/contest',
-        component: Contest
-      },
-      {
-        path: "/contest/:cid/problems",
-        component: contestProblems
-      },
-      {
-        path: "/contest/:cid",
-        component: contestDetail
-      },
-      {
-        path: '/problems',
-        component: Problems
-      },
-      {
-        path: '/problem/:pid',
-        component: problemDetail
-      },
-      {
-        path: '/submission/:id',
-        component: submissionDetail
-      },
-      {
-        path: '/submission',
-        component: Submission
-      },
-      {
-        path: '/user',
-        component: user,
-        redirect: '/user/edit',
-        children: [{
-          path: '/user/edit',
-          component: edit
+      redirect: '/editor',
+      children: [
+        {
+          path: '/login',
+          component: Login
         },
         {
-          path: '/user/security',
-          component: security
+          path: '/register',
+          component: Register
         },
         {
-          path: '/user/problem',
-          component: problem
+          path: '/dashboard',
+          component: DashBoard
         },
         {
-          path: '/user/contest',
-          component: userContest
+          path: '/contest',
+          component: Contest
         },
         {
-          path: '/user/group',
-          component: group
-        }
-        ]
-      },
-      {
-        path: '/profile/:uid',
-        component: profile
-      },
-      {
-        path: '/editor',
-        component: Editor
-      }]
+          path: "/contest/:cid/problems",
+          component: contestProblems
+        },
+        {
+          path: "/contest/:cid",
+          component: contestDetail
+        },
+        {
+          path: '/problems',
+          component: Problems
+        },
+        {
+          path: '/problem/:pid',
+          component: problemDetail
+        },
+        {
+          path: '/submission/:id',
+          component: submissionDetail
+        },
+        {
+          path: '/submission',
+          component: Submission
+        },
+        {
+          path: '/user',
+          component: user,
+          redirect: '/user/edit',
+          children: [{
+            path: '/user/edit',
+            component: edit
+          },
+          {
+            path: '/user/security',
+            component: security
+          },
+          {
+            path: '/user/problem',
+            component: problem
+          },
+          {
+            path: '/user/contest',
+            component: userContest
+          },
+          {
+            path: '/user/group',
+            component: group
+          }
+          ]
+        },
+        {
+          path: '/profile/:uid',
+          component: profile
+        },
+        {
+          path: '/editor',
+          component: Editor
+        }]
     },
     {
       path: '*',
-      redirect: '/login'
+      redirect: '/editor'
     }
   ]
 })
@@ -116,10 +122,12 @@ router.beforeEach((to, from, next) => {
   // from 代表从哪个路径跳转而来
   // next 是一个函数，表示放行
   //     next()  放行    next('/login')  强制跳转
-  if (to.path === '/login') return next()
+  if (to.path === '/login' || to.path === '/register' || to.path === '/editor') return next()
   // 获取token
   const tokenStr = window.sessionStorage.getItem('token')
-  if (!tokenStr) return next('/login')
+  if (!tokenStr) {
+    return next({ path: `/login?redirect=${to.path}` })
+  }
   next()
 })
 

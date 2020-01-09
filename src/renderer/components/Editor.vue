@@ -1,13 +1,32 @@
 <template>
   <div>
-    <aceEditor @input="getSourceCode" @switchLanguage="getLang"></aceEditor>
+    <el-row :gutter="20">
+      <el-col :span="14">
+        <div>
+          <aceEditor @input="getSourceCode" @switchLanguage="getLang"></aceEditor>
+        </div>
+      </el-col>
+      <el-col :span="10">
+        <div style="margin: 10px 0 20px 0;">
+          <el-button @click="run" type="primary" icon="el-icon-s-promotion">点击运行</el-button>
+          <el-input placeholder="标准输入(stdin)" v-model="my_stdin" style="width: 50%"></el-input>
+        </div>
+        <el-input
+          type="textarea"
+          :autosize="{ minRows: 32, maxRows: 100}"
+          placeholder="运行结果"
+          v-model="runResult"
+        ></el-input>
+      </el-col>
+    </el-row>
+    <!-- <aceEditor @input="getSourceCode" @switchLanguage="getLang"></aceEditor>
     <div style="margin: 20px 0;">
       <el-button @click="compile">点击编译</el-button>
       <el-button @click="run">点击运行</el-button>
       <el-input placeholder="标准输入(stdin)" v-model="my_stdin" style="width: 40%"></el-input>
     </div>编译结果
     <el-input type="textarea" :autosize="{ minRows: 1, maxRows: 10}" v-model="compileResult"></el-input>运行结果
-    <el-input type="textarea" :autosize="{ minRows: 1, maxRows: 10}" v-model="runResult"></el-input>
+    <el-input type="textarea" :autosize="{ minRows: 1, maxRows: 10}" v-model="runResult"></el-input>-->
   </div>
 </template>
 
@@ -41,7 +60,7 @@ export default {
     return {
       source_code: "",
       lang: "",
-      compileResult: "",
+      // compileResult: "",
       runResult: "",
       my_stdin: "",
       compilerArray: compilerArray
@@ -51,28 +70,28 @@ export default {
     aceEditor
   },
   methods: {
-    compile() {
-      var runWandbox = require("wandbox-api");
-      let compiler = this.getCompiler();
-      if (this.source_code === "") {
-        return this.$message.warning("请先输入代码");
-      }
-      runWandbox.fromString(
-        this.source_code,
-        { compiler: compiler },
-        (error, results) => {
-          if (error) {
-            throw new Error(error.message);
-          }
+    // compile() {
+    //   var runWandbox = require("wandbox-api");
+    //   let compiler = this.getCompiler();
+    //   if (this.source_code === "") {
+    //     return this.$message.warning("请先输入代码");
+    //   }
+    //   runWandbox.fromString(
+    //     this.source_code,
+    //     { compiler: compiler },
+    //     (error, results) => {
+    //       if (error) {
+    //         throw new Error(error.message);
+    //       }
 
-          if (results.status === "0") {
-            this.compileResult = "编译成功";
-          } else {
-            this.compileResult = results.compiler_message;
-          }
-        }
-      );
-    },
+    //       if (results.status === "0") {
+    //         this.compileResult = "编译成功";
+    //       } else {
+    //         this.compileResult = results.compiler_message;
+    //       }
+    //     }
+    //   );
+    // },
     run() {
       var runWandbox = require("wandbox-api");
       let compiler = this.getCompiler();
@@ -87,14 +106,11 @@ export default {
             throw new Error(error.message);
           }
 
-          if (results.status === "0") {
-            this.compileResult = "编译成功";
+          if (results.status !== "0") {
+            this.runResult = results.compiler_message;
           } else {
-            this.compileResult = results.compiler_message;
-            return;
+            this.runResult = results.program_message;
           }
-
-          this.runResult = results.program_message;
         }
       );
     },

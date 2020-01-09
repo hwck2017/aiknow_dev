@@ -2,7 +2,7 @@
   <!-- document.getElementById('editor').style.fontSize='12px'; 设置字体
   editor.setFontSize(18)-->
   <div class="ace-container">
-    <div style="margin: 20px 0 10px 0;">
+    <div style="margin: 10px 0 10px 0;">
       <el-row :gutter="10">
         <el-col :span="6">
           编程语言:
@@ -88,8 +88,8 @@ export default {
   mounted() {
     this.aceEditor = ace.edit(this.$refs.ace, {
       maxLines: 100,
-      minLines: 20,
-      fontSize: 14,
+      minLines: 32,
+      fontSize: 16,
       value: this.value ? this.value : "",
       tabSize: 4,
       theme: this.themePath,

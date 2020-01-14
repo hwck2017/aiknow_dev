@@ -14,7 +14,7 @@
         <el-input
           type="textarea"
           :autosize="{ minRows: 32, maxRows: 100}"
-          placeholder="运行结果"
+          placeholder="运行结果(编译失败显示编译失败原因, 编译成功则显示程序运行结果)"
           v-model="runResult"
         ></el-input>
       </el-col>

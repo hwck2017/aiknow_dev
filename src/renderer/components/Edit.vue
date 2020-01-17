@@ -11,7 +11,7 @@
           </el-select>
         </el-col>
         <el-col :span="6">
-          字体大小: 
+          字体大小:
           <el-select v-model="fontSize" size="mini" @change="handleChangeSize">
             <el-option v-for="(item, idx) in sizes" :key="idx" :label="item" :value="item"></el-option>
           </el-select>
@@ -101,7 +101,12 @@ export default {
       enableLiveAutocompletion: true,
       enableBasicAutocompletion: true
     });
+    this.aceEditor.on("copy", () => {
+      this.$message.success("复制成功");
+    });
     this.aceEditor.getSession().on("change", this.change);
+    this.aceEditor.selectAll();
+    this.aceEditor.undo();
   },
   data() {
     return {

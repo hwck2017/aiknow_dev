@@ -4,16 +4,11 @@
     <div class="login_box">
       <el-radio-group v-model="loginMode" size="medium">
         <el-radio-button label="passwd">账号密码登录</el-radio-button>
-        <el-radio-button label="telephone">手机号登录</el-radio-button>
+        <el-radio-button label="phone">手机号登录</el-radio-button>
       </el-radio-group>
 
-      <el-form
-        class="login_form"
-        :rules="loginFormRules"
-        ref="loginFormRef"
-        label-width="0px"
-        :model="loginInfo"
-      >
+      <!-- :rules="loginFormRules" -->
+      <el-form class="login_form" ref="loginFormRef" label-width="0px" :model="loginInfo">
         <el-form-item v-if="loginMode==='passwd'" prop="username">
           <el-input v-model="loginInfo.username" prefix-icon="el-icon-user" placeholder="请输入登录账号"></el-input>
         </el-form-item>
@@ -25,15 +20,19 @@
             :show-password="true"
           ></el-input>
         </el-form-item>
-        <el-form-item v-if="loginMode==='telephone'" prop="telephone">
+        <el-form-item v-if="loginMode==='phone'" prop="telephone">
           <el-input
             v-model="loginInfo.phoneNumber"
             prefix-icon="el-icon-mobile-phone"
             placeholder="请输入手机号码"
           ></el-input>
         </el-form-item>
-        <el-form-item v-if="loginMode==='telephone'" prop="verify">
-          <el-input v-model="loginInfo.verifyCode" prefix-icon="el-icon-key" placeholder="请输入验证码"></el-input>
+        <el-form-item v-if="loginMode==='phone'" prop="verify">
+          <el-input v-model="loginInfo.verifyCode" prefix-icon="el-icon-key" placeholder="请输入验证码">
+            <template slot="append">
+              <el-button @click="getVerifyCode">获取验证码</el-button>
+            </template>
+          </el-input>
           <!-- <el-button>获取验证码</el-button> -->
         </el-form-item>
         <el-form-item class="btns">
@@ -45,74 +44,39 @@
 
     <!-- <div class="editor">
       <el-button class="el-icon-edit" @click="openEditor">打开编辑器</el-button>
-    </div> -->
+    </div>-->
   </div>
 </template>
 
 <script>
 export default {
   data() {
-    // 验证邮箱的规则
-    var checkEmail = (rule, value, cb) => {
-      // 验证邮箱的正则表达式
-      const regEmail = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(\.[a-zA-Z0-9_-])+/;
-
-      if (regEmail.test(value)) {
-        // 合法的邮箱
-        return cb();
-      }
-
-      cb(new Error("请输入合法的邮箱"));
-    };
-
-    // 验证手机号的规则
-    var checkMobile = (rule, value, cb) => {
-      // 验证手机号的正则表达式
-      const regMobile = /^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/;
-
-      if (regMobile.test(value)) {
-        return cb();
-      }
-
-      cb(new Error("请输入合法的手机号"));
-    };
-
-    var checkPassword = (rule, value, cb) => {
-      if (value === "") {
-        cb(new Error("请再次输入密码"));
-      } else if (value !== this.addForm.password) {
-        cb(new Error("两次输入密码不一致!"));
-      } else {
-        cb();
-      }
-    };
-
     return {
       loginMode: "passwd",
       loginInfo: {
-        username: "ck2020",
-        password: "123456",
+        username: "",
+        password: "",
         phoneNumber: "",
         verifyCode: ""
-      },
-      // 这是表单的验证规则对象
-      loginFormRules: {
-        // 验证用户名是否合法
-        username: [
-          { required: true, message: "请输入登录账号", trigger: "blur" },
-          { min: 3, max: 10, message: "长度在 3 到 10 个字符", trigger: "blur" }
-        ],
-        // 验证密码是否合法
-        password: [
-          { required: true, message: "请输入登录密码", trigger: "blur" },
-          { min: 6, max: 15, message: "长度在 6 到 15 个字符", trigger: "blur" }
-        ],
-        telephone: [
-          { required: true, message: "请输入手机号码", trigger: "blur" },
-          { min: 11, max: 11, message: "请输入有效手机号码", trigger: "blur" }
-        ],
-        verify: [{ required: true, message: "请输入验证码", trigger: "blur" }]
       }
+      // 这是表单的验证规则对象
+      // loginFormRules: {
+      //   // 验证用户名是否合法
+      //   username: [
+      //     { required: true, message: "请输入登录账号", trigger: "blur" },
+      //     { min: 3, max: 10, message: "长度在 3 到 10 个字符", trigger: "blur" }
+      //   ],
+      //   // 验证密码是否合法
+      //   password: [
+      //     { required: true, message: "请输入登录密码", trigger: "blur" },
+      //     { min: 6, max: 15, message: "长度在 6 到 15 个字符", trigger: "blur" }
+      //   ],
+      //   telephone: [
+      //     { required: true, message: "请输入手机号码", trigger: "blur" }
+      //     // { min: 11, max: 11, message: "请输入有效手机号码", trigger: "blur" }
+      //   ],
+      //   verify: [{ required: true, message: "请输入验证码", trigger: "blur" }]
+      // }
     };
   },
   methods: {
@@ -123,13 +87,25 @@ export default {
     login() {
       this.$refs.loginFormRef.validate(async valid => {
         if (!valid) return;
-        const { data: res } = await this.$http.post(
-          "http://study.aiknow.cn/study/account/login",
-          {
+        let data;
+        let url;
+        if (this.loginMode === "phone") {
+          url = "http://study.aiknow.cn/study/account/sms/login";
+          data = {
+            phone: this.loginInfo.phoneNumber,
+            code: this.loginInfo.verifyCode
+          };
+        } else {
+          url = "http://study.aiknow.cn/study/account/login";
+          data = {
             username: this.loginInfo.username,
             password: this.loginInfo.password
-          }
-        );
+          };
+        }
+
+        console.log(data);
+        const { data: res } = await this.$http.post(url, data);
+
         // console.log(res);
         if (res.errno !== 200) return this.$message.error(res.errmsg);
         // 1. 将登录成功之后的 token，保存到客户端的 sessionStorage 中
@@ -144,11 +120,25 @@ export default {
         } else {
           this.$router.push("/home");
         }
-        this.$message.success("登录成功");
+        this.$message({
+          message: "登录成功",
+          type: "success",
+          duration: 1000
+        });
       });
     },
     openEditor() {
       this.$router.push("/editor");
+    },
+    async getVerifyCode() {
+      const { data: res } = await this.$http.post(
+        "http://47.92.228.153/study/sms",
+        {
+          phone: this.loginInfo.phoneNumber
+        }
+      );
+
+      if (res.errno === 200) return this.$message.success("已发送");
     }
   }
 };

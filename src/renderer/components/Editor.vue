@@ -7,43 +7,37 @@
         </div>
       </el-col>
       <el-col :span="10">
-        <div style="margin: 10px 0 20px 0;">
+        <div style="margin: 10px 0;">
           <el-button @click="run" type="primary" icon="el-icon-s-promotion">点击运行</el-button>
           <el-input placeholder="标准输入(stdin)" v-model="my_stdin" style="width: 50%"></el-input>
         </div>
         <el-input
           type="textarea"
           :autosize="{ minRows: 32, maxRows: 100}"
-          placeholder="运行结果(编译失败显示编译失败原因, 编译成功则显示程序运行结果)"
+          placeholder="编译失败显示编译失败原因,编译成功显示程序运行结果"
           v-model="runResult"
         ></el-input>
       </el-col>
     </el-row>
-    <!-- <aceEditor @input="getSourceCode" @switchLanguage="getLang"></aceEditor>
-    <div style="margin: 20px 0;">
-      <el-button @click="compile">点击编译</el-button>
-      <el-button @click="run">点击运行</el-button>
-      <el-input placeholder="标准输入(stdin)" v-model="my_stdin" style="width: 40%"></el-input>
-    </div>编译结果
-    <el-input type="textarea" :autosize="{ minRows: 1, maxRows: 10}" v-model="compileResult"></el-input>运行结果
-    <el-input type="textarea" :autosize="{ minRows: 1, maxRows: 10}" v-model="runResult"></el-input>-->
   </div>
 </template>
 
 <script>
 import aceEditor from "./Edit.vue";
+
+// curl https://wandbox.org/api/list.json 获取编译器选项
 const compilerArray = [
   {
-    name: "PYTHON27",
-    compiler: "python-2.7.0"
+    name: "PYTHON",
+    compiler: "cpython-2.7-head"
   },
   {
-    name: "PYTHON35",
-    compiler: "python-3.5.0"
+    name: "PYTHON3",
+    compiler: "cpython-head"
   },
   {
-    name: "JAVA8",
-    compiler: ""
+    name: "JAVA",
+    compiler: "openjdk-head"
   },
   {
     name: "CPP",
@@ -51,7 +45,7 @@ const compilerArray = [
   },
   {
     name: "C",
-    compiler: "gcc-head"
+    compiler: "gcc-head-c"
   }
 ];
 
@@ -70,28 +64,6 @@ export default {
     aceEditor
   },
   methods: {
-    // compile() {
-    //   var runWandbox = require("wandbox-api");
-    //   let compiler = this.getCompiler();
-    //   if (this.source_code === "") {
-    //     return this.$message.warning("请先输入代码");
-    //   }
-    //   runWandbox.fromString(
-    //     this.source_code,
-    //     { compiler: compiler },
-    //     (error, results) => {
-    //       if (error) {
-    //         throw new Error(error.message);
-    //       }
-
-    //       if (results.status === "0") {
-    //         this.compileResult = "编译成功";
-    //       } else {
-    //         this.compileResult = results.compiler_message;
-    //       }
-    //     }
-    //   );
-    // },
     run() {
       var runWandbox = require("wandbox-api");
       let compiler = this.getCompiler();

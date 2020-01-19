@@ -64,7 +64,7 @@ export default {
       this.$refs["password"].validate(valid => {
         if (valid) {
           this.$http
-            .post("http://47.92.228.153/study/account/change/password", {
+            .post("http://study.aiknow.cn/study/account/change/password", {
               username: this.$store.state.userInfo.username,
               password: this.password.form.newPassword,
               code: "888888"

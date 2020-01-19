@@ -132,7 +132,7 @@ export default {
     },
     async getVerifyCode() {
       const { data: res } = await this.$http.post(
-        "http://47.92.228.153/study/sms",
+        "http://study.aiknow.cn/study/sms",
         {
           phone: this.loginInfo.phoneNumber
         }

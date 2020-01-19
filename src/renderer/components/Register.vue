@@ -150,7 +150,7 @@ export default {
       this.$refs.addFormRef.validate(async valid => {
         if (!valid) return;
         const { data: res } = await this.$http.post(
-          "http://47.92.228.153/study/account/register",
+          "http://study.aiknow.cn/study/account/register",
           this.addForm
         );
 

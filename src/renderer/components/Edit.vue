@@ -1,22 +1,30 @@
 <template>
-  <!-- document.getElementById('editor').style.fontSize='12px'; 设置字体
-  editor.setFontSize(18)-->
   <div>
     <div class="tool-bar">
       <el-row :gutter="6">
         <el-col :span="5">
           <!-- 编程语言: -->
           <el-popover placement="top-start" trigger="hover" content="选择编程语言">
-            <el-select v-model="lang" size="small" slot="reference" @change="handleLangSwitch">
-              <el-option v-for="(item, idx) in langs" :key="idx" :label="item" :value="item"></el-option>
+            <el-select
+              v-model="languageOpt"
+              size="small"
+              slot="reference"
+              @change="langChangeHandle"
+            >
+              <el-option v-for="(item, idx) in languageOpts" :key="idx" :label="item" :value="item"></el-option>
             </el-select>
           </el-popover>
         </el-col>
         <el-col :span="4">
           <!-- 字体大小: -->
           <el-popover placement="top-start" trigger="hover" content="调整字体大小">
-            <el-select v-model="fontSize" size="small" slot="reference" @change="handleChangeSize">
-              <el-option v-for="(item, idx) in sizes" :key="idx" :label="item" :value="item"></el-option>
+            <el-select
+              v-model="fontSizeOpt"
+              size="small"
+              slot="reference"
+              @change="fontSizeChangeHandle"
+            >
+              <el-option v-for="(item, idx) in fontSizeOpts" :key="idx" :label="item" :value="item"></el-option>
             </el-select>
           </el-popover>
         </el-col>
@@ -45,58 +53,25 @@ import "ace-builds/src-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/theme-monokai";
 import "ace-builds/src-noconflict/mode-c_cpp";
 
-var { ipcRenderer, remote } = require("electron");
+var { ipcRenderer } = require("electron");
 
-const modeArray = [
-  {
-    name: "PYTHON",
-    path: "ace/mode/python"
-  },
-  {
-    name: "PYTHON3",
-    path: "ace/mode/python"
-  },
-  {
-    name: "JAVA",
-    path: "ace/mode/java"
-  },
-  {
-    name: "CPP",
-    path: "ace/mode/c_cpp"
-  },
-  {
-    name: "C",
-    path: "ace/mode/c_cpp"
-  }
-];
+const languageOpts = ["PYTHON", "PYTHON3", "JAVA", "CPP", "C"];
+const fontSizeOpts = ["超大", "大", "中", "小"];
 
-const sizeArr = [
-  {
-    name: "超大",
-    size: 30
-  },
-  {
-    name: "大",
-    size: 22
-  },
-  {
-    name: "中",
-    size: 16
-  },
-  {
-    name: "小",
-    size: 12
-  }
-];
+var mapMode = new Map([
+  ["PYTHON", "ace/mode/python"],
+  ["PYTHON3", "ace/mode/python"],
+  ["JAVA", "ace/mode/java"],
+  ["CPP", "ace/mode/c_cpp"],
+  ["C", "ace/mode/c_cpp"]
+]);
+var mapFontSize = new Map([
+  ["超大", 30],
+  ["大", 22],
+  ["中", 16],
+  ["小", 12]
+]);
 
-const langs = ["PYTHON", "PYTHON3", "JAVA", "CPP", "C"];
-const sizes = ["超大", "大", "中", "小"];
-// const themeArray = [
-//   {
-//     name: "monokai",
-//     path: "ace/theme/monokai"
-//   }
-// ];
 export default {
   props: ["value", "language"],
   mounted() {
@@ -106,8 +81,8 @@ export default {
       fontSize: 16,
       value: this.value ? this.value : "",
       tabSize: 4,
-      theme: this.themePath,
-      mode: this.modePath
+      theme: "ace/theme/monokai",
+      mode: "ace/mode/c_cpp"
     });
     // 激活自动提示
     this.aceEditor.setOptions({
@@ -118,43 +93,33 @@ export default {
     this.aceEditor.on("copy", () => {
       this.$message.success("复制成功");
     });
-    this.aceEditor.getSession().on("change", this.change);
+    this.aceEditor.getSession().on("change", this.inputChange);
     this.aceEditor.selectAll();
     this.aceEditor.undo();
   },
   data() {
     return {
       aceEditor: null,
-      themePath: "ace/theme/monokai",
-      modePath: "ace/mode/c_cpp",
-      langs: langs,
-      lang: "CPP",
-      modeArray: modeArray,
-      fontSize: "中",
-      sizes: sizes,
-      sizeArr: sizeArr
+      languageOpts: languageOpts,
+      languageOpt: "CPP",
+      modes: mapMode,
+      fontSizeOpts: fontSizeOpts,
+      fontSizeOpt: "中",
+      fontSizes: mapFontSize
     };
   },
   methods: {
-    change() {
+    inputChange() {
       this.$emit("input", this.aceEditor.getSession().getValue());
     },
-    handleLangSwitch(newLang) {
-      for (var i = 0; i < this.modeArray.length; i++) {
-        if (this.modeArray[i].name === newLang) {
-          this.aceEditor.getSession().setMode(this.modeArray[i].path);
-          this.$emit("switchLanguage", newLang);
-          break;
-        }
-      }
+    langChangeHandle() {
+      let m = this.modes.get(this.languageOpt);
+      this.aceEditor.getSession().setMode(m);
+      this.$emit("languageChanged", this.languageOpt);
     },
-    handleChangeSize(newSize) {
-      for (var i = 0; i < this.sizeArr.length; i++) {
-        if (this.sizeArr[i].name === newSize) {
-          this.aceEditor.setFontSize(this.sizeArr[i].size);
-          break;
-        }
-      }
+    fontSizeChangeHandle() {
+      let size = this.fontSizes.get(this.fontSizeOpt);
+      this.aceEditor.setFontSize(size);
     },
     openFile() {
       ipcRenderer.send("action", "open");
@@ -165,15 +130,18 @@ export default {
         "save",
         this.aceEditor.getSession().getValue()
       );
+    },
+    init() {
+      ipcRenderer.on("data", (event, data) => {
+        this.aceEditor
+          .getSession()
+          .getDocument()
+          .setValue(data.toString());
+      });
     }
   },
   created() {
-    ipcRenderer.on("data", (event, data) => {
-      this.aceEditor
-        .getSession()
-        .getDocument()
-        .setValue(data.toString());
-    });
+    this.init();
   }
 };
 </script>

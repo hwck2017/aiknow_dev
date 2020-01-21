@@ -45,7 +45,7 @@
           </div>
         </el-card>
 
-        <aceEditor @input="getSourceCode" @switchLanguage="getNewLang"></aceEditor>
+        <aceEditor @input="getSourceCode" @languageChanged="langChangeHandle"></aceEditor>
         <div style="margin: 20px 0;">
           <el-button @click="compile">本地编译</el-button>
           <el-button @click="submitCode">提交</el-button>
@@ -82,6 +82,14 @@
 import aceEditor from "../Edit.vue";
 import judgeResult from "./judgeResult.vue";
 
+const mapCompiler = new Map([
+  ["PYTHON", "cpython-2.7-head"],
+  ["PYTHON3", "cpython-head"],
+  ["JAVA", "openjdk-head"],
+  ["CPP", "gcc-head"],
+  ["C", "gcc-head-c"]
+]);
+
 export default {
   data() {
     return {
@@ -107,7 +115,9 @@ export default {
       },
       results: {},
       isSubmit: false,
-      nodeID: ""
+      nodeID: "",
+      compilers: mapCompiler,
+      compiler: ""
     };
   },
   created() {
@@ -142,21 +152,22 @@ export default {
     // 本地编译
     compile() {
       var runWandbox = require("wandbox-api");
-      // TODO:: 编程语言变化
-      runWandbox.fromString(this.commitInfo.source_code, (error, results) => {
-        if (error) {
-          throw new Error(error.message);
-        }
+      runWandbox.fromString(
+        this.commitInfo.source_code,
+        { compiler: this.compiler },
+        (error, results) => {
+          if (error) {
+            throw new Error(error.message);
+          }
 
-        // console.log(results);
-
-        if (results.status === "0") {
-          this.compileResult = "编译成功";
-          this.compilePass = true;
-        } else {
-          this.compileResult = results.compiler_message;
+          if (results.status === "0") {
+            this.compileResult = "编译成功";
+            this.compilePass = true;
+          } else {
+            this.compileResult = results.compiler_message;
+          }
         }
-      });
+      );
     },
 
     //提交代码到题库
@@ -223,8 +234,9 @@ export default {
     getSourceCode(msg) {
       this.commitInfo.source_code = msg;
     },
-    getNewLang(lang) {
+    langChangeHandle(lang) {
       this.commitInfo.lang = lang;
+      this.compiler = this.compilers.get(lang);
     }
   },
   components: {

@@ -56,6 +56,7 @@ export default new Vuex.Store({
         axios.get('/code/' + id).then(res => {
           let data = res.data.data
           // let index = 0
+          console.log(data)
           let obj;
           for (let i = 0; i < state.submissions.length; i++) {
             if (state.submissions[i].id == id) {
@@ -82,7 +83,7 @@ export default new Vuex.Store({
             clearInterval(clock)
           }
 
-          if (data.status === '完成' && data.response.result === 'AC' && obj.nodeid !== "") {
+          if (data.status === '完成' && data.response.result === 'AC' && obj.nodeid !== null) {
             axios.post('http://study.aiknow.cn/study/studyProcess/updateProcess', {
               "nodeid": obj.nodeid
             })

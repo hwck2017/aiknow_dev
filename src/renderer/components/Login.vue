@@ -103,9 +103,7 @@ export default {
           };
         }
 
-        console.log(data);
         const { data: res } = await this.$http.post(url, data);
-
         // console.log(res);
         if (res.errno !== 200) return this.$message.error(res.errmsg);
         // 1. 将登录成功之后的 token，保存到客户端的 sessionStorage 中

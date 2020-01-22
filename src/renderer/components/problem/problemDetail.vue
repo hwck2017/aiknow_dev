@@ -235,7 +235,9 @@ export default {
       this.commitInfo.source_code = msg;
     },
     langChangeHandle(lang) {
-      this.commitInfo.lang = lang;
+      if (lang === "PYTHON") this.commitInfo.lang = "PYTHON27";
+      else if (lang === "PYTHON3") this.commitInfo.lang = "PYTHON35";
+      else this.commitInfo.lang = lang;
       this.compiler = this.compilers.get(lang);
     }
   },

@@ -137,7 +137,17 @@ export default {
       );
 
       if (res.errno === 200) return this.$message.success("已发送");
+    },
+    justNotice() {
+      this.$message({
+        message: "请登录",
+        type: "success",
+        duration: 1000
+      });
     }
+  },
+  created() {
+    this.justNotice();
   }
 };
 </script>

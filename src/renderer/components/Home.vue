@@ -25,7 +25,8 @@
                 <i class="el-icon-s-home"></i>
                 <span slot="title">主页</span>
               </el-menu-item>
-              <el-menu-item index="/problems" v-if="$store.state.userInfo.isLogin">
+              <!-- <el-menu-item index="/problems" v-if="$store.state.userInfo.isLogin"> -->
+              <el-menu-item index="/problems">
                 <i class="el-icon-menu"></i>
                 <span slot="title">题目</span>
               </el-menu-item>

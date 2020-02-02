@@ -13,7 +13,7 @@
         </div>
         <el-row v-for="(item, index) in data.response.test_cases" :key="index">
           <el-col :span="6">
-            测试点-{{index+1}}
+            测试点-{{index+1}}&nbsp;&nbsp;
             {{item.result}}
           </el-col>
           <el-col :span="18">{{item.error_message}}</el-col>

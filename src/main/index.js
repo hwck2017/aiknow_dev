@@ -21,7 +21,7 @@ function createWindow () {
     height: 563,
     useContentSize: true,
     width: 1000,
-    webPreferences: {webSecurity: false}
+    webPreferences: {webSecurity: false},
   })
 
   mainWindow.loadURL(winURL)
@@ -31,6 +31,7 @@ function createWindow () {
   })
 
   require('./ipcMain.js');
+  require('./menu.js')
 }
 
 app.on('ready', createWindow)

@@ -56,7 +56,7 @@ export default new Vuex.Store({
         axios.get('/code/' + id).then(res => {
           let data = res.data.data
           // let index = 0
-          console.log(data)
+          // console.log(data)
           let obj;
           for (let i = 0; i < state.submissions.length; i++) {
             if (state.submissions[i].id == id) {

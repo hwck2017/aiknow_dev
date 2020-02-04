@@ -24,13 +24,14 @@
 </template>
 
 <script>
-import ProblemResult from "../components/problem/problemResult.vue";
+import ProblemResult from "../problem/problemResult.vue";
 export default {
   methods: {
     removeNotice(index) {
       this.$store.commit("deleteSubmission", index);
     },
     getSubmissionResult(id) {
+      // console.log(id)
       this.$router.push({ path: `/submission/${id}` });
     }
   },

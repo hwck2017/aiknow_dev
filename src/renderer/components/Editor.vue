@@ -125,12 +125,12 @@ export default {
       enableLiveAutocompletion: true,
       enableBasicAutocompletion: true
     });
-    this.aceEditor.on("copy", () => {
-      this.$message.success("复制成功");
-    });
-    // this.aceEditor.getSession().on("change", this.inputChange);
-    this.aceEditor.selectAll();
-    this.aceEditor.undo();
+    // this.aceEditor.on("copy", () => {
+    //   this.$message.success("复制成功");
+    // });
+    // // this.aceEditor.getSession().on("change", this.inputChange);
+    // this.aceEditor.selectAll();
+    // this.aceEditor.undo();
 
     this.readFromStorage();
   },
@@ -215,7 +215,7 @@ export default {
 
       // 打开运行结果展示窗口
       this.ran = true;
-      this.runResult = "";
+      this.runResult = "运行中...";
       runWandbox.fromString(
         code,
         { compiler: compiler, stdin: this.stdin },
@@ -333,7 +333,7 @@ export default {
   width: 99%;
   height: 30px;
   background-color: #eee;
-  border: 1px solid #eee;
+  border: 1px solid #409eff;
   padding: 4px;
   /* position: absolute; */
 }

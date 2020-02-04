@@ -1,5 +1,6 @@
 var { ipcMain, dialog, BrowserWindow } = require('electron');
 var fs = require('fs');
+var path = require("path");
 
 /*
 问题：
@@ -72,3 +73,14 @@ function saveCurrentDoc(data) {
         isSave = true;
     }
 }
+
+// let win
+// ipcMain.on('newWin', () => {
+//     console.log("new window")
+//     win = new BrowserWindow({ width: 800, height: 600 });
+//     // win.loadFile(path.join('file:', __dirname, 'new.html'));
+//     win.loadFile('new.html');
+//     win.on("close", function () {
+//         win = null;
+//     });
+// })

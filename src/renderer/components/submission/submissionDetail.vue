@@ -24,7 +24,7 @@
 </template>
 
 <script>
-import ProblemResult from "./problem/problemResult.vue";
+import ProblemResult from "../problem/problemResult.vue";
 export default {
   created() {
     this.getStatus();
@@ -36,15 +36,11 @@ export default {
   },
   methods: {
     getStatus() {
-      this.$http.get("/code/" + this.getId).then(res => {
+      console.log(this.$route.params.id);
+      this.$http.get("/code/" + this.$route.params.id).then(res => {
         // console.log(res.data);
         this.data = res.data.data;
       });
-    }
-  },
-  computed: {
-    getId() {
-      return this.$route.params.id;
     }
   },
   components: {

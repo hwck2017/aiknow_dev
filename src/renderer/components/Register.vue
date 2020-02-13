@@ -130,7 +130,7 @@ export default {
         nickname: [{ required: true, message: "请输入昵称", trigger: "blur" }],
         phone: [
           { required: true, message: "请输入手机号", trigger: "blur" },
-          { validator: checkMobile, trigger: "blur" }
+          // { validator: checkMobile, trigger: "blur" }
         ]
       },
       // province->alliances

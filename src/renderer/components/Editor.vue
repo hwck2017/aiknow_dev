@@ -81,9 +81,11 @@ import "ace-builds/src-noconflict/mode-c_cpp";
 
 var { ipcRenderer } = require("electron");
 
+//编程语言选项
 const languageOpts = ["PYTHON", "PYTHON3", "JAVA", "CPP", "C"];
+//字体大小选项
 const fontSizeOpts = ["超大", "大", "中", "小"];
-
+//语言模式选项
 var mapMode = new Map([
   ["PYTHON", "ace/mode/python"],
   ["PYTHON3", "ace/mode/python"],
@@ -181,8 +183,9 @@ export default {
         this.aceEditor.getSession().getValue()
       );
     },
-    store() {
+    storeData() {
       let code = this.aceEditor.getSession().getValue();
+      //内容为空或者未发生改变则不保存
       if (
         code === "" ||
         code === window.sessionStorage.getItem("code" + this.problemID)
@@ -224,6 +227,7 @@ export default {
             throw new Error(error.message);
           }
 
+          this.stdin = "";
           if (results.status !== "0") {
             if (results.compiler_message === undefined)
               this.runResult = results.program_error;
@@ -235,7 +239,7 @@ export default {
         }
       );
     },
-    // 获取题目对应课程节点
+    // 获取题目对应课程节点ID
     async getNodeID() {
       if (this.problemID === undefined) {
         return;
@@ -300,7 +304,9 @@ export default {
     init() {
       this.problemID = this.$route.params.pid;
       this.getNodeID();
-      setInterval(this.store, 10000);
+      // 每10s保存一次编辑器中的内容
+      setInterval(this.storeData, 10000);
+      // 打开文件时获取到的文件内容
       ipcRenderer.on("data", (event, data) => {
         this.aceEditor
           .getSession()

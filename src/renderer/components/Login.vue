@@ -30,10 +30,9 @@
         <el-form-item v-if="loginMode==='phone'" prop="verify">
           <el-input v-model="loginInfo.verifyCode" prefix-icon="el-icon-key" placeholder="请输入验证码">
             <template slot="append">
-              <el-button @click="getVerifyCode">获取验证码</el-button>
+              <el-button type="primary" plain @click="getVerifyCode">{{content}}</el-button>
             </template>
           </el-input>
-          <!-- <el-button>获取验证码</el-button> -->
         </el-form-item>
         <el-form-item class="btns">
           <el-button @click="login">登录</el-button>
@@ -41,10 +40,6 @@
         </el-form-item>
       </el-form>
     </div>
-
-    <!-- <div class="editor">
-      <el-button class="el-icon-edit" @click="openEditor">打开编辑器</el-button>
-    </div>-->
   </div>
 </template>
 
@@ -58,7 +53,10 @@ export default {
         password: "",
         phoneNumber: "",
         verifyCode: ""
-      }
+      },
+      content: "发送验证码",
+      totalTime: 60,
+      canClick: true
       // 这是表单的验证规则对象
       // loginFormRules: {
       //   // 验证用户名是否合法
@@ -129,6 +127,12 @@ export default {
       this.$router.push("/editor");
     },
     async getVerifyCode() {
+      if (this.loginInfo.phoneNumber === "") {
+        return this.$message.warning("请输入手机号码");
+      }
+
+      if (!this.canClick) return;
+      this.canClick = false;
       const { data: res } = await this.$http.post(
         "http://study.aiknow.cn/study/sms",
         {
@@ -136,7 +140,22 @@ export default {
         }
       );
 
+      this.countDown();
       if (res.errno === 200) return this.$message.success("已发送");
+    },
+    countDown() {
+      this.content = this.totalTime + "s后重新发送"; //这里解决60秒不见了的问题
+      let clock = window.setInterval(() => {
+        this.totalTime--;
+        this.content = this.totalTime + "s后重新发送";
+        if (this.totalTime < 0) {
+          //当倒计时小于0时清除定时器
+          window.clearInterval(clock);
+          this.content = "重新发送验证码";
+          this.totalTime = 60;
+          this.canClick = true;
+        }
+      }, 1000);
     },
     justNotice() {
       this.$message({

@@ -311,7 +311,7 @@ export default {
         this.aceEditor
           .getSession()
           .getDocument()
-          .setValue(data.toString());
+          .setValue(data);
       });
     }
   },

@@ -18,17 +18,16 @@ ipcMain.on('action', function (event, action, data) {
             break;
 
         case "open":
-            //通过dialog打开文件
-            var dir = dialog.showOpenDialog({
-                properties: ['openFile']
-            });
-
-            if (dir) {
-                //获取文件内容
-                var fsData = fs.readFileSync(dir[0]);
-                //将文件内容发送至渲染进程
-                BrowserWindow.getFocusedWindow().webContents.send("data", fsData);
-            }
+            dialog.showOpenDialog({ properties: ['openFile'] })
+                .then(result => {
+                    // console.log(result.filePaths)
+                    if (result.filePaths) {
+                        var fsData = fs.readFileSync(result.filePaths[0]);
+                        //将文件内容发送至渲染进程
+                        BrowserWindow.getFocusedWindow().webContents.send("data", fsData.toString());
+                    }
+                })
+                // .catch(err => { console.log(err) })
             break;
 
         case "save":
@@ -56,20 +55,21 @@ function askSaveDialog() {
 function saveCurrentDoc(data) {
     // 当前文件路径不存在
     if (!currentFile) {
-        var dir = dialog.showSaveDialog({
-            defaultPath: 'a.cpp',
+        dialog.showSaveDialog({
+            defaultPath: '1.cpp',
             filters: [
                 { name: 'All Files', extensions: ['*'] }
             ]
+        }).then(result => {
+            console.log(result)
+            if (result.filePath) {
+                currentFile = result.filePath;
+                fs.writeFileSync(currentFile, data, 'utf-8');
+                isSave = true;
+            }
         });
-
-        if (dir) {
-            currentFile = dir;
-            fs.writeFileSync(currentFile, data);
-            isSave = true;
-        }
     } else {
-        fs.writeFileSync(currentFile, data);
+        fs.writeFileSync(currentFile, data, 'utf-8');
         isSave = true;
     }
 }

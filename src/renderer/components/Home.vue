@@ -5,7 +5,7 @@
         <el-col :span="4">
           <div style="display:flex; padding: 5px 0px;">
             <img
-              src="../../../static/aiknow.jpg"
+              src="static/aiknow.jpg"
               style="width:50px; height:50px; vertical-align:middle;"
             />
             <span class="title-style">爱知部落</span>

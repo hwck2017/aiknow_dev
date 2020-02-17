@@ -1,7 +1,9 @@
 const electron = require('electron')
 const Menu = electron.Menu
 
-var template = [{},
+var template = [{
+    label:""
+},
     {
     label: '编辑',
     submenu: [{

@@ -20,6 +20,8 @@ import edit from '../components/user/edit.vue'
 import Editor from '../components/Editor.vue'
 import security from '../components/user/security.vue'
 
+import pythonEditor from '../components/pythonEditor.vue'
+
 import problem from '../components/user/problem.vue'
 import userContest from '../components/user/contest.vue'
 import group from '../components/user/group.vue'
@@ -107,7 +109,12 @@ const router = new Router({
         {
           path: '/editor',
           component: Editor
-        }]
+        },
+        {
+          path: '/pythoneditor',
+          component: pythonEditor
+        }
+      ]
     },
     {
       path: '*',

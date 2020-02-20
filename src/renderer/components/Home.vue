@@ -34,6 +34,10 @@
                 <i class="el-icon-edit"></i>
                 <span slot="title">编辑器</span>
               </el-menu-item>
+              <el-menu-item index="/pythoneditor">
+                <i class="el-icon-edit"></i>
+                <span slot="title">Python编辑器</span>
+              </el-menu-item>
               <!-- <el-menu-item index="/contest" disabled>
                 <i class="el-icon-s-flag"></i>
                 <span slot="title">比赛</span>

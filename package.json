@@ -53,6 +53,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "blockly": "^3.20200123.1",
+    "bufferutil": "^4.0.1",
     "chart.js": "^2.9.3",
     "date-fns": "^2.8.1",
     "element-ui": "^2.12.0",

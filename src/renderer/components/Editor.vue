@@ -16,6 +16,24 @@
           </el-popover>
         </el-col>
         <el-col :span="6">
+          <!-- <el-dropdown size="small" split-button @command="setupProcess">
+            设置
+            <el-dropdown-menu>
+              <el-tree
+                :data="data"
+                show-checkbox
+                check-strictly
+                accordion
+                check-on-click-node
+                node-key="id"
+                ref="tree"
+                highlight-current
+                :props="defaultProps"
+                @node-click="handleNodeClick"
+                @check-change="checkChange"
+              >></el-tree>
+            </el-dropdown-menu>
+          </el-dropdown>-->
           <!-- 字体大小: -->
           <el-popover placement="top-start" trigger="hover" content="调整字体大小">
             <el-select
@@ -29,12 +47,21 @@
           </el-popover>
         </el-col>
         <el-col :span="12">
-          <el-popover placement="top-start" trigger="hover" content="打开本地文件">
+          <!-- <el-popover placement="top-start" trigger="hover" content="打开本地文件">
             <el-button size="small" icon="el-icon-folder-opened" slot="reference" @click="openFile"></el-button>
           </el-popover>
           <el-popover placement="top-start" trigger="hover" content="保存至本地文件">
             <el-button size="small" icon="el-icon-collection" slot="reference" @click="save"></el-button>
-          </el-popover>
+          </el-popover>-->
+          <el-dropdown size="small" split-button @command="fileOperationProcess">
+            文件
+            <el-dropdown-menu slot="dropdown">
+              <!-- <el-dropdown-item command="new">新建</el-dropdown-item> -->
+              <el-dropdown-item command="open">打开</el-dropdown-item>
+              <el-dropdown-item command="save">保存</el-dropdown-item>
+              <!-- <el-dropdown-item command="saveAs">另存为</el-dropdown-item> -->
+            </el-dropdown-menu>
+          </el-dropdown>
           <el-popover placement="top-start" trigger="hover" content="测试运行">
             <el-button
               size="small"
@@ -50,8 +77,29 @@
       </el-row>
     </div>
 
-    <el-dialog title="请输入测试数据" :visible.sync="isRunning">
-      <el-input type="textarea" :autosize="{ minRows: 10, maxRows: 50}" v-model="stdin"></el-input>
+    <el-dialog
+      title="请输入测试数据, 输入为空可不填"
+      :visible.sync="isRunning"
+      v-for="(item, index) in testCases"
+    >
+      <el-row :gutter="6">
+        <el-col :span="12">
+          <el-input
+            type="textarea"
+            :autosize="{ minRows: 5, maxRows: 10}"
+            v-model="item.stdin"
+            placeholder="输入"
+          ></el-input>
+        </el-col>
+        <el-col :span="12">
+          <el-input
+            type="textarea"
+            :autosize="{ minRows: 5, maxRows: 10}"
+            v-model="item.stdout"
+            placeholder="期望结果"
+          ></el-input>
+        </el-col>
+      </el-row>
       <span slot="footer" class="dialog-footer">
         <el-button @click="isRunning = false">取 消</el-button>
         <el-button type="primary" @click="run">运 行</el-button>
@@ -82,13 +130,12 @@ import "ace-builds/src-noconflict/mode-c_cpp";
 var { ipcRenderer } = require("electron");
 
 //编程语言选项
-const languageOpts = ["PYTHON", "PYTHON3", "JAVA", "CPP", "C"];
+const languageOpts = ["PYTHON", "JAVA", "CPP", "C"];
 //字体大小选项
 const fontSizeOpts = ["超大", "大", "中", "小"];
 //语言模式选项
 var mapMode = new Map([
   ["PYTHON", "ace/mode/python"],
-  ["PYTHON3", "ace/mode/python"],
   ["JAVA", "ace/mode/java"],
   ["CPP", "ace/mode/c_cpp"],
   ["C", "ace/mode/c_cpp"]
@@ -96,8 +143,7 @@ var mapMode = new Map([
 
 // curl https://wandbox.org/api/list.json 获取编译器选项
 const mapCompiler = new Map([
-  ["PYTHON", "cpython-2.7-head"],
-  ["PYTHON3", "cpython-head"],
+  ["PYTHON", "cpython-head"],
   ["JAVA", "openjdk-head"],
   ["CPP", "gcc-head"],
   ["C", "gcc-head-c"]
@@ -127,12 +173,6 @@ export default {
       enableLiveAutocompletion: true,
       enableBasicAutocompletion: true
     });
-    // this.aceEditor.on("copy", () => {
-    //   this.$message.success("复制成功");
-    // });
-    // // this.aceEditor.getSession().on("change", this.inputChange);
-    // this.aceEditor.selectAll();
-    // this.aceEditor.undo();
 
     this.readFromStorage();
   },
@@ -140,11 +180,17 @@ export default {
     return {
       isRunning: false,
       ran: false, //运行完成展示结果
-      stdin: "",
+      // stdin: "",
+      testCases: [
+        {
+          stdin: "",
+          stdout: ""
+        }
+      ],
       runResult: "",
       problemID: 0,
       nodeID: "",
-      compileok: false,
+      // compileok: false,
       isSubmit: false,
       compilers: mapCompiler,
       aceEditor: null,
@@ -153,10 +199,56 @@ export default {
       modes: mapMode,
       fontSizeOpts: fontSizeOpts,
       fontSizeOpt: "中",
-      fontSizes: mapFontSize
+      fontSizes: mapFontSize,
+      data: [
+        {
+          id: 1,
+          label: "字体大小",
+          children: [
+            {
+              id: 9,
+              label: "超大"
+            },
+            {
+              id: 10,
+              label: "大"
+            },
+            {
+              id: 11,
+              label: "中"
+            },
+            {
+              id: 12,
+              label: "小"
+            }
+          ]
+        }
+      ],
+      defaultProps: {
+        children: "children",
+        label: "label"
+      }
     };
   },
   methods: {
+    handleNodeClick(item, node, self) {
+      //自己定义的editCheckId，防止单选出现混乱
+      console.log(item);
+      console.log(node);
+      console.log(self);
+      this.editCheckId = item.id;
+      this.$refs.tree.setCheckedKeys([item.id]);
+    },
+    checkChange(item, node, self) {
+      if (node == true) {
+        this.editCheckId = item.id;
+        this.$refs.tree.setCheckedKeys([item.id]);
+      } else {
+        if (this.editCheckId == item.id) {
+          this.$refs.tree.setCheckedKeys([item.id]);
+        }
+      }
+    },
     // inputChange() {
     //   this.$emit("input", this.aceEditor.getSession().getValue());
     // },
@@ -169,9 +261,13 @@ export default {
       this.aceEditor.getSession().setMode(m);
       // this.$emit("languageChanged", this.languageOpt);
     },
+    setupProcess() {},
     fontSizeChangeHandle() {
       let size = this.fontSizes.get(this.fontSizeOpt);
       this.aceEditor.setFontSize(size);
+    },
+    newFile() {
+      ipcRenderer.send("action", "new");
     },
     openFile() {
       ipcRenderer.send("action", "open");
@@ -180,6 +276,13 @@ export default {
       ipcRenderer.send(
         "action",
         "save",
+        this.aceEditor.getSession().getValue()
+      );
+    },
+    saveAs() {
+      ipcRenderer.send(
+        "action",
+        "saveAs",
         this.aceEditor.getSession().getValue()
       );
     },
@@ -202,42 +305,104 @@ export default {
           .getDocument()
           .setValue(code);
     },
+    fileOperationProcess(e) {
+      console.log(e);
+      switch (e) {
+        case "new":
+          this.newFile();
+          break;
+        case "open":
+          this.openFile();
+          break;
+        case "save":
+          this.save();
+          break;
+        case "saveAs":
+          this.saveAs();
+          break;
+      }
+    },
     getCompiler() {
       return this.compilers.get(this.languageOpt);
     },
     // 本地编译+运行
+    // run() {
+    //   // ipcRenderer.send(
+    //   //   "run",
+    //   //   this.aceEditor.getSession().getValue()
+    //   // );
+    //   // return;
+    // },
+    getSubmission(id) {
+      let clock = setInterval(() => {
+        this.$http
+          .get("/code/" + id)
+          .then(res => {
+            let data = res.data.data;
+            console.log(data);
+
+            // 判卷完成
+            if (data.status == "完成" || data.status == "错误") {
+              if (data.status == "完成") {
+                switch (data.response.result) {
+                  case "AC":
+                    this.runResult = "恭喜, 答案正确";
+                    break;
+                  case "CE":
+                    this.runResult = "编译错误 \n ";
+                    this.runResult += data.response.test_cases[0].error_message;
+                    break;
+                  case "WA":
+                    this.runResult = "太遗憾了, 答案错误";
+                    break;
+                  case "TLE":
+                    this.runResult = "运行超时";
+                    break;
+                  case "RTE":
+                    this.runResult = "运行错误 \n ";
+                    this.runResult += data.response.test_cases[0].error_message;
+                    break;
+                  default:
+                    this.runResult = "服务器内部错误";
+                    break;
+                }
+              } else {
+                this.runResult = "运行错误";
+              }
+              clearInterval(clock);
+            }
+          })
+          .catch(res => {
+            clearInterval(clock);
+          });
+      }, 1000);
+    },
     run() {
-      // 关闭测试数据输入窗口
       this.isRunning = false;
-      var runWandbox = require("wandbox-api");
-      let compiler = this.getCompiler();
       let code = this.aceEditor.getSession().getValue();
-      if (code === "") {
-        return this.$message.warning("请先输入代码");
+      if (code.length == 0) {
+        return this.$message.warning("请输入代码");
       }
 
-      // 打开运行结果展示窗口
+      if (this.testCases[0].stdin === "" && this.testCases[0].stdout === "") {
+        return this.$message.warning("请输入测试数据");
+      }
+
       this.ran = true;
       this.runResult = "运行中...";
-      runWandbox.fromString(
-        code,
-        { compiler: compiler, stdin: this.stdin },
-        (error, results) => {
-          if (error) {
-            throw new Error(error.message);
-          }
-
-          this.stdin = "";
-          if (results.status !== "0") {
-            if (results.compiler_message === undefined)
-              this.runResult = results.program_error;
-            else this.runResult = results.compiler_message;
-          } else {
-            this.runResult = results.program_message;
-            this.compileok = true;
-          }
-        }
-      );
+      this.$http
+        .post("/code", {
+          lang: this.languageConverse(),
+          source_code: code,
+          test_cases: this.testCases
+        })
+        .then(res => {
+          // console.log(res);
+          let id = res.data.data;
+          this.getSubmission(id);
+          this.testCases[0].stdin = "";
+          this.testCases[0].stdout = "";
+        });
     },
     // 获取题目对应课程节点ID
     async getNodeID() {
@@ -255,8 +420,7 @@ export default {
       this.nodeID = res.data;
     },
     languageConverse() {
-      if (this.languageOpt === "PYTHON") return "PYTHON27";
-      else if (this.languageOpt === "PYTHON3") return "PYTHON35";
+      if (this.languageOpt === "PYTHON") return "PYTHON35";
       else return this.languageOpt;
     },
     //提交代码到题库
@@ -265,11 +429,10 @@ export default {
         return this.$message.warning("编辑器模式下请勿提交");
       }
       if (!this.$store.state.userInfo.isLogin) {
+        this.$router.push("/login");
         return this.$message.warning("请先登入");
       }
-      if (this.compileok !== true) {
-        return this.$message.warning("请先做本地测试运行, 通过之后再提交");
-      }
+      this.$message.success("温馨提示: 做好本地测试再提交可提高准确率");
 
       let code = this.aceEditor.getSession().getValue();
       if (code.length == 0) {
@@ -311,7 +474,7 @@ export default {
         this.aceEditor
           .getSession()
           .getDocument()
-          .setValue(data);
+          .setValue(data.toString());
       });
     }
   },
@@ -342,5 +505,14 @@ export default {
   border: 1px solid #409eff;
   padding: 4px;
   /* position: absolute; */
+}
+
+.el-tree-node {
+  .is-leaf + .el-checkbox .el-checkbox__inner {
+    display: inline-block !important;
+  }
+  .el-checkbox .el-checkbox__inner {
+    display: none !important;
+  }
 }
 </style>

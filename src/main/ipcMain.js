@@ -1,3 +1,133 @@
+// var { ipcMain, dialog, BrowserWindow } = require('electron');
+// var fs = require('fs');
+// var path = require("path");
+
+// /*
+// 问题：
+//     1、新建 打开 保存的问题
+//     2、如果已经保存 第二次保存的时候不提示，且直接保存
+// */
+// var isSave = false;   //判断文件是否保存
+// var currentFile = '';   //保存当前文件的路径
+
+// ipcMain.on('action', function (event, action, data) {
+//     console.log(action);
+//     switch (action) {
+//         case "new":
+//             askSaveDialog();
+//             break;
+
+//         case "open":
+//             dialog.showOpenDialog({ properties: ['openFile'] })
+//                 .then(result => {
+//                     // console.log(result.filePaths)
+//                     if (result.filePaths) {
+//                         var fsData = fs.readFileSync(result.filePaths[0]);
+//                         //将文件内容发送至渲染进程
+//                         BrowserWindow.getFocusedWindow().webContents.send("data", fsData.toString());
+//                     }
+//                 })
+//             // .catch(err => { console.log(err) })
+//             break;
+
+//         case "save":
+//             saveToLocal(data);
+//             break;
+//         case "saveAs":
+//             saveAsToLocal(data);
+//             break;
+//     }
+// })
+
+// //判断文件是否需要保存, 保存则执行保存操作
+// function askSaveDialog() {
+//     if (!isSave) {
+//         var index = dialog.showMessageBox({
+//             type: "question",
+//             message: '是否要保存此文件?',
+//             buttons: ['Yes', 'No']
+//         })
+
+//         if (index == 0) {
+//             saveToLocal();
+//         }
+//     }
+// }
+
+// // 执行保存
+// function saveToLocal(data) {
+//     // 当前文件路径不存在
+//     if (!currentFile) {
+//         dialog.showSaveDialog({
+//             defaultPath: 'aiknow.cpp',
+//             filters: [
+//                 { name: 'All Files', extensions: ['*'] }
+//             ]
+//         }).then(result => {
+//             // console.log(result)
+//             if (result.filePath) {
+//                 currentFile = result.filePath;
+//                 fs.writeFileSync(currentFile, data, 'utf-8');
+//                 isSave = true;
+//             }
+//         });
+//     } else {
+//         fs.writeFileSync(currentFile, data, 'utf-8');
+//         isSave = true;
+//     }
+// }
+
+// function saveAsToLocal(data) {
+//     dialog.showSaveDialog({
+//         defaultPath: 'aiknow.cpp',
+//         filters: [
+//             { name: 'All Files', extensions: ['*'] }
+//         ]
+//     }).then(result => {
+//         // console.log(result)
+//         if (result.filePath) {
+//             currentFile = result.filePath;
+//             fs.writeFileSync(currentFile, data, 'utf-8');
+//             isSave = true;
+//         }
+//     });
+// }
+
+// // let win
+// // ipcMain.on('newWin', () => {
+// //     console.log("new window")
+// //     win = new BrowserWindow({ width: 800, height: 600 });
+// //     // win.loadFile(path.join('file:', __dirname, 'new.html'));
+// //     win.loadFile('new.html');
+// //     win.on("close", function () {
+// //         win = null;
+// //     });
+// // })
+
+// const { spawn } = require('child_process');
+
+// // 任何你期望执行的cmd命令，ls都可以
+// // let cmdStr = 'python3 ./p.py'
+// // 执行cmd命令的目录，如果使用cd xx && 上面的命令，这种将会无法正常退出子进程
+// // let cmdPath = '执行cmd命令的路径'
+// // 子进程名称
+
+// function runExec() {
+//     let child1 = spawn('python3', ['./python.py'], {
+//         "stdio": ['inherit', 'inherit', 'inherit']
+//     })
+
+//     child1.on('close', (code) => {
+//         console.log(`子进程使用代码 ${code} 关闭所有 stdio`);
+//     });
+// }
+
+// ipcMain.on('run', function (event, data) {
+//     fs.writeFileSync('./python.py', data, 'utf-8');
+//     runExec();
+// })
+
+
 var { ipcMain, dialog, BrowserWindow } = require('electron');
 var fs = require('fs');
 var path = require("path");
@@ -18,16 +148,17 @@ ipcMain.on('action', function (event, action, data) {
             break;
 
         case "open":
-            dialog.showOpenDialog({ properties: ['openFile'] })
-                .then(result => {
-                    // console.log(result.filePaths)
-                    if (result.filePaths) {
-                        var fsData = fs.readFileSync(result.filePaths[0]);
-                        //将文件内容发送至渲染进程
-                        BrowserWindow.getFocusedWindow().webContents.send("data", fsData.toString());
-                    }
-                })
-                // .catch(err => { console.log(err) })
+            //通过dialog打开文件
+            var dir = dialog.showOpenDialog({
+                properties: ['openFile']
+            });
+
+            if (dir) {
+                //获取文件内容
+                var fsData = fs.readFileSync(dir[0]);
+                //将文件内容发送至渲染进程
+                BrowserWindow.getFocusedWindow().webContents.send("data", fsData);
+            }
             break;
 
         case "save":
@@ -55,32 +186,20 @@ function askSaveDialog() {
 function saveCurrentDoc(data) {
     // 当前文件路径不存在
     if (!currentFile) {
-        dialog.showSaveDialog({
-            defaultPath: '1.cpp',
+        var dir = dialog.showSaveDialog({
+            defaultPath: 'a.cpp',
             filters: [
                 { name: 'All Files', extensions: ['*'] }
             ]
-        }).then(result => {
-            console.log(result)
-            if (result.filePath) {
-                currentFile = result.filePath;
-                fs.writeFileSync(currentFile, data, 'utf-8');
-                isSave = true;
-            }
         });
+
+        if (dir) {
+            currentFile = dir;
+            fs.writeFileSync(currentFile, data);
+            isSave = true;
+        }
     } else {
-        fs.writeFileSync(currentFile, data, 'utf-8');
+        fs.writeFileSync(currentFile, data);
         isSave = true;
     }
 }
-
-// let win
-// ipcMain.on('newWin', () => {
-//     console.log("new window")
-//     win = new BrowserWindow({ width: 800, height: 600 });
-//     // win.loadFile(path.join('file:', __dirname, 'new.html'));
-//     win.loadFile('new.html');
-//     win.on("close", function () {
-//         win = null;
-//     });
-// })

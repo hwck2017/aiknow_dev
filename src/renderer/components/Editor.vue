@@ -208,6 +208,8 @@ export default {
     // 本地编译+运行
     run() {
       // 关闭测试数据输入窗口
+      ipcRenderer.send("run");
+      return;
       this.isRunning = false;
       var runWandbox = require("wandbox-api");
       let compiler = this.getCompiler();

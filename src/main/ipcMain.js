@@ -84,3 +84,28 @@ function saveCurrentDoc(data) {
 //         win = null;
 //     });
 // })
+
+import terminal from "./terminal";
+
+let spawn, tty;
+const s = new terminal.shell()
+
+// console.log(shell.object);
+
+spawn = new terminal.SpawnWrapper(s.object);
+
+// console.log(spawn.object);
+ipcMain.on('run', () => {
+    // console.log(action);
+    tty = spawn.tty({
+        'pause': true,
+        'pipeFile': false,
+        'pipePath': '',
+        'log': true,
+        // 'args': ['python', `${process.env.USERPROFILE}\\Dropbox\\Source\\Python\\hello.py`],
+        'args': ['python', `${process.env.HOME}/Documents/Python/hello.py`],
+        // 'options': new Object()
+    });
+
+    tty.unref();
+})

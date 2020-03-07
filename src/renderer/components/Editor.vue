@@ -210,36 +210,36 @@ export default {
       // 关闭测试数据输入窗口
       ipcRenderer.send("run");
       return;
-      this.isRunning = false;
-      var runWandbox = require("wandbox-api");
-      let compiler = this.getCompiler();
-      let code = this.aceEditor.getSession().getValue();
-      if (code === "") {
-        return this.$message.warning("请先输入代码");
-      }
+      // this.isRunning = false;
+      // var runWandbox = require("wandbox-api");
+      // let compiler = this.getCompiler();
+      // let code = this.aceEditor.getSession().getValue();
+      // if (code === "") {
+      //   return this.$message.warning("请先输入代码");
+      // }
 
-      // 打开运行结果展示窗口
-      this.ran = true;
-      this.runResult = "运行中...";
-      runWandbox.fromString(
-        code,
-        { compiler: compiler, stdin: this.stdin },
-        (error, results) => {
-          if (error) {
-            throw new Error(error.message);
-          }
+      // // 打开运行结果展示窗口
+      // this.ran = true;
+      // this.runResult = "运行中...";
+      // runWandbox.fromString(
+      //   code,
+      //   { compiler: compiler, stdin: this.stdin },
+      //   (error, results) => {
+      //     if (error) {
+      //       throw new Error(error.message);
+      //     }
 
-          this.stdin = "";
-          if (results.status !== "0") {
-            if (results.compiler_message === undefined)
-              this.runResult = results.program_error;
-            else this.runResult = results.compiler_message;
-          } else {
-            this.runResult = results.program_message;
-            this.compileok = true;
-          }
-        }
-      );
+      //     this.stdin = "";
+      //     if (results.status !== "0") {
+      //       if (results.compiler_message === undefined)
+      //         this.runResult = results.program_error;
+      //       else this.runResult = results.compiler_message;
+      //     } else {
+      //       this.runResult = results.program_message;
+      //       this.compileok = true;
+      //     }
+      //   }
+      // );
     },
     // 获取题目对应课程节点ID
     async getNodeID() {

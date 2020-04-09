@@ -1,111 +1,136 @@
-var { ipcMain, dialog, BrowserWindow } = require('electron');
+var { ipcMain, dialog, BrowserWindow, app } = require('electron');
 var fs = require('fs');
 var path = require("path");
-
-/*
-问题：
-    1、新建 打开 保存的问题
-    2、如果已经保存 第二次保存的时候不提示，且直接保存
-*/
-var isSave = true;   //判断文件是否保存
-var currentFile = '';   //保存当前文件的路径
+const { spawn } = require('child_process')
 
 ipcMain.on('action', function (event, action, data) {
-    // console.log(action);
-    switch (action) {
-        case "new":
-            askSaveDialog();
-            break;
+  console.log(action);
+  switch (action) {
+    case "close":
+      askSaveDialog(data);
+      break;
 
-        case "open":
-            //通过dialog打开文件
-            var dir = dialog.showOpenDialog({
-                properties: ['openFile']
-            });
+    case "open":
+      openFile();
+      break;
 
-            if (dir) {
-                //获取文件内容
-                var fsData = fs.readFileSync(dir[0]);
-                //将文件内容发送至渲染进程
-                BrowserWindow.getFocusedWindow().webContents.send("data", fsData);
-            }
-            break;
-
-        case "save":
-            saveCurrentDoc(data);
-            break;
-    }
+    case "save":
+      saveFile(data);
+      break;
+  }
 })
 
 //判断文件是否需要保存, 保存则执行保存操作
-function askSaveDialog() {
-    if (!isSave) {
-        var index = dialog.showMessageBox({
-            type: "question",
-            message: '是否要保存此文件?',
-            buttons: ['Yes', 'No']
-        })
+function askSaveDialog(data) {
+    var index = dialog.showMessageBox({
+      type: "question",
+      message: '是否要保存此文件?',
+      buttons: ['Yes', 'No']
+    })
 
-        if (index == 0) {
-            saveCurrentDoc();
-        }
+    console.log(index);
+    if (index == 0) {
+      saveFile(data);
     }
+}
+
+function openFile() {
+  var dir = dialog.showOpenDialog({
+    properties: ['openFile']
+  });
+
+  if (dir) {
+    //将文件路径发送至渲染进程
+    console.log(dir)
+    BrowserWindow.getFocusedWindow().webContents.send("open", dir[0]);
+  }
 }
 
 // 执行保存
-function saveCurrentDoc(data) {
-    // 当前文件路径不存在
-    if (!currentFile) {
-        var dir = dialog.showSaveDialog({
-            defaultPath: 'a.cpp',
-            filters: [
-                { name: 'All Files', extensions: ['*'] }
-            ]
-        });
-
-        if (dir) {
-            currentFile = dir;
-            fs.writeFileSync(currentFile, data);
-            isSave = true;
-        }
-    } else {
-        fs.writeFileSync(currentFile, data);
-        isSave = true;
-    }
+function saveFile(data) {
+  var dir = dialog.showSaveDialog({
+    defaultPath: 'main',
+    filters: [
+      { name: 'All Files', extensions: ['*'] },
+      { name: "CPP", extensions: ['cpp'] },
+      { name: 'C', extensions: ['c'] },
+      { name: "Python", extensions: ['py'] }
+    ]
+  }, res => {
+    BrowserWindow.getFocusedWindow().webContents.send('save', res);
+  });
 }
 
-// let win
-// ipcMain.on('newWin', () => {
-//     console.log("new window")
-//     win = new BrowserWindow({ width: 800, height: 600 });
-//     // win.loadFile(path.join('file:', __dirname, 'new.html'));
-//     win.loadFile('new.html');
-//     win.on("close", function () {
-//         win = null;
-//     });
-// })
+function getFileName(path) {
+  var pos;
+  if (process.platform === 'win32')
+    pos = path.lastIndexOf("\\")
+  else
+    pos = path.lastIndexOf('/')
 
-import terminal from "./terminal";
+  return path.substring(pos + 1);
+}
 
-let spawn, tty;
-const s = new terminal.shell()
+function getDir(path) {
+  var pos;
+  if (process.platform === 'win32')
+    pos = path.lastIndexOf("\\")
+  else
+    pos = path.lastIndexOf('/')
 
-// console.log(shell.object);
+  return path.substring(0, pos + 1);
+}
 
-spawn = new terminal.SpawnWrapper(s.object);
 
-// console.log(spawn.object);
-ipcMain.on('run', () => {
-    // console.log(action);
-    tty = spawn.tty({
-        'pause': true,
-        'pipeFile': false,
-        'pipePath': '',
-        'log': true,
-        // 'args': ['python', `${process.env.USERPROFILE}\\Dropbox\\Source\\Python\\hello.py`],
-        'args': ['python', `${process.env.HOME}/Documents/Python/hello.py`],
-        // 'options': new Object()
-    });
+// TODO: 需拿到运行结果
+function runExec(lang, fullPath) {
+  var exePath, dir, fileName;
+  exePath = path.dirname(app.getAppPath());
+  dir = getDir(fullPath);
+  fileName = getFileName(fullPath);
+  console.log("app path: %s, file dir: %s, file name: %s", exePath, dir, fileName);
+  console.log("platform: %s", process.platform);
 
-    tty.unref();
+  var compiler, output, proc;
+  if (process.platform === 'win32') {
+    if (lang === "CPP") {
+      compiler = exePath + "\\win32\\run_cpp.bat";
+      output = dir + fileName.substring(0, fileName.indexOf(".")) + ".exe";
+      console.log("output file name: %s", output);
+      proc = spawn('cmd', ['/c', 'start', 'call', compiler, fullPath, output])
+    } else if (lang === "C") {
+      compiler = exePath + "\\win32\\run_c.bat";
+      output = dir + fileName.substring(0, fileName.indexOf(".")) + ".exe";
+      console.log("output file name: %s", output);
+      proc = spawn('cmd', ['/c', 'start', 'call', compiler, fullPath, output])
+    } else if (lang === "PYTHON") {
+      compiler = exePath + "\\win32\\run_py.bat";
+      proc = spawn('cmd', ['/c', 'start', 'call', compiler, fullPath])
+    } else {
+      // TODO
+    }
+
+  } else if (process.platform === 'darwin') {
+    if (lang === "CPP") {
+      compiler = exePath + "/darwin/run_cpp";
+    } else if (lang === "C") {
+      compiler = exePath + "/darwin/run_c";
+    } else if (lang === "PYTHON") {
+      compiler = exePath + "/darwin/run_py";
+    } else {
+      // TODO
+    }
+
+    output = dir + fileName.substring(0, fileName.indexOf("."));
+  } else {
+    // TODO
+  }
+
+  proc.on('close', (code) => {
+    console.log(`关闭cmd窗口, 返回码 ${code}`);
+  });
+}
+
+ipcMain.on('run', function (event, lang, fullPath) {
+  runExec(lang, fullPath)
 })

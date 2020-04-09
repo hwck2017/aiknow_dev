@@ -3,12 +3,11 @@
     <el-header>
       <el-row :gutter="5" type="flex" justify="space-between">
         <el-col :span="4">
-          <div style="display:flex; padding: 5px 0px;">
+          <div style="display:flex; padding: 10px 0px;">
             <img
-              src="../../../static/aiknow.jpg"
-              style="width:50px; height:50px; vertical-align:middle;"
+              src="../../../static/logo.png"
+              style="width:130px; height:40px; vertical-align:middle;"
             />
-            <span class="title-style">爱知部落</span>
           </div>
         </el-col>
         <el-col :span="14">
@@ -25,7 +24,6 @@
                 <i class="el-icon-s-home"></i>
                 <span slot="title">主页</span>
               </el-menu-item>
-              <!-- <el-menu-item index="/problems" v-if="$store.state.userInfo.isLogin"> -->
               <el-menu-item index="/problems">
                 <i class="el-icon-menu"></i>
                 <span slot="title">题目</span>
@@ -33,10 +31,6 @@
               <el-menu-item index="/editor">
                 <i class="el-icon-edit"></i>
                 <span slot="title">编辑器</span>
-              </el-menu-item>
-              <el-menu-item index="/pythoneditor">
-                <i class="el-icon-edit"></i>
-                <span slot="title">Python编辑器</span>
               </el-menu-item>
               <!-- <el-menu-item index="/contest" disabled>
                 <i class="el-icon-s-flag"></i>
@@ -87,7 +81,7 @@
       <el-main>
         <router-view></router-view>
       </el-main>
-      <el-footer height="20px">
+      <el-footer height="30px">
         <div class="footer">2019-2020 &copy; aiknow</div>
       </el-footer>
     </el-container>

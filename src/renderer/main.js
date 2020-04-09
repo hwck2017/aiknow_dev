@@ -15,8 +15,8 @@ import './assets/css/global.css'
 import ace from 'ace-builds'
 Vue.use(ace)
 
-import blockly from 'blockly'
-Vue.use(blockly)
+// import blockly from 'blockly'
+// Vue.use(blockly)
 
 // 如果存在token密钥，进行用户自动登入，并且获取信息
 if (window.sessionStorage.getItem('token')) {

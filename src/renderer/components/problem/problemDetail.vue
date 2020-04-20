@@ -73,7 +73,7 @@
 </template>
 
 <script>
-import aceEditor from "../Editor.vue";
+import aceEditor from "../problem/editor";
 import judgeResult from "./judgeResult.vue";
 
 export default {

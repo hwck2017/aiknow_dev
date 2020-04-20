@@ -1,8 +1,8 @@
 {
-  "name": "aiknow-dev",
-  "version": "0.0.1",
-  "author": "aiknow",
-  "description": "An electron-vue project",
+  "name": "aiknow-editor",
+  "version": "3.0.0",
+  "author": "爱知部落",
+  "description": "aiknow editor for C++/C/Pyhton ",
   "license": null,
   "main": "./dist/electron/main.js",
   "scripts": {
@@ -17,7 +17,7 @@
     "postinstall": ""
   },
   "build": {
-    "productName": "editor-demo",
+    "productName": "Aiknow Editor",
     "appId": "com.example.yourapp",
     "directories": {
       "output": "build"
@@ -44,7 +44,15 @@
       "icon": "build/icons/icon.icns"
     },
     "win": {
-      "icon": "build/icons/icon.ico"
+      "icon": "build/icons/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "ia32"
+          ]
+        }
+      ]
     },
     "linux": {
       "icon": "build/icons"
@@ -53,12 +61,11 @@
   "dependencies": {
     "ace-builds": "^1.4.8",
     "axios": "^0.18.0",
-    "bcrypt": "^3.0.8",
-    "blockly": "^3.20200123.1",
-    "canvas": "^2.6.1",
+    "bufferutil": "^4.0.1",
     "chart.js": "^2.9.3",
     "date-fns": "^2.10.0",
     "element-ui": "^2.13.0",
+    "mousetrap": "^1.6.5",
     "node-gyp": "^6.1.0",
     "vue": "^2.5.16",
     "vue-electron": "^1.0.6",
@@ -84,7 +91,7 @@
     "css-loader": "^0.28.11",
     "del": "^3.0.0",
     "devtron": "^1.4.0",
-    "electron": "^2.0.4",
+    "electron": "^2.0.18",
     "electron-builder": "^20.19.2",
     "electron-debug": "^1.5.0",
     "electron-devtools-installer": "^2.2.4",

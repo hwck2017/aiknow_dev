@@ -36,7 +36,6 @@
               <i class="el-icon-arrow-down el-icon--right"></i>
             </el-button>
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item command="new">新建</el-dropdown-item>
               <el-dropdown-item command="open">打开</el-dropdown-item>
               <el-dropdown-item command="save">保存</el-dropdown-item>
               <el-dropdown-item command="saveAs">另存为</el-dropdown-item>
@@ -71,23 +70,6 @@
         </el-col>
       </el-row>
     </div>
-    <div>
-      <el-tabs
-        v-model="activeTab"
-        type="card"
-        editable
-        @edit="handleTabsEdit"
-        :before-leave="beforeLeaveHandle"
-        @tab-click="clickTab"
-      >
-        <el-tab-pane
-          v-for="(item, index) in editableTabs"
-          :key="item.name"
-          :label="item.title"
-          :name="item.name"
-        ></el-tab-pane>
-      </el-tabs>
-    </div>
     <div class="ace-editor" ref="ace"></div>
   </div>
 </template>
@@ -96,11 +78,9 @@
 var fs = require("fs");
 var { ipcRenderer } = require("electron");
 
-var myStudy = require("../../../lib/study/study");
-var myProblem = require("../../../lib/oj/problem");
-var myEditor = require("../../../lib/editor/toolbar");
-var myFile = require("../../../lib/file");
-var myTab = require("../../../lib/editor/tab");
+var myStudy = require("../../../../lib/study/study");
+var myProblem = require("../../../../lib/oj/problem");
+var myEditor = require("../../../../lib/editor/toolbar");
 
 //编程语言选项
 const languageOpts = ["PYTHON", "JAVA", "CPP", "C"];
@@ -123,67 +103,16 @@ export default {
       fontSizeOpt: "中",
       editorTheme: "monokai",
       needRun: false,
-      //激活的tab name
-      activeTab: "0",
-      oldActiveTab: "0",
-      //创建的tab集合
-      editableTabs: []
+      fileInfo: {
+        isSave: false,
+        filePath: "",
+        content: ""
+      }
     };
   },
   methods: {
     themeChangeHandle() {
       myEditor.setTheme(this.editorTheme);
-    },
-    addTab(tab) {
-      myTab.addTab(tab);
-      this.activeTab = tab.name;
-    },
-    handleTabsEdit(tagName, action) {
-      if (action === "add") {
-        let tab = myTab.initTab();
-        this.addTab(tab);
-        // myEditor.setSourceCode(tab.content);
-      } else {
-        // remove
-        console.log(tagName, this.activeTab);
-        this.activeTab = myTab.removeTab(tagName, this.activeTab);
-        let curTab = myTab.findTabByName(this.activeTab);
-        if (curTab != undefined) {
-          myEditor.setSourceCode(curTab.content);
-        }
-
-        this.editableTabs = myTab.getTabs();
-        if (myTab.isEmpty()) {
-          myEditor.setSourceCode("");
-        }
-      }
-    },
-    clickTab() {
-      // tab切换时，保存原tab数据，获取新tab数据
-      let oldTab, curTab;
-      console.log("curr active tab", this.activeTab);
-      console.log("old active tab:", this.oldActiveTab);
-
-      oldTab = myTab.findTabByName(this.oldActiveTab);
-      curTab = myTab.findTabByName(this.activeTab);
-      // console.log(curTab);
-      // console.log(oldTab);
-
-      if (oldTab != undefined) {
-        oldTab.content = myEditor.getSourceCode();
-      }
-
-      if (curTab != undefined) {
-        myEditor.setSourceCode(curTab.content);
-      }
-    },
-    beforeLeaveHandle(newName, oldName) {
-      // console.log(newName, oldName);
-      this.oldActiveTab = oldName;
-      return true;
-    },
-    newFile() {
-      this.handleTabsEdit("", "add");
     },
     langChangeHandle() {
       myEditor.setMode(this.languageOpt);
@@ -196,16 +125,10 @@ export default {
     },
     saveFile(saveAs) {
       let code = myEditor.getSourceCode();
-      let tab = myTab.findTabByName(this.activeTab);
-      if (tab === undefined) {
-        // tab全部被删除
-        this.addTab(myTab.setTab("", code, "", false));
-      }
-
-      if (saveAs === false && tab.isSave) {
-        fs.writeFileSync(tab.filePath, code);
+      if (saveAs === false && this.fileInfo.isSave) {
+        fs.writeFileSync(this.fileInfo.filePath, code);
         if (this.needRun) {
-          ipcRenderer.send("run", this.languageOpt, tab.filePath);
+          ipcRenderer.send("run", this.languageOpt, this.fileInfo.filePath);
           this.needRun = false;
         }
         return;
@@ -216,9 +139,6 @@ export default {
     fileOperProc(cmd) {
       console.log(cmd);
       switch (cmd) {
-        case "new":
-          this.newFile();
-          break;
         case "open":
           this.openFile();
           break;
@@ -290,22 +210,17 @@ export default {
       this.keyWatcher();
       this.problemInfo.problemID = this.$route.params.pid;
       this.problemInfo.nodeID = myStudy.getNodeID(this.problemInfo.problemID);
-      this.editableTabs = myTab.getTabs();
       // 每10s保存一次编辑器中的内容
       setInterval(this.storeData, 10000);
       // 打开文件时获取到的文件内容
       ipcRenderer.on("open", (event, path) => {
         console.log(path);
-        let tab = myTab.findTabByPath(path);
-        if (tab != undefined) {
-          return this.$message.success("文件已经被打开");
-        }
-
         let data = fs.readFileSync(path);
-        let fileName = myFile.getFileName(path);
-        // console.log(process.platform);
-        tab = myTab.setTab(fileName, data.toString(), path, true);
-        this.addTab(tab);
+        this.fileInfo = {
+          isSave: true,
+          filePath: path,
+          content: data
+        };
         myEditor.setSourceCode(data.toString());
       });
       ipcRenderer.on("save", (event, rsp) => {
@@ -315,21 +230,17 @@ export default {
           return this.$message.warning("请选择文件保存路径");
         }
 
-        let tab = myTab.findTabByName(this.activeTab);
-        if (tab === undefined) {
-          tab = myTab.initTab();
-          this.addTab(tab);
-        }
-        tab.isSave = true;
-        tab.filePath = rsp;
-        tab.title = myFile.getFileName(rsp);
-        tab.content = myEditor.getSourceCode();
-        fs.writeFileSync(tab.filePath, myEditor.getSourceCode());
+        this.fileInfo = {
+          isSave: true,
+          filePath: rsp,
+          content: myEditor.getSourceCode()
+        };
+        fs.writeFileSync(this.fileInfo.filePath, myEditor.getSourceCode());
 
         // this.$message.success("保存文件成功");
         if (this.needRun) {
           // 编译运行
-          ipcRenderer.send("run", this.languageOpt, tab.filePath);
+          ipcRenderer.send("run", this.languageOpt, this.fileInfo.filePath);
           this.needRun = false;
         }
       });

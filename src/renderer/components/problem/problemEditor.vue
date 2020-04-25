@@ -79,7 +79,6 @@ var fs = require("fs");
 var { ipcRenderer } = require("electron");
 
 var myStudy = require("../../../../lib/study/study");
-var myProblem = require("../../../../lib/oj/problem");
 var myEditor = require("../../../../lib/editor/toolbar");
 
 //编程语言选项
@@ -156,14 +155,14 @@ export default {
       //内容为空或者未发生改变则不保存
       if (
         code === "" ||
-        code === window.sessionStorage.getItem("code" + this.problemID)
+        code === window.sessionStorage.getItem("code" + this.problemInfo.problemID)
       )
         return;
 
-      window.sessionStorage.setItem("code" + this.problemID, code);
+      window.sessionStorage.setItem("code" + this.problemInfo.problemID, code);
     },
     readFromStorage() {
-      let code = window.sessionStorage.getItem("code" + this.problemID);
+      let code = window.sessionStorage.getItem("code" + this.problemInfo.problemID);
       if (code) myEditor.setSourceCode(code);
     },
     // 本地测试运行
@@ -177,21 +176,36 @@ export default {
     },
     //提交代码到题库
     submit() {
-      if (this.problemInfo.problemID === undefined) {
-        return this.$message.warning("编辑器模式下请勿提交");
-      }
       if (!this.$store.state.userInfo.isLogin) {
         return this.$message.warning("请先登入");
       }
 
-      this.problemInfo.path = this.$route.fullPath;
       this.problemInfo.code = myEditor.getSourceCode();
-      this.problemInfo.lang = this.languageConverse();
       if (this.problemInfo.code.length == 0) {
         return this.$message.warning("请输入代码");
       }
 
-      myProblem.submit(this.problemInfo);
+      this.problemInfo.path = this.$route.fullPath;
+      this.problemInfo.lang = this.languageConverse();
+
+      this.$http
+        .post("/code/user", {
+          group_id: 0,
+          problem_id: this.problemInfo.problemID,
+          language: "",
+          lang: this.problemInfo.lang,
+          source_code: this.problemInfo.code,
+          contest_id: 0
+        })
+        .then(res => {
+          this.$store.commit("addSubmission", {
+            title: this.problemInfo.problemID,
+            url: this.problemInfo.path,
+            id: res.data.data,
+            nodeid: this.problemInfo.nodeID
+          });
+        })
+        .catch(res => {});
     },
     keyWatcher() {
       // js监听键盘ctrl + s快捷键保存;

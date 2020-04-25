@@ -107,7 +107,7 @@ export default new Vuex.Store({
   actions: {
     getUserInfo() {
       axios.get('/user').then(res => {
-        // console.log(res)
+        console.log(res)
         this.commit('login', res.data.data)
       })
     },

@@ -74,21 +74,40 @@ export default {
     resetLoginForm() {
       this.$refs.loginFormRef.resetFields();
     },
-    login() {
-      // let errno
-      let resPromise = myStudy.login(this.loginMode, this.loginInfo);
-      resPromise.then(res => {
-        if (res.errno !== 200) {
-          return this.$message.error(res.errmsg);
-        } else {
-          this.$message({
-            message: "登录成功",
-            type: "success",
-            duration: 1000
-          });
-        }
-      });
+    async login() {
+      let data;
+      let url;
+      if (this.loginMode === "phone") {
+        url = "http://study.aiknow.cn/study/account/sms/login";
+        data = {
+          phone: this.loginInfo.phoneNumber,
+          code: this.loginInfo.verifyCode
+        };
+      } else {
+        url = "http://study.aiknow.cn/study/account/login";
+        data = {
+          username: this.loginInfo.username,
+          password: this.loginInfo.password
+        };
+      }
 
+      const { data: res } = await this.$http.post(url, data);
+      console.log(res);
+      if (res.errno !== 200) return this.$message.error(res.errmsg);
+      // 将登录成功之后的 token，保存到客户端的 sessionStorage 中
+      console.log(res.data.token);
+      myStorage.storeToSS("token", res.data.token);
+      if (this.loginInfo.remember) {
+        myStorage.storeToLS("userInfo", this.loginInfo);
+      } else {
+        myStorage.storeToLS("userInfo", {
+          username: "",
+          password: "",
+          phoneNumber: "",
+          verifyCode: "",
+          remember: false
+        });
+      }
       this.$store.dispatch("getUserInfo");
       // 判断是否有redirect，无跳转到home
       let redirect = this.$route.query.redirect;

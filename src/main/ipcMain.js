@@ -6,7 +6,7 @@ const { spawn } = require('child_process')
 var myFile = require("../../lib/file")
 
 ipcMain.on('action', function (event, action, data) {
-  console.log(action);
+  console.log(action, data);
   switch (action) {
     case "close":
       askSaveDialog(data);
@@ -17,13 +17,21 @@ ipcMain.on('action', function (event, action, data) {
       break;
 
     case "save":
-      saveFile(data);
+      saveFile();
+      break;
+
+    case "install":
+      libManage("install", data);
+      break;
+
+    case "uninstall":
+      libManage("uninstall", data);
       break;
   }
 })
 
 //判断文件是否需要保存, 保存则执行保存操作
-function askSaveDialog(data) {
+function askSaveDialog() {
   var index = dialog.showMessageBox({
     type: "question",
     message: '是否要保存此文件?',
@@ -32,7 +40,7 @@ function askSaveDialog(data) {
 
   console.log(index);
   if (index == 0) {
-    saveFile(data);
+    saveFile();
   }
 }
 
@@ -49,7 +57,7 @@ function openFile() {
 }
 
 // 执行保存
-function saveFile(data) {
+function saveFile() {
   var dir = dialog.showSaveDialog({
     defaultPath: 'main',
     filters: [
@@ -60,6 +68,23 @@ function saveFile(data) {
     ]
   }, res => {
     BrowserWindow.getFocusedWindow().webContents.send('save', res);
+  });
+}
+
+function libManage(action, lib) {
+  exePath = path.dirname(app.getAppPath());
+
+  if (action == "install") {
+    manager = exePath + "\\win32\\install.bat";
+  } else if (action == "uninstall") {
+    manager = exePath + "\\win32\\uninstall.bat";
+  } else {
+
+  }
+
+  proc = spawn('cmd', ['/c', 'start', 'call', manager, lib])
+  proc.on('close', (code) => {
+    console.log(`关闭cmd窗口, 返回码 ${code}`);
   });
 }
 

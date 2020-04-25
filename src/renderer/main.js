@@ -37,6 +37,7 @@ Vue.prototype.$getAvatar = function (aid) {
 axios.defaults.baseURL = 'http://oj.aiknow.cn/aiqb'
 axios.interceptors.request.use(config => {
   config.headers.Authorization = window.sessionStorage.getItem('token')
+  // config.headers.Authorization = "eyJhbGciOiJIUzI1NiJ9.eyJMT0dJTl9VU0VSX1RJTUUiOjE1ODczOTUyOTM1ODAsIkxPR0lOX1VTRVJfS0VZIjoyMjgwfQ.TkF7g5WwFbJvsl96oczboG6tq2SuLJPUqhcDuXJF074"
   return config
 })
 

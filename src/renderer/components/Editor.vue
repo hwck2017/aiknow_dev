@@ -6,7 +6,7 @@
           <!-- 编程语言: -->
           <el-popover placement="top-start" trigger="hover" content="选择编程语言">
             <el-select
-              v-model="languageOpt"
+              v-model="userOpt.languageOpt"
               size="small"
               slot="reference"
               @change="langChangeHandle"
@@ -19,7 +19,7 @@
           <!-- 字体大小: -->
           <el-popover placement="top-start" trigger="hover" content="调整字体大小">
             <el-select
-              v-model="fontSizeOpt"
+              v-model="userOpt.fontSizeOpt"
               size="small"
               slot="reference"
               @change="fontSizeChangeHandle"
@@ -52,7 +52,7 @@
               <el-dropdown-item command="theme">
                 夜间模式
                 <el-switch
-                  v-model="editorTheme"
+                  v-model="userOpt.editorTheme"
                   active-color="#13ce66"
                   inactive-color="#eee"
                   active-value="monokai"
@@ -62,11 +62,19 @@
               </el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
-          <el-popover placement="top-start" trigger="hover" content="本地测试运行">
+          <el-popover placement="top-start" trigger="hover" content="编译运行">
             <el-button size="small" icon="el-icon-s-promotion" slot="reference" @click="run"></el-button>
           </el-popover>
-          <el-popover placement="top-start" trigger="hover" content="上传题库判题">
+          <!-- <el-popover placement="top-start" trigger="hover" content="上传题库判题">
             <el-button size="small" icon="el-icon-upload2" slot="reference" @click="submit"></el-button>
+          </el-popover>-->
+          <el-popover placement="top-start" trigger="hover" content="python第三方库管理">
+            <el-button
+              size="small"
+              icon="el-icon-box"
+              slot="reference"
+              @click="libInstalling = true"
+            ></el-button>
           </el-popover>
         </el-col>
       </el-row>
@@ -88,6 +96,28 @@
         ></el-tab-pane>
       </el-tabs>
     </div>
+    <el-dialog title="库管理" width="80%" :visible.sync="libInstalling">
+      <el-table :data="libs">
+        <el-table-column property="name" label="名称" width="150"></el-table-column>
+        <el-table-column property="desc" label="描述" width="500"></el-table-column>
+        <el-table-column property="status" label="状态">
+          <template slot-scope="scope">
+            <el-button
+              type="primary"
+              @click="libInstall(scope.row)"
+              v-if="scope.row.status === false"
+              size="small"
+            >安装</el-button>
+            <el-button
+              type="info"
+              @click="libUninstall(scope.row)"
+              v-if="scope.row.status"
+              size="small"
+            >卸载</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-dialog>
     <div class="ace-editor" ref="ace"></div>
   </div>
 </template>
@@ -96,11 +126,10 @@
 var fs = require("fs");
 var { ipcRenderer } = require("electron");
 
-var myStudy = require("../../../lib/study/study");
-var myProblem = require("../../../lib/oj/problem");
 var myEditor = require("../../../lib/editor/toolbar");
 var myFile = require("../../../lib/file");
 var myTab = require("../../../lib/editor/tab");
+var myStorage = require("../../../lib/storage");
 
 //编程语言选项
 const languageOpts = ["PYTHON", "JAVA", "CPP", "C"];
@@ -110,18 +139,42 @@ const fontSizeOpts = ["超大", "大", "中", "小"];
 export default {
   data() {
     return {
+      libInstalling: false,
+      libs: [
+        {
+          name: "openpyxl",
+          desc: "openpyxl是用于读写Excel 2010文档的Python库",
+          status: false
+        },
+        {
+          name: "pygame",
+          desc: "pygame是用于开发2D游戏的python库",
+          status: false
+        },
+        {
+          name: "PyPDF2",
+          desc:
+            "PyPDF2是用于处理pdf文件的python库, 它提供了读、写、分割、合并、文件转换等多种操作",
+          status: false
+        },
+        {
+          name: "python-docx",
+          desc: "python-docx是用于操作word文档的python库",
+          status: false
+        }
+      ],
       problemInfo: {
-        problemID: 0,
         code: "",
         path: "",
-        lang: "CPP",
-        nodeID: ""
+        lang: "CPP"
+      },
+      userOpt: {
+        languageOpt: "CPP",
+        fontSizeOpt: "中",
+        editorTheme: "monokai"
       },
       languageOpts: languageOpts,
-      languageOpt: "CPP",
       fontSizeOpts: fontSizeOpts,
-      fontSizeOpt: "中",
-      editorTheme: "monokai",
       needRun: false,
       //激活的tab name
       activeTab: "0",
@@ -131,8 +184,25 @@ export default {
     };
   },
   methods: {
+    libInstall(row) {
+      row.status = true;
+      ipcRenderer.send("action", "install", row.name);
+    },
+    libUninstall(row) {
+      row.status = false;
+      ipcRenderer.send("action", "uninstall", row.name);
+    },
     themeChangeHandle() {
-      myEditor.setTheme(this.editorTheme);
+      myEditor.setTheme(this.userOpt.editorTheme);
+      myStorage.storeToLS("userOpt", this.userOpt);
+    },
+    langChangeHandle() {
+      myEditor.setMode(this.userOpt.languageOpt);
+      myStorage.storeToLS("userOpt", this.userOpt);
+    },
+    fontSizeChangeHandle() {
+      myEditor.setFontSize(this.userOpt.fontSizeOpt);
+      myStorage.storeToLS("userOpt", this.userOpt);
     },
     addTab(tab) {
       myTab.addTab(tab);
@@ -185,12 +255,6 @@ export default {
     newFile() {
       this.handleTabsEdit("", "add");
     },
-    langChangeHandle() {
-      myEditor.setMode(this.languageOpt);
-    },
-    fontSizeChangeHandle() {
-      myEditor.setFontSize(this.fontSizeOpt);
-    },
     openFile() {
       ipcRenderer.send("action", "open");
     },
@@ -199,13 +263,14 @@ export default {
       let tab = myTab.findTabByName(this.activeTab);
       if (tab === undefined) {
         // tab全部被删除
-        this.addTab(myTab.setTab("", code, "", false));
+        tab = myTab.setTab("", code, "", false);
+        this.addTab(tab);
       }
 
       if (saveAs === false && tab.isSave) {
         fs.writeFileSync(tab.filePath, code);
         if (this.needRun) {
-          ipcRenderer.send("run", this.languageOpt, tab.filePath);
+          ipcRenderer.send("run", this.userOpt.languageOpt, tab.filePath);
           this.needRun = false;
         }
         return;
@@ -234,16 +299,12 @@ export default {
     storeData() {
       let code = myEditor.getSourceCode();
       //内容为空或者未发生改变则不保存
-      if (
-        code === "" ||
-        code === window.sessionStorage.getItem("code" + this.problemID)
-      )
-        return;
+      if (code === "" || code === myStorage.getFromSS("codeEditor")) return;
 
-      window.sessionStorage.setItem("code" + this.problemID, code);
+      myStorage.storeToSS("codeEditor", code);
     },
     readFromStorage() {
-      let code = window.sessionStorage.getItem("code" + this.problemID);
+      let code = myStorage.getFromSS("codeEditor");
       if (code) myEditor.setSourceCode(code);
     },
     // 本地测试运行
@@ -251,53 +312,25 @@ export default {
       this.needRun = true;
       this.saveFile(false);
     },
-    languageConverse() {
-      if (this.languageOpt === "PYTHON") return "PYTHON35";
-      else return this.languageOpt;
-    },
-    //提交代码到题库
-    submit() {
-      if (this.problemInfo.problemID === undefined) {
-        return this.$message.warning("编辑器模式下请勿提交");
-      }
-      if (!this.$store.state.userInfo.isLogin) {
-        return this.$message.warning("请先登入");
-      }
-
-      this.problemInfo.path = this.$route.fullPath;
-      this.problemInfo.code = myEditor.getSourceCode();
-      this.problemInfo.lang = this.languageConverse();
-      if (this.problemInfo.code.length == 0) {
-        return this.$message.warning("请输入代码");
-      }
-
-      myProblem.submit(this.problemInfo);
-    },
     keyWatcher() {
       // js监听键盘ctrl + s快捷键保存;
-      document.addEventListener("keydown", function(e) {
+      document.addEventListener("keydown", e => {
         if (
           e.keyCode == 83 &&
           (navigator.platform.match("Mac") ? e.metaKey : e.ctrlKey)
         ) {
           e.preventDefault();
           console.log(e);
-          ipcRenderer.send("action", "save");
+          this.saveFile(false);
         }
       });
     },
-    init() {
-      this.keyWatcher();
-      this.problemInfo.problemID = this.$route.params.pid;
-      this.problemInfo.nodeID = myStudy.getNodeID(this.problemInfo.problemID);
-      this.editableTabs = myTab.getTabs();
-      // 每10s保存一次编辑器中的内容
-      setInterval(this.storeData, 10000);
+    openWatcher() {
       // 打开文件时获取到的文件内容
       ipcRenderer.on("open", (event, path) => {
         console.log(path);
         let tab = myTab.findTabByPath(path);
-        if (tab != undefined) {
+        if (tab !== undefined) {
           return this.$message.success("文件已经被打开");
         }
 
@@ -308,6 +341,8 @@ export default {
         this.addTab(tab);
         myEditor.setSourceCode(data.toString());
       });
+    },
+    saveWatcher() {
       ipcRenderer.on("save", (event, rsp) => {
         console.log(rsp);
 
@@ -329,18 +364,32 @@ export default {
         // this.$message.success("保存文件成功");
         if (this.needRun) {
           // 编译运行
-          ipcRenderer.send("run", this.languageOpt, tab.filePath);
+          ipcRenderer.send("run", this.userOpt.languageOpt, tab.filePath);
           this.needRun = false;
         }
       });
+    },
+    init() {
+      this.editableTabs = myTab.getTabs();
+      myEditor.init(this.$refs.ace);
+      let userOpt = myStorage.getFromLS("userOpt");
+      if (userOpt) {
+        this.userOpt = userOpt;
+        myEditor.setMode(this.userOpt.languageOpt);
+        myEditor.setFontSize(this.userOpt.fontSizeOpt);
+        myEditor.setTheme(this.userOpt.editorTheme);
+      }
+
+      console.log(this.userOpt);
+      // 每10s保存一次编辑器中的内容
+      setInterval(this.storeData, 1000);
+      this.keyWatcher();
+      this.openWatcher();
+      this.saveWatcher();
     }
   },
-  created() {
-    this.init();
-  },
   mounted() {
-    myEditor.init(this.$refs.ace);
-    this.readFromStorage();
+    this.init();
   }
 };
 </script>

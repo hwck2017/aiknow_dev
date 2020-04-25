@@ -157,6 +157,11 @@ if (process.env.NODE_ENV === 'production') {
         from: path.join(__dirname, '../static'),
         to: path.join(__dirname, '../dist/electron/static'),
         ignore: ['.*']
+      },
+      {
+        from: path.join(__dirname, '../core'),
+        // to: path.join(__dirname, '../dist/electron/core'),
+        to: path.join(__dirname, '../build/mac/Aiknow Editor.app/Contents/Resources/core')
       }
     ]),
     new webpack.DefinePlugin({

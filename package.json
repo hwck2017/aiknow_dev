@@ -40,6 +40,12 @@
         }
       ]
     },
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "http://106.54.114.8/download/"
+      }
+    ],
     "mac": {
       "icon": "build/icons/icon.icns"
     },
@@ -54,6 +60,17 @@
         }
       ]
     },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "allowElevation": true,
+      "installerIcon": "build/icons/icon.ico",
+      "createDesktopShortcut": true
+    },
+    "extraResources": {
+      "from": "build/icons",
+      "to": "./"
+    },
     "linux": {
       "icon": "build/icons"
     }
@@ -64,6 +81,8 @@
     "bufferutil": "^4.0.1",
     "chart.js": "^2.9.3",
     "date-fns": "^2.10.0",
+    "electron-log": "^4.1.2",
+    "electron-updater": "^4.3.1",
     "element-ui": "^2.13.0",
     "mousetrap": "^1.6.5",
     "node-gyp": "^6.1.0",

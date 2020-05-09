@@ -8,8 +8,8 @@ import Register from '../components/Register.vue'
 import Home from '../components/Home.vue'
 import Problems from '../components/Problems.vue'
 import problemDetail from '../components/problem/problemDetail.vue'
-import Submission from '../components/Submission.vue'
-import submissionDetail from '../components/submissionDetail.vue'
+import Submission from '../components/submission/Submission.vue'
+import submissionDetail from '../components/submission/submissionDetail.vue'
 
 import DashBoard from '../components/DashBoard.vue'
 import Contest from '../components/Contest.vue'
@@ -107,7 +107,8 @@ const router = new Router({
         {
           path: '/editor',
           component: Editor
-        }]
+        }
+      ]
     },
     {
       path: '*',

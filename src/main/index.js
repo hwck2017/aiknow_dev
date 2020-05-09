@@ -1,5 +1,7 @@
 import { app, BrowserWindow } from 'electron'
 
+import { updateHandle } from './autoUpdater.js'
+
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -21,7 +23,7 @@ function createWindow () {
     height: 563,
     useContentSize: true,
     width: 1000,
-    webPreferences: {webSecurity: false}
+    webPreferences: {webSecurity: false},
   })
 
   mainWindow.loadURL(winURL)
@@ -30,7 +32,10 @@ function createWindow () {
     mainWindow = null
   })
 
-  // require('./ipcMain.js');
+  require('./ipcMain.js');
+  require('./menu.js')
+
+  updateHandle(mainWindow);
 }
 
 app.on('ready', createWindow)

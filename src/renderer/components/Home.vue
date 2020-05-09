@@ -2,16 +2,15 @@
   <el-container class="home-container">
     <el-header>
       <el-row :gutter="5" type="flex" justify="space-between">
-        <el-col :span="5">
-          <div style="display:flex; padding: 5px 0px;">
+        <el-col :span="4">
+          <div style="display:flex; padding: 10px 0px;">
             <img
-              src="../../../static/aiknow.jpg"
-              style="width:50px; height:50px; vertical-align:middle;"
+              src="../../../static/logo.png"
+              style="width:130px; height:40px; vertical-align:middle;"
             />
-            <span class="title-style">爱知部落</span>
           </div>
         </el-col>
-        <el-col :span="15">
+        <el-col :span="14">
           <div>
             <el-menu
               :default-active="$route.path"
@@ -25,7 +24,7 @@
                 <i class="el-icon-s-home"></i>
                 <span slot="title">主页</span>
               </el-menu-item>
-              <el-menu-item index="/problems" v-if="$store.state.userInfo.isLogin">
+              <el-menu-item index="/problems">
                 <i class="el-icon-menu"></i>
                 <span slot="title">题目</span>
               </el-menu-item>
@@ -48,13 +47,14 @@
             </el-menu>
           </div>
         </el-col>
-        <el-col :span="4">
-          <div v-if="$store.state.userInfo.isLogin" style="padding: 15px 10px;">
-            <el-avatar
+        <el-col :span="6">
+          <div v-if="$store.state.userInfo.isLogin" style="padding: 15px 20px;">
+            <!-- <el-avatar
               :size="30"
               :src="$getAvatar($store.state.userInfo.uid)"
               style="vertical-align:middle;"
-            ></el-avatar>
+            ></el-avatar>-->
+            <el-avatar :size="35" :src="circleUrl" style="vertical-align:middle;"></el-avatar>
             <span>
               <el-dropdown @command="handleCommand">
                 <span class="el-dropdown-link">
@@ -81,7 +81,7 @@
       <el-main>
         <router-view></router-view>
       </el-main>
-      <el-footer height="25px">
+      <el-footer height="30px">
         <div class="footer">2019-2020 &copy; aiknow</div>
       </el-footer>
     </el-container>
@@ -92,7 +92,8 @@
 export default {
   data() {
     return {
-      isCollapse: false
+      circleUrl:
+        "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png"
     };
   },
   methods: {

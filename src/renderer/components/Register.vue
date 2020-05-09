@@ -2,7 +2,34 @@
   <div class="register_box">
     <!-- 注册 -->
     <!-- <el-dialog title="用户注册" @close="addDialogClosed"> -->
-    <el-form :model="addForm" :rules="addFormRules" ref="addFormRef" class="register_form" label-width="80px">
+    <el-form
+      :model="addForm"
+      :rules="addFormRules"
+      ref="addFormRef"
+      class="register_form"
+      label-width="80px"
+    >
+      <el-form-item>
+        <el-select
+          v-model="province"
+          filterable
+          placeholder="请选择省份"
+          @change="changeProvince($event)"
+          style="width: 100%"
+        >
+          <el-option v-for="p in provinces" :key="p" :label="p" :value="p"></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item>
+        <el-select
+          v-model="addForm.alliances"
+          filterable
+          placeholder="请选择机构"
+          style="width: 100%"
+        >
+          <el-option v-for="item in alliances" :key="item.id" :label="item.name" :value="item.id"></el-option>
+        </el-select>
+      </el-form-item>
       <el-form-item prop="username" label="用户名">
         <el-input v-model="addForm.username"></el-input>
       </el-form-item>
@@ -64,6 +91,7 @@ export default {
       }
     };
 
+    var map = new Map();
     return {
       addForm: {
         username: "",
@@ -71,7 +99,7 @@ export default {
         passwordAgain: "",
         phone: "",
         nickname: "",
-        alliances: "3"
+        alliances: ""
       },
       addFormRules: {
         username: [
@@ -102,9 +130,15 @@ export default {
         nickname: [{ required: true, message: "请输入昵称", trigger: "blur" }],
         phone: [
           { required: true, message: "请输入手机号", trigger: "blur" },
-          { validator: checkMobile, trigger: "blur" }
+          // { validator: checkMobile, trigger: "blur" }
         ]
-      }
+      },
+      // province->alliances
+      alliancesMap: map,
+      // alliances in a province
+      alliances: [],
+      province: "",
+      provinces: []
     };
   },
   methods: {
@@ -112,13 +146,11 @@ export default {
     addDialogClosed() {
       this.$refs.addFormRef.resetFields();
     },
-    // 点击按钮，添加新用户
     regist() {
       this.$refs.addFormRef.validate(async valid => {
         if (!valid) return;
-        // 可以发起添加用户的网络请求
         const { data: res } = await this.$http.post(
-          "http://47.92.228.153/study/account/register",
+          "http://study.aiknow.cn/study/account/register",
           this.addForm
         );
 
@@ -127,13 +159,39 @@ export default {
         }
 
         this.$message.success("注册成功！");
-        // 隐藏添加用户的对话框
-        // this.addDialogVisible = false;
-        // this.loginInfo.username = this.addForm.username;
-        // this.loginInfo.password = this.addForm.password;
         this.$router.push("/login");
       });
+    },
+    async getOrigination() {
+      const { data: res } = await this.$http.get(
+        "http://study.aiknow.cn/study/studycmsAlliancess/api/allAlliancesList"
+      );
+
+      if (res.errno !== 200) {
+        this.$message.error(res.errmsg);
+      }
+
+      let list = res.data;
+      for (var i = 0; i < list.length; i++) {
+        this.provinces.push(list[i].province);
+        let l = list[i].alliancesList;
+        let arr = [];
+        for (var j = 0; j < l.length; j++) {
+          let info = {
+            id: l[j].id,
+            name: l[j].alliancename
+          };
+          arr.push(info);
+        }
+        this.alliancesMap.set(list[i].province, arr);
+      }
+    },
+    changeProvince(e) {
+      this.alliances = this.alliancesMap.get(e);
     }
+  },
+  created() {
+    this.getOrigination();
   }
 };
 </script>
@@ -141,15 +199,15 @@ export default {
 <style scoped>
 .register_box {
   width: 450px;
-  height: 400px;
+  height: 420px;
   background-color: #fff;
   border-radius: 5px;
   border: 1px solid #eee;
   position: absolute;
   left: 50%;
-  top: 50%;
+  top: 55%;
   transform: translate(-50%, -50%);
-  margin-bottom: 20px;
+  /* margin-bottom: 20px; */
 }
 
 .register_form {
@@ -158,5 +216,9 @@ export default {
   width: 100%;
   padding: 0 20px;
   box-sizing: border-box;
+}
+
+.el-form-item {
+  margin-bottom: 10px;
 }
 </style>

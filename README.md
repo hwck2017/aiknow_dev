@@ -1,6 +1,6 @@
-# y
+# Aiknow Editor
 
-> An electron-vue project
+> editor for c/cpp/python
 
 #### Build Setup
 

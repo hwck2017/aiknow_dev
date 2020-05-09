@@ -19,6 +19,7 @@
           <ProblemResult :result="item.response.result"></ProblemResult>
           <el-tag type="success">{{item.response.memory}} M</el-tag>
           <el-tag type="success">{{item.response.time}} S</el-tag>
+          <!-- <el-button type="danger" size="small" v-on:click="showDetail(item.id)">查看详情</el-button> -->
           <el-button type="danger" size="small" @click="getSubmissionResult(item.id)">查看详情</el-button>
         </div>
       </div>
@@ -28,6 +29,7 @@
 
 <script>
 import ProblemResult from "./problemResult.vue";
+
 export default {
   data() {
     return {};
@@ -38,7 +40,11 @@ export default {
     },
     getSubmissionResult(id) {
       this.$router.push({ path: `/submission/${id}` });
-    }
+    },
+    // showDetail(id) {
+    //   var {ipcRenderer} = require("electron");
+    //   ipcRenderer.send("newWin");
+    // }
   },
   computed: {
     getSubmissions() {

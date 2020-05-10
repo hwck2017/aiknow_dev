@@ -1,6 +1,6 @@
 {
   "name": "aiknow-editor",
-  "version": "3.0.0",
+  "version": "3.2.0",
   "author": "爱知部落",
   "description": "aiknow editor for C++/C/Pyhton ",
   "license": null,
@@ -43,7 +43,8 @@
     "publish": [
       {
         "provider": "generic",
-        "url": "http://106.54.114.8/download/"
+        "url": "http://106.54.114.8/download/",
+        "channel": "latest"
       }
     ],
     "mac": {
@@ -109,7 +110,7 @@
     "css-loader": "^0.28.11",
     "del": "^3.0.0",
     "devtron": "^1.4.0",
-    "electron": "^2.0.18",
+    "electron": "^3.0.0",
     "electron-builder": "^20.19.2",
     "electron-debug": "^1.5.0",
     "electron-devtools-installer": "^2.2.4",

@@ -77,6 +77,6 @@ export function updateHandle(window) {
     ipcMain.on("checkForUpdate", () => {
         //执行自动更新检查
         log.info('check for update');
-        autoUpdater.checkForUpdatesAndNotify();
+        autoUpdater.checkForUpdates();
     })
 }

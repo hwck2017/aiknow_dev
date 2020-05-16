@@ -1,9 +1,8 @@
 <template>
   <div>
     <div class="tool-bar">
-      <el-row :gutter="6">
-        <el-col :span="6">
-          <!-- 编程语言: -->
+      <el-row>
+        <el-col :span="24">
           <el-popover placement="top-start" trigger="hover" content="选择编程语言">
             <el-select
               v-model="userOpt.languageOpt"
@@ -14,9 +13,6 @@
               <el-option v-for="(item, idx) in languageOpts" :key="idx" :label="item" :value="item"></el-option>
             </el-select>
           </el-popover>
-        </el-col>
-        <el-col :span="4">
-          <!-- 字体大小: -->
           <el-popover placement="top-start" trigger="hover" content="调整字体大小">
             <el-select
               v-model="userOpt.fontSizeOpt"
@@ -27,25 +23,24 @@
               <el-option v-for="(item, idx) in fontSizeOpts" :key="idx" :label="item" :value="item"></el-option>
             </el-select>
           </el-popover>
-        </el-col>
-        <el-col :span="14">
           <el-dropdown size="small" @command="fileOperProc">
             <el-button size="small">
               <i class="el-icon-folder-opened"></i>
-              <!-- 文件 -->
+              文件
               <i class="el-icon-arrow-down el-icon--right"></i>
             </el-button>
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item command="new">新建</el-dropdown-item>
               <el-dropdown-item command="open">打开</el-dropdown-item>
-              <el-dropdown-item command="save">保存</el-dropdown-item>
+              <!-- <el-dropdown-item command="save">保存</el-dropdown-item> -->
               <el-dropdown-item command="saveAs">另存为</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
-          <el-dropdown size="small">
+          <el-button size="small" icon="el-icon-s-order" @click="saveFile(false)">保存</el-button>
+          <!-- <el-dropdown size="small">
             <el-button size="small">
               <i class="el-icon-setting"></i>
-              <!-- 设置 -->
+              设置
               <i class="el-icon-arrow-down el-icon--right"></i>
             </el-button>
             <el-dropdown-menu slot="dropdown">
@@ -61,21 +56,9 @@
                 ></el-switch>
               </el-dropdown-item>
             </el-dropdown-menu>
-          </el-dropdown>
-          <el-popover placement="top-start" trigger="hover" content="编译运行">
-            <el-button size="small" icon="el-icon-s-promotion" slot="reference" @click="run"></el-button>
-          </el-popover>
-          <!-- <el-popover placement="top-start" trigger="hover" content="上传题库判题">
-            <el-button size="small" icon="el-icon-upload2" slot="reference" @click="submit"></el-button>
-          </el-popover>-->
-          <el-popover placement="top-start" trigger="hover" content="python第三方库管理">
-            <el-button
-              size="small"
-              icon="el-icon-box"
-              slot="reference"
-              @click="libInstalling = true"
-            ></el-button>
-          </el-popover>
+          </el-dropdown>-->
+          <el-button size="small" icon="el-icon-s-promotion" @click="run">运行</el-button>
+          <!-- <el-button size="small" icon="el-icon-box" @click="libInstalling = true">Python库管理</el-button> -->
         </el-col>
       </el-row>
     </div>
@@ -256,7 +239,7 @@ export default {
       this.handleTabsEdit("", "add");
     },
     openFile() {
-      ipcRenderer.send("action", "open");
+      ipcRenderer.send("action", "open", "", "editor");
     },
     saveFile(saveAs) {
       let code = myEditor.getSourceCode();
@@ -276,7 +259,7 @@ export default {
         return;
       }
 
-      ipcRenderer.send("action", "save");
+      ipcRenderer.send("action", "save", "", "editor");
     },
     fileOperProc(cmd) {
       console.log(cmd);
@@ -327,8 +310,9 @@ export default {
     },
     openWatcher() {
       // 打开文件时获取到的文件内容
-      ipcRenderer.on("open", (event, path) => {
-        console.log(path);
+      ipcRenderer.on("open", (event, path, from) => {
+        console.log("editor-open: ", path, from);
+        if (from == "problem") return;
         let tab = myTab.findTabByPath(path);
         if (tab !== undefined) {
           return this.$message.success("文件已经被打开");
@@ -343,8 +327,9 @@ export default {
       });
     },
     saveWatcher() {
-      ipcRenderer.on("save", (event, rsp) => {
-        console.log(rsp);
+      ipcRenderer.on("save", (event, from, rsp) => {
+        console.log("editor-save: ", rsp, from);
+        if (from == "problem") return;
 
         if (rsp === undefined || rsp === null) {
           return this.$message.warning("请选择文件保存路径");
@@ -383,7 +368,7 @@ export default {
       console.log(this.userOpt);
       // 每10s保存一次编辑器中的内容
       setInterval(this.storeData, 1000);
-      this.keyWatcher();
+      // this.keyWatcher();
       this.openWatcher();
       this.saveWatcher();
     }

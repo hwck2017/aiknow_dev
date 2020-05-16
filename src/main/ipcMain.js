@@ -5,19 +5,19 @@ const { spawn } = require('child_process')
 
 var myFile = require("../../lib/file")
 
-ipcMain.on('action', function (event, action, data) {
+ipcMain.on('action', function (event, action, data, from) {
   console.log(action, data);
   switch (action) {
     case "close":
-      askSaveDialog(data);
+      askSaveDialog(from);
       break;
 
     case "open":
-      openFile();
+      openFile(from);
       break;
 
     case "save":
-      saveFile();
+      saveFile(from);
       break;
 
     case "install":
@@ -31,7 +31,7 @@ ipcMain.on('action', function (event, action, data) {
 })
 
 //判断文件是否需要保存, 保存则执行保存操作
-function askSaveDialog() {
+function askSaveDialog(from) {
   var index = dialog.showMessageBox({
     type: "question",
     message: '是否要保存此文件?',
@@ -44,20 +44,21 @@ function askSaveDialog() {
   }
 }
 
-function openFile() {
+function openFile(from) {
   var dir = dialog.showOpenDialog({
     properties: ['openFile']
   });
 
+  console.log("+++++++open")
   if (dir) {
     //将文件路径发送至渲染进程
     console.log(dir)
-    BrowserWindow.getFocusedWindow().webContents.send("open", dir[0]);
+    BrowserWindow.getFocusedWindow().webContents.send("open", dir[0], from);
   }
 }
 
 // 执行保存
-function saveFile() {
+function saveFile(from) {
   var dir = dialog.showSaveDialog({
     defaultPath: 'main',
     filters: [
@@ -67,7 +68,7 @@ function saveFile() {
       { name: 'All Files', extensions: ['*'] }
     ]
   }, res => {
-    BrowserWindow.getFocusedWindow().webContents.send('save', res);
+    BrowserWindow.getFocusedWindow().webContents.send('save', from, res);
   });
 }
 

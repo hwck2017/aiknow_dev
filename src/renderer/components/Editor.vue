@@ -37,7 +37,7 @@
             </el-dropdown-menu>
           </el-dropdown>
           <el-button size="small" icon="el-icon-s-order" @click="saveFile(false)">保存</el-button>
-          <!-- <el-dropdown size="small">
+          <el-dropdown size="small">
             <el-button size="small">
               <i class="el-icon-setting"></i>
               设置
@@ -56,9 +56,9 @@
                 ></el-switch>
               </el-dropdown-item>
             </el-dropdown-menu>
-          </el-dropdown>-->
+          </el-dropdown>
           <el-button size="small" icon="el-icon-s-promotion" @click="run">运行</el-button>
-          <!-- <el-button size="small" icon="el-icon-box" @click="libInstalling = true">Python库管理</el-button> -->
+          <el-button size="small" icon="el-icon-box" @click="libInstalling = true">Python库管理</el-button>
         </el-col>
       </el-row>
     </div>
@@ -107,7 +107,9 @@
  
 <script>
 var fs = require("fs");
+var iconv = require("iconv-lite");
 var { ipcRenderer } = require("electron");
+const { dialog } = require("electron").remote;
 
 var myEditor = require("../../../lib/editor/toolbar");
 var myFile = require("../../../lib/file");
@@ -158,7 +160,6 @@ export default {
       },
       languageOpts: languageOpts,
       fontSizeOpts: fontSizeOpts,
-      needRun: false,
       //激活的tab name
       activeTab: "0",
       oldActiveTab: "0",
@@ -239,7 +240,26 @@ export default {
       this.handleTabsEdit("", "add");
     },
     openFile() {
-      ipcRenderer.send("action", "open", "", "editor");
+      var dir = dialog.showOpenDialog({
+        properties: ["openFile"]
+      });
+
+      if (dir) {
+        let path = dir[0];
+        let tab = myTab.findTabByPath(path);
+        if (tab !== undefined) {
+          return this.$message.success("文件已经被打开");
+        }
+
+        let data = fs.readFileSync(path);
+        let fileStr = fs.readFileSync(path, { encoding: "binary" });
+        var buf = new Buffer(fileStr, "binary"); //先用二进制的方式读入, 再转utf-8
+        var data = iconv.decode(buf, "utf-8");
+        let fileName = myFile.getFileName(path);
+        tab = myTab.setTab(fileName, data, path, true);
+        this.addTab(tab);
+        myEditor.setSourceCode(data);
+      }
     },
     saveFile(saveAs) {
       let code = myEditor.getSourceCode();
@@ -250,16 +270,39 @@ export default {
         this.addTab(tab);
       }
 
+      // 非save_as情况下 如果已经保存 则直接保存 不需要询问保存路径
       if (saveAs === false && tab.isSave) {
         fs.writeFileSync(tab.filePath, code);
-        if (this.needRun) {
-          ipcRenderer.send("run", this.userOpt.languageOpt, tab.filePath);
-          this.needRun = false;
-        }
         return;
       }
 
-      ipcRenderer.send("action", "save", "", "editor");
+      var dir = dialog.showSaveDialog(
+        {
+          defaultPath: "main",
+          filters: [
+            { name: "CPP", extensions: ["cpp"] },
+            { name: "C", extensions: ["c"] },
+            { name: "Python", extensions: ["py"] },
+            { name: "All Files", extensions: ["*"] }
+          ]
+        },
+        rsp => {
+          if (rsp === undefined || rsp === null) {
+            return this.$message.warning("请选择文件保存路径");
+          }
+
+          let tab = myTab.findTabByName(this.activeTab);
+          if (tab === undefined) {
+            tab = myTab.initTab();
+            this.addTab(tab);
+          }
+          tab.isSave = true;
+          tab.filePath = rsp;
+          tab.title = myFile.getFileName(rsp);
+          tab.content = myEditor.getSourceCode();
+          fs.writeFileSync(tab.filePath, myEditor.getSourceCode());
+        }
+      );
     },
     fileOperProc(cmd) {
       console.log(cmd);
@@ -292,8 +335,9 @@ export default {
     },
     // 本地测试运行
     run() {
-      this.needRun = true;
       this.saveFile(false);
+      let tab = myTab.findTabByName(this.activeTab);
+      ipcRenderer.send("run", this.userOpt.languageOpt, tab.filePath);
     },
     keyWatcher() {
       // js监听键盘ctrl + s快捷键保存;
@@ -305,52 +349,6 @@ export default {
           e.preventDefault();
           console.log(e);
           this.saveFile(false);
-        }
-      });
-    },
-    openWatcher() {
-      // 打开文件时获取到的文件内容
-      ipcRenderer.on("open", (event, path, from) => {
-        console.log("editor-open: ", path, from);
-        if (from == "problem") return;
-        let tab = myTab.findTabByPath(path);
-        if (tab !== undefined) {
-          return this.$message.success("文件已经被打开");
-        }
-
-        let data = fs.readFileSync(path);
-        let fileName = myFile.getFileName(path);
-        // console.log(process.platform);
-        tab = myTab.setTab(fileName, data.toString(), path, true);
-        this.addTab(tab);
-        myEditor.setSourceCode(data.toString());
-      });
-    },
-    saveWatcher() {
-      ipcRenderer.on("save", (event, from, rsp) => {
-        console.log("editor-save: ", rsp, from);
-        if (from == "problem") return;
-
-        if (rsp === undefined || rsp === null) {
-          return this.$message.warning("请选择文件保存路径");
-        }
-
-        let tab = myTab.findTabByName(this.activeTab);
-        if (tab === undefined) {
-          tab = myTab.initTab();
-          this.addTab(tab);
-        }
-        tab.isSave = true;
-        tab.filePath = rsp;
-        tab.title = myFile.getFileName(rsp);
-        tab.content = myEditor.getSourceCode();
-        fs.writeFileSync(tab.filePath, myEditor.getSourceCode());
-
-        // this.$message.success("保存文件成功");
-        if (this.needRun) {
-          // 编译运行
-          ipcRenderer.send("run", this.userOpt.languageOpt, tab.filePath);
-          this.needRun = false;
         }
       });
     },
@@ -366,15 +364,16 @@ export default {
       }
 
       console.log(this.userOpt);
-      // 每10s保存一次编辑器中的内容
-      setInterval(this.storeData, 1000);
+      // 每1s保存一次编辑器中的内容
+      
       // this.keyWatcher();
-      this.openWatcher();
-      this.saveWatcher();
     }
   },
+  created() {
+    setInterval(this.storeData, 1000);
+  },
   mounted() {
-    this.init();
+    this.init()
   }
 };
 </script>

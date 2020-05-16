@@ -6,7 +6,7 @@
           <!-- 编程语言: -->
           <el-popover placement="top-start" trigger="hover" content="选择编程语言">
             <el-select
-              v-model="languageOpt"
+              v-model="userOpt.languageOpt"
               size="small"
               slot="reference"
               @change="langChangeHandle"
@@ -19,7 +19,7 @@
           <!-- 字体大小: -->
           <el-popover placement="top-start" trigger="hover" content="调整字体大小">
             <el-select
-              v-model="fontSizeOpt"
+              v-model="userOpt.fontSizeOpt"
               size="small"
               slot="reference"
               @change="fontSizeChangeHandle"
@@ -33,7 +33,7 @@
             <el-button size="small" icon="el-icon-folder-opened" slot="reference" @click="openFile"></el-button>
           </el-popover>
           <el-popover placement="top-start" trigger="hover" content="保存至本地文件">
-            <el-button size="small" icon="el-icon-collection" slot="reference" @click="save"></el-button>
+            <el-button size="small" icon="el-icon-collection" slot="reference" @click="saveFile"></el-button>
           </el-popover>
           <el-popover placement="top-start" trigger="hover" content="测试运行">
             <el-button size="small" icon="el-icon-s-promotion" slot="reference" @click="run"></el-button>
@@ -61,6 +61,7 @@ import "ace-builds/src-noconflict/mode-c_cpp";
 var fs = require("fs");
 var iconv = require("iconv-lite");
 var { ipcRenderer } = require("electron");
+const { dialog } = require("electron").remote;
 
 const languageOpts = ["PYTHON", "JAVA", "CPP", "C"];
 const fontSizeOpts = ["超大", "大", "中", "小"];
@@ -77,65 +78,100 @@ var mapFontSize = new Map([
   ["中", 16],
   ["小", 12]
 ]);
+
 export default {
-  mounted() {
-    this.aceEditor = ace.edit(this.$refs.ace, {
-      maxLines: 100,
-      minLines: 33,
-      fontSize: 16,
-      value: this.value ? this.value : "",
-      tabSize: 4,
-      theme: "ace/theme/monokai",
-      mode: "ace/mode/c_cpp"
-    });
-    // 激活自动提示
-    this.aceEditor.setOptions({
-      enableSnippets: true,
-      enableLiveAutocompletion: true,
-      enableBasicAutocompletion: true
-    });
-    this.aceEditor.on("copy", () => {
-      this.$message.success("复制成功");
-    });
-    // this.aceEditor.getSession().on("change", this.inputChange);
-    this.aceEditor.selectAll();
-    this.aceEditor.undo();
-    this.readFromStorage();
-  },
   data() {
     return {
-      needRun: false,
       problemID: 0,
       nodeID: "",
-      // compileok: false,
       aceEditor: null,
       languageOpts: languageOpts,
-      languageOpt: "CPP",
       modes: mapMode,
       fontSizeOpts: fontSizeOpts,
-      fontSizeOpt: "中",
-      fontSizes: mapFontSize
+      fontSizes: mapFontSize,
+      userOpt: {
+        languageOpt: "CPP",
+        fontSizeOpt: "中",
+        editorTheme: "monokai"
+      },
+      fileProp: {
+        isSaved: false,
+        path: ""
+      }
     };
   },
   methods: {
+    editorInit() {
+      this.aceEditor = ace.edit(this.$refs.ace, {
+        maxLines: 100,
+        minLines: 33,
+        fontSize: 16,
+        value: this.value ? this.value : "",
+        tabSize: 4,
+        theme: "ace/theme/monokai",
+        mode: "ace/mode/c_cpp"
+      });
+      // 激活自动提示
+      this.aceEditor.setOptions({
+        enableSnippets: true,
+        enableLiveAutocompletion: true,
+        enableBasicAutocompletion: true
+      });
+    },
     langChangeHandle() {
-      let m = this.modes.get(this.languageOpt);
+      let m = this.modes.get(this.userOpt.languageOpt);
       // 根据编程语言设置编辑器模式
       this.aceEditor.getSession().setMode(m);
     },
     fontSizeChangeHandle() {
-      let size = this.fontSizes.get(this.fontSizeOpt);
+      let size = this.fontSizes.get(this.userOpt.fontSizeOpt);
       this.aceEditor.setFontSize(size);
     },
-    openFile() {
-      ipcRenderer.send("action", "open", "", "problem");
+    languageConverse() {
+      if (this.userOpt.languageOpt === "PYTHON") return "PYTHON35";
+      else return this.userOpt.languageOpt;
     },
-    save() {
-      ipcRenderer.send(
-        "action",
-        "save",
-        this.aceEditor.getSession().getValue(),
-        "problem"
+    openFile() {
+      var dir = dialog.showOpenDialog({
+        properties: ["openFile"]
+      });
+
+      if (dir) {
+        let path = dir[0];
+        let fileStr = fs.readFileSync(path, { encoding: "binary" });
+        var buf = new Buffer(fileStr, "binary");
+        var code = iconv.decode(buf, "utf-8");
+        this.aceEditor
+          .getSession()
+          .getDocument()
+          .setValue(code);
+      }
+    },
+    saveFile() {
+      let code = this.aceEditor.getSession().getValue();
+      if (this.fileProp.isSaved) {
+        fs.writeFileSync(this.fileProp.path, code);
+        return;
+      }
+
+      var dir = dialog.showSaveDialog(
+        {
+          defaultPath: "main",
+          filters: [
+            { name: "CPP", extensions: ["cpp"] },
+            { name: "C", extensions: ["c"] },
+            { name: "Python", extensions: ["py"] },
+            { name: "All Files", extensions: ["*"] }
+          ]
+        },
+        rsp => {
+          if (rsp === undefined || rsp === null) {
+            return this.$message.warning("请选择文件保存路径");
+          }
+
+          this.fileProp.path = rsp;
+          fs.writeFileSync(this.fileProp.path, code);
+        }
       );
     },
     store() {
@@ -157,8 +193,8 @@ export default {
     },
     // 本地编译+运行
     run() {
-      this.needRun = true;
-      this.save();
+      this.saveFile();
+      ipcRenderer.send("run", this.userOpt.languageOpt, this.fileProp.path);
     },
     // 获取题目对应课程节点
     async getNodeID() {
@@ -173,10 +209,6 @@ export default {
       }
       // console.log(res);
       this.nodeID = res.data;
-    },
-    languageConverse() {
-      if (this.languageOpt === "PYTHON") return "PYTHON35";
-      else return this.languageOpt;
     },
     //提交代码到题库
     submit() {
@@ -215,55 +247,17 @@ export default {
           this.isSubmit = false;
         });
     },
-    saveWatcher() {
-      ipcRenderer.on("save", (event, from, rsp) => {
-        console.log("prob-save: ", rsp, from);
-        if (from == "editor") return;
-
-        if (rsp === undefined || rsp === null) {
-          return this.$message.warning("请选择文件保存路径");
-        }
-
-        fs.writeFileSync(rsp, this.aceEditor.getSession().getValue());
-        if (this.needRun) {
-          // 编译运行
-          ipcRenderer.send("run", this.userOpt.languageOpt, rsp);
-          this.needRun = false;
-        }
-      });
-    },
-    openWatcher() {
-      // 打开文件时获取到的文件内容
-      ipcRenderer.on("open", (event, path, from) => {
-        console.log("prob-open: ", path, from);
-        if (from == "editor") return;
-
-        let fileStr = fs.readFileSync(path, { encoding: "binary" });
-        //先用二进制的方式读入
-        var buf = Buffer.alloc(4096, fileStr, "binary");
-        //存为Buffer
-        var code = iconv.decode(buf, "gbk");
-        this.aceEditor
-          .getSession()
-          .getDocument()
-          .setValue(code);
-      });
-    },
     init() {
       this.problemID = this.$route.params.pid;
       this.getNodeID();
-      this.saveWatcher();
-      this.openWatcher();
-      setInterval(this.store, 10000);
-      ipcRenderer.on("data", (event, data) => {
-        this.aceEditor
-          .getSession()
-          .getDocument()
-          .setValue(data.toString());
-      });
+      this.editorInit();
+      this.readFromStorage();
     }
   },
   created() {
+    setInterval(this.store, 2000);
+  },
+  mounted() {
     this.init();
   }
 };

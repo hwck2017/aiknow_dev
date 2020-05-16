@@ -1,23 +1,14 @@
-var { ipcMain, dialog, BrowserWindow, app } = require('electron');
-var fs = require('fs');
+var { ipcMain, dialog, app } = require('electron');
 var path = require("path");
 const { spawn } = require('child_process')
 
 var myFile = require("../../lib/file")
 
-ipcMain.on('action', function (event, action, data, from) {
+ipcMain.on('action', function (event, action, data) {
   console.log(action, data);
   switch (action) {
     case "close":
-      askSaveDialog(from);
-      break;
-
-    case "open":
-      openFile(from);
-      break;
-
-    case "save":
-      saveFile(from);
+      askSaveDialog();
       break;
 
     case "install":
@@ -30,8 +21,12 @@ ipcMain.on('action', function (event, action, data, from) {
   }
 })
 
+ipcMain.on('run', function (event, lang, fullPath) {
+  runExec(lang, fullPath)
+})
+
 //判断文件是否需要保存, 保存则执行保存操作
-function askSaveDialog(from) {
+function askSaveDialog() {
   var index = dialog.showMessageBox({
     type: "question",
     message: '是否要保存此文件?',
@@ -42,34 +37,6 @@ function askSaveDialog(from) {
   if (index == 0) {
     saveFile();
   }
-}
-
-function openFile(from) {
-  var dir = dialog.showOpenDialog({
-    properties: ['openFile']
-  });
-
-  console.log("+++++++open")
-  if (dir) {
-    //将文件路径发送至渲染进程
-    console.log(dir)
-    BrowserWindow.getFocusedWindow().webContents.send("open", dir[0], from);
-  }
-}
-
-// 执行保存
-function saveFile(from) {
-  var dir = dialog.showSaveDialog({
-    defaultPath: 'main',
-    filters: [
-      { name: "CPP", extensions: ['cpp'] },
-      { name: 'C', extensions: ['c'] },
-      { name: "Python", extensions: ['py'] },
-      { name: 'All Files', extensions: ['*'] }
-    ]
-  }, res => {
-    BrowserWindow.getFocusedWindow().webContents.send('save', from, res);
-  });
 }
 
 function libManage(action, lib) {
@@ -128,8 +95,4 @@ function runExec(lang, fullPath) {
     console.log(`关闭cmd窗口, 返回码 ${code}`);
   });
 }
-
-ipcMain.on('run', function (event, lang, fullPath) {
-  runExec(lang, fullPath)
-})
 

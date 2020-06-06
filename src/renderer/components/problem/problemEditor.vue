@@ -82,6 +82,7 @@ var mapFontSize = new Map([
 export default {
   data() {
     return {
+      needRun: false,
       problemID: 0,
       nodeID: "",
       aceEditor: null,
@@ -138,6 +139,8 @@ export default {
 
       if (dir) {
         let path = dir[0];
+        this.fileProp.isSaved = true;
+        this.fileProp.path = path;
         let fileStr = fs.readFileSync(path, { encoding: "binary" });
         var buf = new Buffer(fileStr, "binary");
         var code = iconv.decode(buf, "utf-8");
@@ -151,6 +154,11 @@ export default {
       let code = this.aceEditor.getSession().getValue();
       if (this.fileProp.isSaved) {
         fs.writeFileSync(this.fileProp.path, code);
+        if (this.needRun) {
+          ipcRenderer.send("run", this.userOpt.languageOpt, this.fileProp.path);
+          this.needRun = false;
+        }
+
         return;
       }
 
@@ -170,7 +178,17 @@ export default {
           }
 
           this.fileProp.path = rsp;
+          this.fileProp.isSaved = true;
           fs.writeFileSync(this.fileProp.path, code);
+          if (this.needRun) {
+            ipcRenderer.send(
+              "run",
+              this.userOpt.languageOpt,
+              this.fileProp.path
+            );
+
+            this.needRun = false;
+          }
         }
       );
     },
@@ -193,8 +211,8 @@ export default {
     },
     // 本地编译+运行
     run() {
+      this.needRun = true;
       this.saveFile();
-      ipcRenderer.send("run", this.userOpt.languageOpt, this.fileProp.path);
     },
     // 获取题目对应课程节点
     async getNodeID() {

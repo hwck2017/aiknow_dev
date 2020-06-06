@@ -28,7 +28,7 @@ export default {
     }
   },
   mounted() {
-    // this.Watcher()
+    this.Watcher()
   }
 };
 </script>

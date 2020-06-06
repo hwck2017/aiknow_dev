@@ -43,7 +43,7 @@
     "publish": [
       {
         "provider": "generic",
-        "url": "http://106.54.114.8/download/",
+        "url": "http://aiknow.oss-cn-beijing.aliyuncs.com/download/cppDev/",
         "channel": "latest"
       }
     ],

@@ -95,4 +95,3 @@ function runExec(lang, fullPath) {
     console.log(`关闭cmd窗口, 返回码 ${code}`);
   });
 }
-

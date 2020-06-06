@@ -146,6 +146,26 @@ export default {
           name: "python-docx",
           desc: "python-docx是用于操作word文档的python库",
           status: false
+        },
+        {
+          name: "matplotlib",
+          desc: "matplotlib是基于python的图表绘图系统",
+          status: false
+        },
+        {
+          name: "seaborn",
+          desc: "seaborn是基于python且建立在matplotlib之上的制作统计图形的库",
+          status: false
+        },
+        {
+          name: "pandas",
+          desc: "pandas是用于数据挖掘和数据分析，同时也提供数据清洗功能的python库，它的使用基础是Numpy",
+          status: false
+        },
+        {
+          name: "numpy",
+          desc: "numpy是python的一个扩展程序库，支持大量的维度数组与矩阵运算，此外也针对数组运算提供大量的数学函数库",
+          status: false
         }
       ],
       problemInfo: {
@@ -158,6 +178,7 @@ export default {
         fontSizeOpt: "中",
         editorTheme: "monokai"
       },
+      needRun: false,
       languageOpts: languageOpts,
       fontSizeOpts: fontSizeOpts,
       //激活的tab name
@@ -170,11 +191,11 @@ export default {
   methods: {
     libInstall(row) {
       row.status = true;
-      // ipcRenderer.send("action", "install", row.name);
+      ipcRenderer.send("action", "install", row.name);
     },
     libUninstall(row) {
       row.status = false;
-      // ipcRenderer.send("action", "uninstall", row.name);
+      ipcRenderer.send("action", "uninstall", row.name);
     },
     themeChangeHandle() {
       myEditor.setTheme(this.userOpt.editorTheme);
@@ -273,6 +294,10 @@ export default {
       // 非save_as情况下 如果已经保存 则直接保存 不需要询问保存路径
       if (saveAs === false && tab.isSave) {
         fs.writeFileSync(tab.filePath, code);
+        if (this.needRun) {
+          ipcRenderer.send("run", this.userOpt.languageOpt, tab.filePath);
+          this.needRun = false;
+        }
         return;
       }
 
@@ -301,6 +326,10 @@ export default {
           tab.title = myFile.getFileName(rsp);
           tab.content = myEditor.getSourceCode();
           fs.writeFileSync(tab.filePath, myEditor.getSourceCode());
+          if (this.needRun) {
+            ipcRenderer.send("run", this.userOpt.languageOpt, tab.filePath);
+            this.needRun = false;
+          }
         }
       );
     },
@@ -335,9 +364,8 @@ export default {
     },
     // 本地测试运行
     run() {
+      this.needRun = true;
       this.saveFile(false);
-      let tab = myTab.findTabByName(this.activeTab);
-      ipcRenderer.send("run", this.userOpt.languageOpt, tab.filePath);
     },
     keyWatcher() {
       // js监听键盘ctrl + s快捷键保存;
@@ -355,6 +383,7 @@ export default {
     init() {
       this.editableTabs = myTab.getTabs();
       myEditor.init(this.$refs.ace);
+      this.readFromStorage();
       let userOpt = myStorage.getFromLS("userOpt");
       if (userOpt) {
         this.userOpt = userOpt;
@@ -364,16 +393,14 @@ export default {
       }
 
       console.log(this.userOpt);
-      // 每1s保存一次编辑器中的内容
-      
-      // this.keyWatcher();
+      this.keyWatcher();
     }
   },
   created() {
     setInterval(this.storeData, 1000);
   },
   mounted() {
-    this.init()
+    this.init();
   }
 };
 </script>

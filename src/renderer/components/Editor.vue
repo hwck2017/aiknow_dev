@@ -272,7 +272,6 @@ export default {
           return this.$message.success("文件已经被打开");
         }
 
-        let data = fs.readFileSync(path);
         let fileStr = fs.readFileSync(path, { encoding: "binary" });
         var buf = new Buffer(fileStr, "binary"); //先用二进制的方式读入, 再转utf-8
         var data = iconv.decode(buf, "utf-8");

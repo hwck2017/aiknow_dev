@@ -52,6 +52,7 @@
     },
     "win": {
       "icon": "build/icons/icon.ico",
+      "requestedExecutionLevel":"highestAvailable",
       "target": [
         {
           "target": "nsis",

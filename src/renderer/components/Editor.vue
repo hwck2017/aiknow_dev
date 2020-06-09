@@ -32,7 +32,6 @@
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item command="new">新建</el-dropdown-item>
               <el-dropdown-item command="open">打开</el-dropdown-item>
-              <!-- <el-dropdown-item command="save">保存</el-dropdown-item> -->
               <el-dropdown-item command="saveAs">另存为</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
@@ -159,12 +158,36 @@ export default {
         },
         {
           name: "pandas",
-          desc: "pandas是用于数据挖掘和数据分析，同时也提供数据清洗功能的python库，它的使用基础是Numpy",
+          desc:
+            "pandas是用于数据挖掘和数据分析，同时也提供数据清洗功能的python库，它的使用基础是Numpy",
           status: false
         },
         {
           name: "numpy",
-          desc: "numpy是python的一个扩展程序库，支持大量的维度数组与矩阵运算，此外也针对数组运算提供大量的数学函数库",
+          desc:
+            "numpy是python的一个扩展程序库，支持大量的维度数组与矩阵运算，此外也针对数组运算提供大量的数学函数库",
+          status: false
+        },
+        {
+          name: "wordcloud",
+          desc: "wordcloud是基于python的词云展示第三方库",
+          status: false
+        },
+        {
+          name: "jieba",
+          desc: "jieba是一款优秀的Python第三方中文分词库",
+          status: false
+        },
+        {
+          name: "PIL",
+          desc:
+            "PIL(Python Image Library)是基于Python的图像处理工具包，它提供了基本的图像处理功能",
+          status: false
+        },
+        {
+          name: "shutil",
+          desc:
+            "shutil提供了许多关于文件和文件集合的高级操作，特别提供了支持文件复制和删除的功能",
           status: false
         }
       ],
@@ -191,10 +214,12 @@ export default {
   methods: {
     libInstall(row) {
       row.status = true;
+      myStorage.storeToLS("libs", this.libs);
       ipcRenderer.send("action", "install", row.name);
     },
     libUninstall(row) {
       row.status = false;
+      myStorage.storeToLS("libs", this.libs);
       ipcRenderer.send("action", "uninstall", row.name);
     },
     themeChangeHandle() {
@@ -261,40 +286,65 @@ export default {
       this.handleTabsEdit("", "add");
     },
     openFile() {
-      var dir = dialog.showOpenDialog({
-        properties: ["openFile"]
-      });
+      dialog.showOpenDialog(
+        {
+          properties: ["openFile"]
+        },
+        dir => {
+          console.log("dir: ", dir);
+          let path = dir[0];
+          let tab = myTab.findTabByPath(path);
+          if (tab !== undefined) {
+            return this.$message.success("文件已经被打开");
+          }
 
-      if (dir) {
-        let path = dir[0];
-        let tab = myTab.findTabByPath(path);
-        if (tab !== undefined) {
-          return this.$message.success("文件已经被打开");
+          let fileStr = fs.readFileSync(path, { encoding: "binary" });
+          var buf = new Buffer(fileStr, "binary"); //先用二进制的方式读入, 再转utf-8
+          let data = iconv.decode(buf, "utf-8");
+          let fileName = myFile.getFileName(path);
+          tab = myTab.setTab(fileName, data, path, true);
+          this.addTab(tab);
+          myEditor.setSourceCode(data);
         }
+      );
 
-        let data = fs.readFileSync(path);
-        let fileStr = fs.readFileSync(path, { encoding: "binary" });
-        var buf = new Buffer(fileStr, "binary"); //先用二进制的方式读入, 再转utf-8
-        var data = iconv.decode(buf, "utf-8");
-        let fileName = myFile.getFileName(path);
-        tab = myTab.setTab(fileName, data, path, true);
-        this.addTab(tab);
-        myEditor.setSourceCode(data);
-      }
+      // console.log(dir)
+      // if (dir) {
+      //   let path = dir[0];
+      //   console.log("path: ", path)
+      //   let tab = myTab.findTabByPath(path);
+      //   if (tab !== undefined) {
+      //     return this.$message.success("文件已经被打开");
+      //   }
+
+      //   let data = fs.readFileSync(path);
+      //   let fileStr = fs.readFileSync(path, { encoding: "binary" });
+      //   var buf = new Buffer(fileStr, "binary"); //先用二进制的方式读入, 再转utf-8
+      //   var data = iconv.decode(buf, "utf-8");
+      //   let fileName = myFile.getFileName(path);
+      //   tab = myTab.setTab(fileName, data, path, true);
+      //   this.addTab(tab);
+      //   myEditor.setSourceCode(data);
+      // }
     },
     saveFile(saveAs) {
+      console.log("save+++++");
       let code = myEditor.getSourceCode();
       let tab = myTab.findTabByName(this.activeTab);
       if (tab === undefined) {
         // tab全部被删除
+        console.log("tab noexist");
         tab = myTab.setTab("", code, "", false);
         this.addTab(tab);
       }
 
       // 非save_as情况下 如果已经保存 则直接保存 不需要询问保存路径
+      console.log("tab is saved: ", tab.isSave);
       if (saveAs === false && tab.isSave) {
         fs.writeFileSync(tab.filePath, code);
+        console.log("save as ok");
         if (this.needRun) {
+          console.log("run: ", this.userOpt.languageOpt, "+", tab.filePath);
           ipcRenderer.send("run", this.userOpt.languageOpt, tab.filePath);
           this.needRun = false;
         }
@@ -364,6 +414,7 @@ export default {
     },
     // 本地测试运行
     run() {
+      console.log("run+++");
       this.needRun = true;
       this.saveFile(false);
     },
@@ -391,8 +442,12 @@ export default {
         myEditor.setFontSize(this.userOpt.fontSizeOpt);
         myEditor.setTheme(this.userOpt.editorTheme);
       }
-
       console.log(this.userOpt);
+
+      let libs = myStorage.getFromLS("libs");
+      if (libs) {
+        this.libs = libs
+      }
       this.keyWatcher();
     }
   },

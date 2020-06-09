@@ -10,12 +10,10 @@ file=${source_file##*/}
 filename=${file%.*}
 # 文件扩展名
 extension=${file##*.}
-#echo filename: ${filename}
-#echo extension: ${file##*.}
+# echo filename: ${filename}
+# echo extension: ${file##*.}
 
-# TODO 目录调整
-#pwd=`pwd`
-pwd="/Applications/aiknow-dev.app/Contents/Resources/script"
+pwd="/Applications/AiknowEditor.app/Contents/Resources/darwin"
 get_timer=$pwd/time_now_ns
 # echo $get_timer
 start_time=`$get_timer`
@@ -36,7 +34,7 @@ fi
 status=$?
 end_time=`$get_timer`
 
-#echo $start_time $end_time
+# echo $start_time $end_time
 
 duration=`expr $end_time - $start_time`
 duration=`printf "%013d\n" $duration`

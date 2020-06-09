@@ -5,6 +5,6 @@ on run args
  -- do shell script "echo " & quoted form of output
 
  tell application "Terminal"
-  set currentTab to do script (("/Users/chenkai/code/aiknow-dev/run.bashrc " & source & " " & lang))
+  set currentTab to do script (("/Applications/AiknowEditor.app/Contents/Resources/darwin/run.bashrc " & source & " " & lang))
  end tell
 end

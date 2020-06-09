@@ -4,7 +4,7 @@ const { spawn } = require('child_process')
 
 var myFile = require("../../lib/file")
 
-ipcMain.on('action', function (event, action, data) {
+ipcMain.on('action', (event, action, data) => {
   console.log(action, data);
   switch (action) {
     case "close":
@@ -21,7 +21,8 @@ ipcMain.on('action', function (event, action, data) {
   }
 })
 
-ipcMain.on('run', function (event, lang, fullPath) {
+ipcMain.on('run', (event, lang, fullPath) => {
+  console.log("compile and run: ", fullPath)
   runExec(lang, fullPath)
 })
 
@@ -42,24 +43,36 @@ function askSaveDialog() {
 function libManage(action, lib) {
   exePath = path.dirname(app.getAppPath());
 
-  if (action == "install") {
-    manager = exePath + "\\win32\\install.bat";
-  } else if (action == "uninstall") {
-    manager = exePath + "\\win32\\uninstall.bat";
-  } else {
+  if (process.platform === 'win32') {
+    if (action == "install") {
+      manager = exePath + "\\win32\\install.bat";
+    } else if (action == "uninstall") {
+      manager = exePath + "\\win32\\uninstall.bat";
+    } else {
+      //nothing to do
+    }
 
+    proc = spawn('cmd', ['/c', 'start', 'call', manager, lib])
+    proc.on('close', (code) => {
+      console.log(`关闭cmd窗口, 返回码 ${code}`);
+    });
+  } else if (process.platform === 'darwin') {
+    if (action == "install") {
+      manager = exePath + "/darwin/install.scpt"
+    } else if (action == "uninstall") {
+      manager = exePath + "/darwin/uninstall.scpt"
+    } else {
+      //nothing to do
+    }
+
+    proc = spawn('osascript', [manager, lib]);
   }
-
-  proc = spawn('cmd', ['/c', 'start', 'call', manager, lib])
-  proc.on('close', (code) => {
-    console.log(`关闭cmd窗口, 返回码 ${code}`);
-  });
 }
 
 // TODO: 需拿到运行结果
 function runExec(lang, fullPath) {
   var exePath, dir, fileName;
-  exePath = path.dirname(app.getAppPath());
+  exePath = path.dirname(app.getAppPath()); ///Applications/AiknowEditor.app/Contents/Resources
   dir = myFile.getDir(fullPath);
   fileName = myFile.getFileName(fullPath);
   console.log("app path: %s, file dir: %s, file name: %s", exePath, dir, fileName);
@@ -85,7 +98,8 @@ function runExec(lang, fullPath) {
     }
 
   } else if (process.platform === 'darwin') {
-    compiler = exePath + "/script/appscrpt.scpt"
+    console.log("compile: ", fullPath)
+    compiler = exePath + "/darwin/appscrpt.scpt"
     proc = spawn('osascript', [compiler, fullPath, lang]);
   } else {
     // TODO

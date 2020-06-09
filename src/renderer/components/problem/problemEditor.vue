@@ -137,8 +137,10 @@ export default {
         properties: ["openFile"]
       });
 
+      console.log("open file: ", dir)
       if (dir) {
         let path = dir[0];
+        console.log("path: ", path)
         this.fileProp.isSaved = true;
         this.fileProp.path = path;
         let fileStr = fs.readFileSync(path, { encoding: "binary" });

@@ -307,25 +307,6 @@ export default {
           myEditor.setSourceCode(data);
         }
       );
-
-      // console.log(dir)
-      // if (dir) {
-      //   let path = dir[0];
-      //   console.log("path: ", path)
-      //   let tab = myTab.findTabByPath(path);
-      //   if (tab !== undefined) {
-      //     return this.$message.success("文件已经被打开");
-      //   }
-
-      //   let data = fs.readFileSync(path);
-      //   let fileStr = fs.readFileSync(path, { encoding: "binary" });
-      //   var buf = new Buffer(fileStr, "binary"); //先用二进制的方式读入, 再转utf-8
-      //   var data = iconv.decode(buf, "utf-8");
-      //   let fileName = myFile.getFileName(path);
-      //   tab = myTab.setTab(fileName, data, path, true);
-      //   this.addTab(tab);
-      //   myEditor.setSourceCode(data);
-      // }
     },
     saveFile(saveAs) {
       console.log("save+++++");

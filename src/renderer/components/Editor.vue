@@ -1,8 +1,8 @@
 <template>
   <div>
     <div class="tool-bar">
-      <el-row>
-        <el-col :span="24">
+      <el-row :gutter="4">
+        <el-col :span="4">
           <el-popover placement="top-start" trigger="hover" content="选择编程语言">
             <el-select
               v-model="userOpt.languageOpt"
@@ -13,6 +13,8 @@
               <el-option v-for="(item, idx) in languageOpts" :key="idx" :label="item" :value="item"></el-option>
             </el-select>
           </el-popover>
+        </el-col>
+        <el-col :span="2">
           <el-popover placement="top-start" trigger="hover" content="调整字体大小">
             <el-select
               v-model="userOpt.fontSizeOpt"
@@ -23,6 +25,8 @@
               <el-option v-for="(item, idx) in fontSizeOpts" :key="idx" :label="item" :value="item"></el-option>
             </el-select>
           </el-popover>
+        </el-col>
+        <el-col :span="18">
           <el-dropdown size="small" @command="fileOperProc">
             <el-button size="small">
               <i class="el-icon-folder-opened"></i>
@@ -58,6 +62,7 @@
           </el-dropdown>
           <el-button size="small" icon="el-icon-s-promotion" @click="run">运行</el-button>
           <el-button size="small" icon="el-icon-box" @click="libInstalling = true">Python库管理</el-button>
+          <el-button size="small" icon="el-icon-question" @click="clickHelp = true">帮助</el-button>
         </el-col>
       </el-row>
     </div>
@@ -100,6 +105,16 @@
         </el-table-column>
       </el-table>
     </el-dialog>
+    <el-dialog title="帮助" width="80%" :visible.sync="clickHelp">
+      <span>
+        <h3>python第三方库自行安装方法(windows)</h3>
+        <ol>
+          <li>找到客户端安装目录, 跳转到安装目录下的\resources\Python\Scripts，例如：安装目录为C:\Program Files\AiknowEditor，则跳转到C:\Program Files\AiknowEditor\resources\Python\Scripts</li>
+          <li>执行命令"pip3.exe install python库名称"自行安装python第三方库，例如需要安装pygame，则执行 pip3.exe install pygame</li>
+          <li>执行命令"pip3.exe uninstall python库名称"卸载python第三方库</li>
+        </ol>
+      </span>
+    </el-dialog>
     <div class="ace-editor" ref="ace"></div>
   </div>
 </template>
@@ -123,6 +138,7 @@ const fontSizeOpts = ["超大", "大", "中", "小"];
 export default {
   data() {
     return {
+      clickHelp: false,
       libInstalling: false,
       libs: [
         {
@@ -448,14 +464,15 @@ export default {
       let libs = myStorage.getFromLS("libs");
       if (libs) {
         // 版本升级后lib增加时，需要将新增的和原来的融合起来
+        console.log("libs status: ", libs);
         for (i = 0; i < libs.length; i++) {
           for (j = 0; j < this.libs.length; j++) {
             if (
-              libs[i].name == this.libs[j].name &&
+              libs[i].name === this.libs[j].name &&
               libs[i].status != this.libs[j].status
             ) {
-              console.log(libs[i].name, " status changed to: ", libs[i].status)
-              this.libs[j] = libs[i];
+              console.log(libs[i].name, " status changed to: ", libs[i].status);
+              this.libs[j].status = libs[i].status;
               break;
             }
           }

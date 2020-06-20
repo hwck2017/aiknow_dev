@@ -91,8 +91,9 @@ export default {
         };
       }
 
+      console.log("login user info: ", data)
       const { data: res } = await this.$http.post(url, data);
-      console.log(res);
+      console.log("login rsp: ", res);
       if (res.errno !== 200) return this.$message.error(res.errmsg);
       // 将登录成功之后的 token，保存到客户端的 sessionStorage 中
       console.log(res.data.token);

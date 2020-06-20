@@ -2,6 +2,7 @@ const electron = require('electron')
 const Menu = electron.Menu
 
 var template = [{
+  label: '爱知部落',
   submenu: [{
     label: '退出',
     accelerator: 'CmdOrCtrl+Q',

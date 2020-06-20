@@ -30,7 +30,7 @@
                 <el-badge v-if="profile!=null" :value="profile.submit_times"></el-badge>
               </div>
               <div class="charts">
-                <!-- <canvas ref="timesChart" width="250" height="250"></canvas> -->
+                <canvas ref="timesChart" width="250" height="250"></canvas>
               </div>
             </el-card>
           </el-col>
@@ -63,7 +63,7 @@
               <el-button size="small" type="info" @click="getUserLog('month')">近1月</el-button>
             </span>
           </p>
-          <!-- <canvas ref="logChart" width="700" height="280"></canvas> -->
+          <canvas ref="logChart" width="700" height="280"></canvas>
         </el-card>
       </el-main>
     </el-container>

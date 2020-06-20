@@ -20,6 +20,7 @@
         </el-row>
       </el-card>
     </div>
+    <el-button @click="back">返回题目详情</el-button>
   </div>
 </template>
 
@@ -41,6 +42,9 @@ export default {
         // console.log(res.data);
         this.data = res.data.data;
       });
+    },
+    back() {
+      this.$router.go(-1);
     }
   },
   components: {

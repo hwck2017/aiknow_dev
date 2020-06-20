@@ -136,6 +136,11 @@ export default {
           status: false
         },
         {
+          name: "pyzero",
+          desc: "pygame Zero是无需模板的游戏开发python库",
+          status: false
+        },
+        {
           name: "PyPDF2",
           desc:
             "PyPDF2是用于处理pdf文件的python库, 它提供了读、写、分割、合并、文件转换等多种操作",
@@ -179,9 +184,26 @@ export default {
           status: false
         },
         {
-          name: "PIL",
+          name: "pillow",
           desc:
-            "PIL(Python Image Library)是基于Python的图像处理工具包，它提供了基本的图像处理功能",
+            "pillow是基于Python的图像处理工具包，它提供了基本的图像处理功能",
+          status: false
+        },
+        {
+          name: "pyautogui",
+          desc:
+            "pyautogui是纯Python的GUI自动化工具，使用pyautogui可以用程序自动控制鼠标和键盘操作",
+          status: false
+        },
+        {
+          name: "pyperclip",
+          desc: "基于python实现读写剪贴板",
+          status: false
+        },
+        {
+          name: "pytesseract",
+          desc:
+            "tesseract是python的光学字符识别（OCR）工具，可识别并读取嵌入图像中的文本。",
           status: false
         },
         {
@@ -309,7 +331,6 @@ export default {
       );
     },
     saveFile(saveAs) {
-      console.log("save+++++");
       let code = myEditor.getSourceCode();
       let tab = myTab.findTabByName(this.activeTab);
       if (tab === undefined) {
@@ -395,7 +416,6 @@ export default {
     },
     // 本地测试运行
     run() {
-      console.log("run+++");
       this.needRun = true;
       this.saveFile(false);
     },
@@ -427,7 +447,20 @@ export default {
 
       let libs = myStorage.getFromLS("libs");
       if (libs) {
-        this.libs = libs
+        // 版本升级后lib增加时，需要将新增的和原来的融合起来
+        for (i = 0; i < libs.length; i++) {
+          for (j = 0; j < this.libs.length; j++) {
+            if (
+              libs[i].name == this.libs[j].name &&
+              libs[i].status != this.libs[j].status
+            ) {
+              console.log(libs[i].name, " status changed to: ", libs[i].status)
+              this.libs[j] = libs[i];
+              break;
+            }
+          }
+        }
+        // this.libs = libs;
       }
       this.keyWatcher();
     }

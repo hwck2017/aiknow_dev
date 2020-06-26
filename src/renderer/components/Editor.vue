@@ -338,7 +338,8 @@ export default {
 
           let fileStr = fs.readFileSync(path, { encoding: "binary" });
           var buf = new Buffer(fileStr, "binary"); //先用二进制的方式读入, 再转utf-8
-          let data = iconv.decode(buf, "utf-8");
+          let data = iconv.decode(buf, "gbk");
+          console.log("data: ", data)
           let fileName = myFile.getFileName(path);
           tab = myTab.setTab(fileName, data, path, true);
           this.addTab(tab);

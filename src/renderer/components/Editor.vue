@@ -109,9 +109,10 @@
       <span>
         <h3>python第三方库自行安装方法(windows)</h3>
         <ol>
-          <li>找到客户端安装目录, 跳转到安装目录下的\resources\Python\Scripts，例如：安装目录为C:\Program Files\AiknowEditor，则跳转到C:\Program Files\AiknowEditor\resources\Python\Scripts</li>
+          <li>点击"跳转安装目录"跳转</li>
           <li>执行命令"pip3.exe install python库名称"自行安装python第三方库，例如需要安装pygame，则执行 pip3.exe install pygame</li>
           <li>执行命令"pip3.exe uninstall python库名称"卸载python第三方库</li>
+          <el-button type="text" @click="directory">跳转安装目录</el-button>
         </ol>
       </span>
     </el-dialog>
@@ -152,7 +153,7 @@ export default {
           status: false
         },
         {
-          name: "pyzero",
+          name: "pgzero",
           desc: "pygame Zero是无需模板的游戏开发python库",
           status: false
         },
@@ -250,6 +251,9 @@ export default {
     };
   },
   methods: {
+    directory() {
+      ipcRenderer.send("direct");
+    },
     libInstall(row) {
       row.status = true;
       myStorage.storeToLS("libs", this.libs);

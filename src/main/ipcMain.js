@@ -109,3 +109,11 @@ function runExec(lang, fullPath) {
     console.log(`关闭cmd窗口, 返回码 ${code}`);
   });
 }
+
+ipcMain.on('direct', () => {
+  let exePath = path.dirname(app.getAppPath());
+  let dir = exePath + "\\Python\\Scripts"
+  let script = exePath + "\\win32\\direct.bat"
+  console.log("direct to pip3, path: ", dir);
+  proc = spawn('cmd', ['/c', 'start', 'call', script, dir])
+})

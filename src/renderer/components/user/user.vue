@@ -7,19 +7,19 @@
             <h4>个人信息</h4>
             <el-menu :default-active="getActiveName" active-text-color="#f11c40" @select="goTo">
               <!-- :active-name="getActiveName" width="auto" @on-select="goTo" -->
-              <el-menu-item index="edit">
+              <!-- <el-menu-item index="edit">
                 <i class="el-icon-edit"></i>
                 <span slot="title">信息编辑</span>
               </el-menu-item>
               <el-menu-item index="security">
                 <i class="el-icon-lock"></i>
                 <span slot="title">账号安全</span>
-              </el-menu-item>
+              </el-menu-item> -->
               <el-menu-item index="my_zone">
                 <i class="el-icon-user"></i>
                 <span slot="title">我的主页</span>
               </el-menu-item>
-              <h4>相关管理</h4>
+              <!-- <h4>相关管理</h4>
               <el-menu-item index="problem" disabled>
                 <i class="el-icon-menu"></i>
                 <span slot="title">题目管理</span>
@@ -31,7 +31,7 @@
               <el-menu-item index="group" disabled>
                 <i class="el-icon-s-custom"></i>
                 <span slot="title">小组管理</span>
-              </el-menu-item>
+              </el-menu-item> -->
             </el-menu>
           </el-col>
         </el-row>

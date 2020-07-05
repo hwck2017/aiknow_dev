@@ -47,9 +47,9 @@ duration_s="$s.$ns"
 echo "
 ----------------------------------------"
 echo "Process exited after $duration_s seconds with return value ${status}"
-echo "请按任意键继续. . ."
+# echo "请按任意键继续. . ."
 
-while true; do
-    read -rsn1 input
-    osascript $pwd/terminal_exit.scpt & exit 0
-done
+# while true; do
+#     read -rsn1 input
+#     osascript $pwd/terminal_exit.scpt & exit 0
+# done

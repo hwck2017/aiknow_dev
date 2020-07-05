@@ -110,9 +110,10 @@
         <h3>python第三方库自行安装方法</h3>
         <h4>windows版本</h4>
         <ol>
-          <li>找到客户端安装目录, 跳转到安装目录下的\resources\Python\Scripts，例如：安装目录为C:\Program Files\AiknowEditor，则跳转到C:\Program Files\AiknowEditor\resources\Python\Scripts</li>
+          <li>点击"跳转安装目录"跳转</li>
           <li>执行命令"pip3.exe install python库名称"自行安装python第三方库，例如需要安装pygame，则执行 pip3.exe install pygame</li>
           <li>执行命令"pip3.exe uninstall python库名称"卸载python第三方库</li>
+          <el-button type="text" @click="directory">跳转安装目录</el-button>
         </ol>
         <h4>MAC版本</h4>
         <ol>
@@ -167,7 +168,7 @@ export default {
           status: false
         },
         {
-          name: "pyzero",
+          name: "pgzero",
           desc: "pygame Zero是无需模板的游戏开发python库",
           status: false
         },
@@ -279,6 +280,9 @@ export default {
       this.prompt = !this.checked;
       myStorage.storeToLS("prompt", this.prompt);
     },
+    directory() {
+      ipcRenderer.send("direct");
+    },
     libInstall(row) {
       row.status = true;
       myStorage.storeToLS("libs", this.libs);
@@ -307,9 +311,18 @@ export default {
     },
     handleTabsEdit(tagName, action) {
       if (action === "add") {
+        console.log("bafore add tab, curr active: ", this.activeTab)
+        let oldActive = this.activeTab
         let tab = myTab.initTab();
         this.addTab(tab);
-        // myEditor.setSourceCode(tab.content);
+        //新增tab时，发生tab切换，需保存old tab数据
+        let oldTab = myTab.findTabByName(oldActive);
+        // console.log(oldtab)
+        if (oldTab != undefined) {
+          oldTab.content = myEditor.getSourceCode();
+        }
+        myEditor.setSourceCode(tab.content);
+        console.log("after add tab, old tab name: ", oldActive, ", new tab name: ", this.activeTab)
       } else {
         // remove
         console.log(tagName, this.activeTab);
@@ -333,8 +346,8 @@ export default {
 
       oldTab = myTab.findTabByName(this.oldActiveTab);
       curTab = myTab.findTabByName(this.activeTab);
-      // console.log(curTab);
-      // console.log(oldTab);
+      console.log(curTab);
+      console.log(oldTab);
 
       if (oldTab != undefined) {
         oldTab.content = myEditor.getSourceCode();
@@ -367,7 +380,8 @@ export default {
 
           let fileStr = fs.readFileSync(path, { encoding: "binary" });
           var buf = new Buffer(fileStr, "binary"); //先用二进制的方式读入, 再转utf-8
-          let data = iconv.decode(buf, "utf-8");
+          let data = iconv.decode(buf, "gbk");
+          console.log("data: ", data)
           let fileName = myFile.getFileName(path);
           tab = myTab.setTab(fileName, data, path, true);
           this.addTab(tab);

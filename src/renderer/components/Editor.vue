@@ -107,12 +107,27 @@
     </el-dialog>
     <el-dialog title="帮助" width="80%" :visible.sync="clickHelp">
       <span>
-        <h3>python第三方库自行安装方法(windows)</h3>
+        <h3>python第三方库自行安装方法</h3>
+        <h4>windows版本</h4>
         <ol>
           <li>找到客户端安装目录, 跳转到安装目录下的\resources\Python\Scripts，例如：安装目录为C:\Program Files\AiknowEditor，则跳转到C:\Program Files\AiknowEditor\resources\Python\Scripts</li>
           <li>执行命令"pip3.exe install python库名称"自行安装python第三方库，例如需要安装pygame，则执行 pip3.exe install pygame</li>
           <li>执行命令"pip3.exe uninstall python库名称"卸载python第三方库</li>
         </ol>
+        <h4>MAC版本</h4>
+        <ol>
+          <li>查看本地是否已安装python3。查看方法：打开终端窗口，执行python3，如果显示已经安装，请跳到第二步；否则复制链接下载安装包：http://aiknow.oss-cn-beijing.aliyuncs.com/download/python3/python-3.8.3-macosx10.9.pkg</li>
+          <li>打开终端，执行命令"pip3 install python库名称"自行安装python第三方库，例如需要安装pyzero，则执行 pip3 install pyzero</li>
+          <li>执行命令"pip3 uninstall python库名称"卸载python第三方库</li>
+        </ol>
+      </span>
+    </el-dialog>
+    <el-dialog title="温馨提示" width="80%" :visible.sync="prompt">
+      <span>
+        <h3>为保证使用体验，请检查本地是否已安装Python3，检查方法参考"帮助"。如果未安装请复制链接下载安装包并安装：http://aiknow.oss-cn-beijing.aliyuncs.com/download/python3/python-3.8.3-macosx10.9.pkg</h3>
+      </span>
+      <span slot="footer" class="dialog-footer">
+        <el-checkbox v-model="checked" @change="promptChange">不再提示</el-checkbox>
       </span>
     </el-dialog>
     <div class="ace-editor" ref="ace"></div>
@@ -246,10 +261,24 @@ export default {
       activeTab: "0",
       oldActiveTab: "0",
       //创建的tab集合
-      editableTabs: []
+      editableTabs: [],
+      prompt: false,
+      checked: false
     };
   },
   methods: {
+    promptUpdate() {
+      if (process.platform === "darwin") {
+        let prompt = myStorage.getFromLS("prompt");
+        if (prompt != undefined) this.prompt = prompt;
+        else this.prompt = true;
+        console.log("prompt: ", this.prompt);
+      }
+    },
+    promptChange() {
+      this.prompt = !this.checked;
+      myStorage.storeToLS("prompt", this.prompt);
+    },
     libInstall(row) {
       row.status = true;
       myStorage.storeToLS("libs", this.libs);
@@ -465,8 +494,8 @@ export default {
       if (libs) {
         // 版本升级后lib增加时，需要将新增的和原来的融合起来
         console.log("libs status: ", libs);
-        for (i = 0; i < libs.length; i++) {
-          for (j = 0; j < this.libs.length; j++) {
+        for (var i = 0; i < libs.length; i++) {
+          for (var j = 0; j < this.libs.length; j++) {
             if (
               libs[i].name === this.libs[j].name &&
               libs[i].status != this.libs[j].status
@@ -479,6 +508,9 @@ export default {
         }
         // this.libs = libs;
       }
+
+      // let prompt = myStorage.getFromLS("prompt");
+      // if (prompt) this.prompt = prompt;
       this.keyWatcher();
     }
   },
@@ -487,6 +519,7 @@ export default {
   },
   mounted() {
     this.init();
+    this.promptUpdate();
   }
 };
 </script>

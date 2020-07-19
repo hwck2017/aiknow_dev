@@ -25,10 +25,11 @@ export default {
       //     ipcRenderer.send("isUpdateNow");
       // });
       ipcRenderer.send("checkForUpdate");
+      ipcRenderer.send("common");
     }
   },
   mounted() {
-    this.Watcher()
+    this.Watcher();
   }
 };
 </script>

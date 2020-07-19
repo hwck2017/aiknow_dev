@@ -81,17 +81,19 @@
       <el-main>
         <router-view></router-view>
       </el-main>
-      <el-footer height="30px">
-        <div class="footer">2019-2020 &copy; aiknow</div>
+      <el-footer height="40px">
+        <div class="footer">2019-2020 &copy; 爱知部落<br>version {{version}}</div>
       </el-footer>
     </el-container>
   </el-container>
 </template>
 
 <script>
+var pkg = require("../../../package.json")
 export default {
   data() {
     return {
+      version: "",
       circleUrl:
         "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png"
     };
@@ -109,7 +111,14 @@ export default {
     },
     regist() {
       this.$router.push("/register");
+    },
+    getVersion() {
+      this.version = pkg.version
+      console.log("process: ", pkg)
     }
+  },
+  created() {
+    this.getVersion()
   }
 };
 </script>

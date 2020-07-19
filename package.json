@@ -52,7 +52,7 @@
     },
     "win": {
       "icon": "build/icons/icon.ico",
-      "requestedExecutionLevel":"highestAvailable",
+      "requestedExecutionLevel": "highestAvailable",
       "target": [
         {
           "target": "nsis",

@@ -19,7 +19,7 @@ get_timer=$pwd/time_now_ns
 start_time=`$get_timer`
 if [[ $compiler = "PYTHON" ]]; then
     exec_file=$source_file
-    python $exec_file
+    python3 $exec_file
 elif [[ $compiler = "CPP" ]]; then
     exec_file=$path/$filename
     g++ $source_file -o $exec_file

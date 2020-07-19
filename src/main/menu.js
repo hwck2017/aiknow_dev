@@ -1,4 +1,5 @@
-const electron = require('electron')
+const electron = require('electron');
+const { ipcMain } = require('electron');
 const Menu = electron.Menu
 
 var template = [{

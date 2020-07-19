@@ -99,7 +99,7 @@ function runExec(lang, fullPath) {
 
   } else if (process.platform === 'darwin') {
     console.log("compile: ", fullPath)
-    compiler = exePath + "/darwin/appscrpt.scpt"
+    compiler = exePath + "/darwin/run.scpt"
     proc = spawn('osascript', [compiler, fullPath, lang]);
   } else {
     // TODO
@@ -111,9 +111,20 @@ function runExec(lang, fullPath) {
 }
 
 ipcMain.on('direct', () => {
-  let exePath = path.dirname(app.getAppPath());
-  let dir = exePath + "\\Python\\Scripts"
-  let script = exePath + "\\win32\\direct.bat"
-  console.log("direct to pip3, path: ", dir);
-  proc = spawn('cmd', ['/c', 'start', 'call', script, dir])
+  if (process.platform === 'win32') {
+    let exePath = path.dirname(app.getAppPath());
+    let dir = exePath + "\\Python\\Scripts"
+    let script = exePath + "\\win32\\direct.bat"
+    console.log("direct to pip3, path: ", dir);
+    proc = spawn('cmd', ['/c', 'start', 'call', script, dir])
+  }
+})
+
+ipcMain.on('common', () => {
+  if (process.platform === 'darwin') {
+    let exePath = path.dirname(app.getAppPath());
+    let script = exePath + "/darwin/init.scpt"
+    console.log("install common")
+    proc = spawn('osascript', [script]);
+  }
 })

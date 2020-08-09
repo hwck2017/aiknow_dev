@@ -1,205 +1,129 @@
-// var { ipcMain, dialog, BrowserWindow } = require('electron');
-// var fs = require('fs');
-// var path = require("path");
-
-// /*
-// 问题：
-//     1、新建 打开 保存的问题
-//     2、如果已经保存 第二次保存的时候不提示，且直接保存
-// */
-// var isSave = false;   //判断文件是否保存
-// var currentFile = '';   //保存当前文件的路径
-
-// ipcMain.on('action', function (event, action, data) {
-//     console.log(action);
-//     switch (action) {
-//         case "new":
-//             askSaveDialog();
-//             break;
-
-//         case "open":
-//             dialog.showOpenDialog({ properties: ['openFile'] })
-//                 .then(result => {
-//                     // console.log(result.filePaths)
-//                     if (result.filePaths) {
-//                         var fsData = fs.readFileSync(result.filePaths[0]);
-//                         //将文件内容发送至渲染进程
-//                         BrowserWindow.getFocusedWindow().webContents.send("data", fsData.toString());
-//                     }
-//                 })
-//             // .catch(err => { console.log(err) })
-//             break;
-
-//         case "save":
-//             saveToLocal(data);
-//             break;
-//         case "saveAs":
-//             saveAsToLocal(data);
-//             break;
-//     }
-// })
-
-// //判断文件是否需要保存, 保存则执行保存操作
-// function askSaveDialog() {
-//     if (!isSave) {
-//         var index = dialog.showMessageBox({
-//             type: "question",
-//             message: '是否要保存此文件?',
-//             buttons: ['Yes', 'No']
-//         })
-
-//         if (index == 0) {
-//             saveToLocal();
-//         }
-//     }
-// }
-
-// // 执行保存
-// function saveToLocal(data) {
-//     // 当前文件路径不存在
-//     if (!currentFile) {
-//         dialog.showSaveDialog({
-//             defaultPath: 'aiknow.cpp',
-//             filters: [
-//                 { name: 'All Files', extensions: ['*'] }
-//             ]
-//         }).then(result => {
-//             // console.log(result)
-//             if (result.filePath) {
-//                 currentFile = result.filePath;
-//                 fs.writeFileSync(currentFile, data, 'utf-8');
-//                 isSave = true;
-//             }
-//         });
-//     } else {
-//         fs.writeFileSync(currentFile, data, 'utf-8');
-//         isSave = true;
-//     }
-// }
-
-// function saveAsToLocal(data) {
-//     dialog.showSaveDialog({
-//         defaultPath: 'aiknow.cpp',
-//         filters: [
-//             { name: 'All Files', extensions: ['*'] }
-//         ]
-//     }).then(result => {
-//         // console.log(result)
-//         if (result.filePath) {
-//             currentFile = result.filePath;
-//             fs.writeFileSync(currentFile, data, 'utf-8');
-//             isSave = true;
-//         }
-//     });
-// }
-
-// // let win
-// // ipcMain.on('newWin', () => {
-// //     console.log("new window")
-// //     win = new BrowserWindow({ width: 800, height: 600 });
-// //     // win.loadFile(path.join('file:', __dirname, 'new.html'));
-// //     win.loadFile('new.html');
-// //     win.on("close", function () {
-// //         win = null;
-// //     });
-// // })
-
-// const { spawn } = require('child_process');
-
-// // 任何你期望执行的cmd命令，ls都可以
-// // let cmdStr = 'python3 ./p.py'
-// // 执行cmd命令的目录，如果使用cd xx && 上面的命令，这种将会无法正常退出子进程
-// // let cmdPath = '执行cmd命令的路径'
-// // 子进程名称
-
-// function runExec() {
-//     let child1 = spawn('python3', ['./python.py'], {
-//         "stdio": ['inherit', 'inherit', 'inherit']
-//     })
-
-//     child1.on('close', (code) => {
-//         console.log(`子进程使用代码 ${code} 关闭所有 stdio`);
-//     });
-// }
-
-// ipcMain.on('run', function (event, data) {
-//     fs.writeFileSync('./python.py', data, 'utf-8');
-//     runExec();
-// })
-
-
-var { ipcMain, dialog, BrowserWindow } = require('electron');
-var fs = require('fs');
+var { ipcMain, dialog, app } = require('electron');
 var path = require("path");
+const { spawn } = require('child_process')
 
-/*
-问题：
-    1、新建 打开 保存的问题
-    2、如果已经保存 第二次保存的时候不提示，且直接保存
-*/
-var isSave = true;   //判断文件是否保存
-var currentFile = '';   //保存当前文件的路径
+var myFile = require("../../lib/file")
 
-ipcMain.on('action', function (event, action, data) {
-    // console.log(action);
-    switch (action) {
-        case "new":
-            askSaveDialog();
-            break;
+ipcMain.on('action', (event, action, data) => {
+  console.log(action, data);
+  switch (action) {
+    case "close":
+      askSaveDialog();
+      break;
 
-        case "open":
-            //通过dialog打开文件
-            var dir = dialog.showOpenDialog({
-                properties: ['openFile']
-            });
+    case "install":
+      libManage("install", data);
+      break;
 
-            if (dir) {
-                //获取文件内容
-                var fsData = fs.readFileSync(dir[0]);
-                //将文件内容发送至渲染进程
-                BrowserWindow.getFocusedWindow().webContents.send("data", fsData);
-            }
-            break;
+    case "uninstall":
+      libManage("uninstall", data);
+      break;
+  }
+})
 
-        case "save":
-            saveCurrentDoc(data);
-            break;
-    }
+ipcMain.on('run', (event, lang, fullPath) => {
+  console.log("compile and run: ", fullPath)
+  runExec(lang, fullPath)
 })
 
 //判断文件是否需要保存, 保存则执行保存操作
 function askSaveDialog() {
-    if (!isSave) {
-        var index = dialog.showMessageBox({
-            type: "question",
-            message: '是否要保存此文件?',
-            buttons: ['Yes', 'No']
-        })
+  var index = dialog.showMessageBox({
+    type: "question",
+    message: '是否要保存此文件?',
+    buttons: ['Yes', 'No']
+  })
 
-        if (index == 0) {
-            saveCurrentDoc();
-        }
-    }
+  console.log(index);
+  if (index == 0) {
+    saveFile();
+  }
 }
 
-// 执行保存
-function saveCurrentDoc(data) {
-    // 当前文件路径不存在
-    if (!currentFile) {
-        var dir = dialog.showSaveDialog({
-            defaultPath: 'a.cpp',
-            filters: [
-                { name: 'All Files', extensions: ['*'] }
-            ]
-        });
+function libManage(action, lib) {
+  exePath = path.dirname(app.getAppPath());
 
-        if (dir) {
-            currentFile = dir;
-            fs.writeFileSync(currentFile, data);
-            isSave = true;
-        }
+  if (process.platform === 'win32') {
+    if (action == "install") {
+      manager = exePath + "\\win32\\install.bat";
+    } else if (action == "uninstall") {
+      manager = exePath + "\\win32\\uninstall.bat";
     } else {
-        fs.writeFileSync(currentFile, data);
-        isSave = true;
+      //nothing to do
     }
+
+    proc = spawn('cmd', ['/c', 'start', 'call', manager, lib])
+    proc.on('close', (code) => {
+      console.log(`关闭cmd窗口, 返回码 ${code}`);
+    });
+  } else if (process.platform === 'darwin') {
+    if (action == "install") {
+      manager = exePath + "/darwin/install.scpt"
+    } else if (action == "uninstall") {
+      manager = exePath + "/darwin/uninstall.scpt"
+    } else {
+      //nothing to do
+    }
+
+    proc = spawn('osascript', [manager, lib]);
+  }
 }
+
+// TODO: 需拿到运行结果
+function runExec(lang, fullPath) {
+  var exePath, fileName;
+  exePath = path.dirname(app.getAppPath()); ///Applications/AiknowEditor.app/Contents/Resources
+  // dir = myFile.getDir(fullPath);
+  fileName = myFile.getFileName(fullPath);
+  console.log("app path: %s, file name: %s", exePath, fileName);
+  console.log("platform: %s", process.platform);
+
+  var compiler, output, proc;
+  if (process.platform === 'win32') {
+    if (lang === "CPP") {
+      compiler = exePath + "\\win32\\run_cpp.bat";
+      output = fileName.substring(0, fileName.indexOf(".")) + ".exe";
+      console.log("output file name: %s", output);
+      proc = spawn('cmd', ['/c', 'start', 'call', compiler, fullPath, output])
+    } else if (lang === "C") {
+      compiler = exePath + "\\win32\\run_c.bat";
+      output = fileName.substring(0, fileName.indexOf(".")) + ".exe";
+      console.log("output file name: %s", output);
+      proc = spawn('cmd', ['/c', 'start', 'call', compiler, fullPath, output])
+    } else if (lang === "PYTHON") {
+      compiler = exePath + "\\win32\\run_py.bat";
+      proc = spawn('cmd', ['/c', 'start', 'call', compiler, fullPath])
+    } else {
+      // TODO
+    }
+  } else if (process.platform === 'darwin') {
+    console.log("compile: ", fullPath)
+    compiler = exePath + "/darwin/run.scpt"
+    proc = spawn('osascript', [compiler, fullPath, lang]);
+  } else {
+    // TODO
+  }
+
+  proc.on('close', (code) => {
+    console.log(`关闭cmd窗口, 返回码 ${code}`);
+  });
+}
+
+ipcMain.on('direct', () => {
+  if (process.platform === 'win32') {
+    let exePath = path.dirname(app.getAppPath());
+    let dir = exePath + "\\Python\\Scripts"
+    let script = exePath + "\\win32\\direct.bat"
+    console.log("direct to pip3, path: ", dir);
+    proc = spawn('cmd', ['/c', 'start', 'call', script, dir])
+  }
+})
+
+ipcMain.on('common', () => {
+  if (process.platform === 'darwin') {
+    let exePath = path.dirname(app.getAppPath());
+    let script = exePath + "/darwin/init.scpt"
+    console.log("install common")
+    proc = spawn('osascript', [script]);
+  }
+})

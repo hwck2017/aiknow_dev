@@ -1,12 +1,11 @@
 <template>
   <div>
     <div class="tool-bar">
-      <el-row :gutter="6">
-        <el-col :span="6">
-          <!-- 编程语言: -->
+      <el-row :gutter="4">
+        <el-col :span="4">
           <el-popover placement="top-start" trigger="hover" content="选择编程语言">
             <el-select
-              v-model="languageOpt"
+              v-model="userOpt.languageOpt"
               size="small"
               slot="reference"
               @change="langChangeHandle"
@@ -15,29 +14,10 @@
             </el-select>
           </el-popover>
         </el-col>
-        <el-col :span="6">
-          <!-- <el-dropdown size="small" split-button @command="setupProcess">
-            设置
-            <el-dropdown-menu>
-              <el-tree
-                :data="data"
-                show-checkbox
-                check-strictly
-                accordion
-                check-on-click-node
-                node-key="id"
-                ref="tree"
-                highlight-current
-                :props="defaultProps"
-                @node-click="handleNodeClick"
-                @check-change="checkChange"
-              >></el-tree>
-            </el-dropdown-menu>
-          </el-dropdown>-->
-          <!-- 字体大小: -->
+        <el-col :span="2">
           <el-popover placement="top-start" trigger="hover" content="调整字体大小">
             <el-select
-              v-model="fontSizeOpt"
+              v-model="userOpt.fontSizeOpt"
               size="small"
               slot="reference"
               @change="fontSizeChangeHandle"
@@ -46,268 +26,459 @@
             </el-select>
           </el-popover>
         </el-col>
-        <el-col :span="12">
-          <!-- <el-popover placement="top-start" trigger="hover" content="打开本地文件">
-            <el-button size="small" icon="el-icon-folder-opened" slot="reference" @click="openFile"></el-button>
-          </el-popover>
-          <el-popover placement="top-start" trigger="hover" content="保存至本地文件">
-            <el-button size="small" icon="el-icon-collection" slot="reference" @click="save"></el-button>
-          </el-popover>-->
-          <el-dropdown size="small" split-button @command="fileOperationProcess">
-            文件
+        <el-col :span="18">
+          <el-dropdown size="small" @command="fileOperProc">
+            <el-button size="small">
+              <i class="el-icon-folder-opened"></i>
+              文件
+              <i class="el-icon-arrow-down el-icon--right"></i>
+            </el-button>
             <el-dropdown-menu slot="dropdown">
-              <!-- <el-dropdown-item command="new">新建</el-dropdown-item> -->
+              <el-dropdown-item command="new">新建</el-dropdown-item>
               <el-dropdown-item command="open">打开</el-dropdown-item>
-              <el-dropdown-item command="save">保存</el-dropdown-item>
-              <!-- <el-dropdown-item command="saveAs">另存为</el-dropdown-item> -->
+              <el-dropdown-item command="saveAs">另存为</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
-          <el-popover placement="top-start" trigger="hover" content="测试运行">
-            <el-button
-              size="small"
-              icon="el-icon-s-promotion"
-              slot="reference"
-              @click="isRunning = true"
-            ></el-button>
-          </el-popover>
-          <el-popover placement="top-start" trigger="hover" content="提交至题库判题">
-            <el-button size="small" icon="el-icon-upload2" slot="reference" @click="submit"></el-button>
-          </el-popover>
+          <el-button size="small" icon="el-icon-s-order" @click="saveFile(false)">保存</el-button>
+          <el-dropdown size="small">
+            <el-button size="small">
+              <i class="el-icon-setting"></i>
+              设置
+              <i class="el-icon-arrow-down el-icon--right"></i>
+            </el-button>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item command="theme">
+                夜间模式
+                <el-switch
+                  v-model="userOpt.editorTheme"
+                  active-color="#13ce66"
+                  inactive-color="#eee"
+                  active-value="monokai"
+                  inactive-value="clouds"
+                  @change="themeChangeHandle"
+                ></el-switch>
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+          <el-button size="small" icon="el-icon-s-promotion" @click="run">运行</el-button>
+          <el-button size="small" icon="el-icon-box" @click="libInstalling = true">Python库管理</el-button>
+          <el-button size="small" icon="el-icon-question" @click="clickHelp = true">帮助</el-button>
         </el-col>
       </el-row>
     </div>
-
-    <el-dialog
-      title="请输入测试数据, 输入为空可不填"
-      :visible.sync="isRunning"
-      v-for="(item, index) in testCases"
-    >
-      <el-row :gutter="6">
-        <el-col :span="12">
-          <el-input
-            type="textarea"
-            :autosize="{ minRows: 5, maxRows: 10}"
-            v-model="item.stdin"
-            placeholder="输入"
-          ></el-input>
-        </el-col>
-        <el-col :span="12">
-          <el-input
-            type="textarea"
-            :autosize="{ minRows: 5, maxRows: 10}"
-            v-model="item.stdout"
-            placeholder="期望结果"
-          ></el-input>
-        </el-col>
-      </el-row>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="isRunning = false">取 消</el-button>
-        <el-button type="primary" @click="run">运 行</el-button>
+    <div>
+      <el-tabs
+        v-model="activeTab"
+        type="card"
+        editable
+        @edit="handleTabsEdit"
+        :before-leave="beforeLeaveHandle"
+        @tab-click="clickTab"
+      >
+        <el-tab-pane
+          v-for="(item, index) in editableTabs"
+          :key="item.name"
+          :label="item.title"
+          :name="item.name"
+        ></el-tab-pane>
+      </el-tabs>
+    </div>
+    <el-dialog title="库管理" width="80%" :visible.sync="libInstalling">
+      <el-table :data="libs">
+        <el-table-column property="name" label="名称" width="150"></el-table-column>
+        <el-table-column property="desc" label="描述" width="500"></el-table-column>
+        <el-table-column property="status" label="状态">
+          <template slot-scope="scope">
+            <el-button
+              type="primary"
+              @click="libInstall(scope.row)"
+              v-if="scope.row.status === false"
+              size="small"
+            >安装</el-button>
+            <el-button
+              type="info"
+              @click="libUninstall(scope.row)"
+              v-if="scope.row.status"
+              size="small"
+            >卸载</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-dialog>
+    <el-dialog title="帮助" width="80%" :visible.sync="clickHelp">
+      <span>
+        <h3>python第三方库自行安装方法</h3>
+        <h4>windows版本</h4>
+        <ol>
+          <li>点击"跳转安装目录"跳转</li>
+          <li>执行命令"pip3.exe install python库名称"自行安装python第三方库，例如需要安装pygame，则执行 pip3.exe install pygame</li>
+          <li>执行命令"pip3.exe uninstall python库名称"卸载python第三方库</li>
+          <el-button type="text" @click="directory">跳转安装目录</el-button>
+        </ol>
+        <h4>MAC版本</h4>
+        <ol>
+          <li>查看本地是否已安装python3。查看方法：打开终端窗口，执行python3，如果显示已经安装，请跳到第二步；否则复制链接下载安装包：http://aiknow.oss-cn-beijing.aliyuncs.com/download/python3/python-3.8.3-macosx10.9.pkg</li>
+          <li>打开终端，执行命令"pip3 install python库名称"自行安装python第三方库，例如需要安装pyzero，则执行 pip3 install pyzero</li>
+          <li>执行命令"pip3 uninstall python库名称"卸载python第三方库</li>
+        </ol>
       </span>
     </el-dialog>
-    <el-dialog title="运行结果" :visible.sync="ran">
-      <el-input
-        type="textarea"
-        style="background-color: #000"
-        :autosize="{ minRows: 10, maxRows: 50}"
-        v-model="runResult"
-      ></el-input>
+    <el-dialog title="温馨提示" width="80%" :visible.sync="prompt">
+      <span>
+        <h3>为保证使用体验，请检查本地是否已安装Python3，检查方法参考"帮助"。如果未安装请复制链接下载安装包并安装：http://aiknow.oss-cn-beijing.aliyuncs.com/download/python3/python-3.8.3-macosx10.9.pkg</h3>
+      </span>
+      <span slot="footer" class="dialog-footer">
+        <el-checkbox v-model="checked" @change="promptChange">不再提示</el-checkbox>
+      </span>
     </el-dialog>
     <div class="ace-editor" ref="ace"></div>
   </div>
 </template>
  
 <script>
-import ace from "ace-builds";
-import "ace-builds/src-noconflict/snippets/c_cpp";
-import "ace-builds/src-noconflict/snippets/java";
-import "ace-builds/src-noconflict/snippets/python";
-import "ace-builds/webpack-resolver";
-import "ace-builds/src-noconflict/ext-language_tools";
-import "ace-builds/src-noconflict/theme-monokai";
-import "ace-builds/src-noconflict/mode-c_cpp";
-
+var fs = require("fs");
+var iconv = require("iconv-lite");
 var { ipcRenderer } = require("electron");
+const { dialog } = require("electron").remote;
+
+var myEditor = require("../../../lib/editor/toolbar");
+var myFile = require("../../../lib/file");
+var myTab = require("../../../lib/editor/tab");
+var myStorage = require("../../../lib/storage");
 
 //编程语言选项
-const languageOpts = ["PYTHON", "JAVA", "CPP", "C"];
+const languageOpts = ["PYTHON", "CPP", "C"];
 //字体大小选项
 const fontSizeOpts = ["超大", "大", "中", "小"];
-//语言模式选项
-var mapMode = new Map([
-  ["PYTHON", "ace/mode/python"],
-  ["JAVA", "ace/mode/java"],
-  ["CPP", "ace/mode/c_cpp"],
-  ["C", "ace/mode/c_cpp"]
-]);
 
-// curl https://wandbox.org/api/list.json 获取编译器选项
-const mapCompiler = new Map([
-  ["PYTHON", "cpython-head"],
-  ["JAVA", "openjdk-head"],
-  ["CPP", "gcc-head"],
-  ["C", "gcc-head-c"]
-]);
+const extensions = [
+  [
+    "CPP",
+    [
+      { name: "CPP", extensions: ["cpp"] },
+      { name: "C", extensions: ["c"] },
+      { name: "Python", extensions: ["py"] },
+      { name: "All Files", extensions: ["*"] }
+    ]
+  ],
+  [
+    "C",
+    [
+      { name: "C", extensions: ["c"] },
+      { name: "CPP", extensions: ["cpp"] },
+      { name: "Python", extensions: ["py"] },
+      { name: "All Files", extensions: ["*"] }
+    ]
+  ],
+  [
+    "PYTHON",
+    [
+      { name: "Python", extensions: ["py"] },
+      { name: "CPP", extensions: ["cpp"] },
+      { name: "C", extensions: ["c"] },
+      { name: "All Files", extensions: ["*"] }
+    ]
+  ]
+];
 
-var mapFontSize = new Map([
-  ["超大", 30],
-  ["大", 22],
-  ["中", 16],
-  ["小", 12]
-]);
+const extMap = new Map(extensions);
 
 export default {
-  mounted() {
-    this.aceEditor = ace.edit(this.$refs.ace, {
-      maxLines: 100,
-      minLines: 33,
-      fontSize: 16,
-      value: this.value ? this.value : "",
-      tabSize: 4,
-      theme: "ace/theme/monokai",
-      mode: "ace/mode/c_cpp"
-    });
-    // 激活自动提示
-    this.aceEditor.setOptions({
-      enableSnippets: true,
-      enableLiveAutocompletion: true,
-      enableBasicAutocompletion: true
-    });
-
-    this.readFromStorage();
-  },
   data() {
     return {
-      isRunning: false,
-      ran: false, //运行完成展示结果
-      // stdin: "",
-      testCases: [
+      clickHelp: false,
+      libInstalling: false,
+      libs: [
         {
-          stdin: "",
-          stdout: ""
+          name: "openpyxl",
+          desc: "openpyxl是用于读写Excel 2010文档的Python库",
+          status: false
+        },
+        {
+          name: "pygame",
+          desc: "pygame是用于开发2D游戏的python库",
+          status: false
+        },
+        {
+          name: "pgzero",
+          desc: "pygame Zero是无需模板的游戏开发python库",
+          status: false
+        },
+        {
+          name: "PyPDF2",
+          desc:
+            "PyPDF2是用于处理pdf文件的python库, 它提供了读、写、分割、合并、文件转换等多种操作",
+          status: false
+        },
+        {
+          name: "python-docx",
+          desc: "python-docx是用于操作word文档的python库",
+          status: false
+        },
+        {
+          name: "matplotlib",
+          desc: "matplotlib是基于python的图表绘图系统",
+          status: false
+        },
+        {
+          name: "seaborn",
+          desc: "seaborn是基于python且建立在matplotlib之上的制作统计图形的库",
+          status: false
+        },
+        {
+          name: "pandas",
+          desc:
+            "pandas是用于数据挖掘和数据分析，同时也提供数据清洗功能的python库，它的使用基础是Numpy",
+          status: false
+        },
+        {
+          name: "numpy",
+          desc:
+            "numpy是python的一个扩展程序库，支持大量的维度数组与矩阵运算，此外也针对数组运算提供大量的数学函数库",
+          status: false
+        },
+        {
+          name: "wordcloud",
+          desc: "wordcloud是基于python的词云展示第三方库",
+          status: false
+        },
+        {
+          name: "jieba",
+          desc: "jieba是一款优秀的Python第三方中文分词库",
+          status: false
+        },
+        {
+          name: "pillow",
+          desc:
+            "pillow是基于Python的图像处理工具包，它提供了基本的图像处理功能",
+          status: false
+        },
+        {
+          name: "pyautogui",
+          desc:
+            "pyautogui是纯Python的GUI自动化工具，使用pyautogui可以用程序自动控制鼠标和键盘操作",
+          status: false
+        },
+        {
+          name: "pyperclip",
+          desc: "基于python实现读写剪贴板",
+          status: false
+        },
+        {
+          name: "pytesseract",
+          desc:
+            "tesseract是python的光学字符识别（OCR）工具，可识别并读取嵌入图像中的文本。",
+          status: false
+        },
+        {
+          name: "shutil",
+          desc:
+            "shutil提供了许多关于文件和文件集合的高级操作，特别提供了支持文件复制和删除的功能",
+          status: false
         }
       ],
-      runResult: "",
-      problemID: 0,
-      nodeID: "",
-      // compileok: false,
-      isSubmit: false,
-      compilers: mapCompiler,
-      aceEditor: null,
+      userOpt: {
+        languageOpt: "CPP",
+        fontSizeOpt: "中",
+        editorTheme: "monokai"
+      },
+      needRun: false,
       languageOpts: languageOpts,
-      languageOpt: "CPP",
-      modes: mapMode,
       fontSizeOpts: fontSizeOpts,
-      fontSizeOpt: "中",
-      fontSizes: mapFontSize,
-      data: [
-        {
-          id: 1,
-          label: "字体大小",
-          children: [
-            {
-              id: 9,
-              label: "超大"
-            },
-            {
-              id: 10,
-              label: "大"
-            },
-            {
-              id: 11,
-              label: "中"
-            },
-            {
-              id: 12,
-              label: "小"
-            }
-          ]
-        }
-      ],
-      defaultProps: {
-        children: "children",
-        label: "label"
-      }
+      extensions: extMap,
+      //激活的tab name
+      activeTab: "0",
+      oldActiveTab: "0",
+      //创建的tab集合
+      editableTabs: [],
+      prompt: false,
+      checked: false
     };
   },
   methods: {
-    handleNodeClick(item, node, self) {
-      //自己定义的editCheckId，防止单选出现混乱
-      console.log(item);
-      console.log(node);
-      console.log(self);
-      this.editCheckId = item.id;
-      this.$refs.tree.setCheckedKeys([item.id]);
-    },
-    checkChange(item, node, self) {
-      if (node == true) {
-        this.editCheckId = item.id;
-        this.$refs.tree.setCheckedKeys([item.id]);
-      } else {
-        if (this.editCheckId == item.id) {
-          this.$refs.tree.setCheckedKeys([item.id]);
-        }
+    promptUpdate() {
+      if (process.platform === "darwin") {
+        let prompt = myStorage.getFromLS("prompt");
+        if (prompt != undefined) this.prompt = prompt;
+        else this.prompt = true;
+        console.log("prompt: ", this.prompt);
       }
     },
-    // inputChange() {
-    //   this.$emit("input", this.aceEditor.getSession().getValue());
-    // },
-    // showRunResult() {
-    //   this.$emit("results", this.runResult);
-    // },
+    promptChange() {
+      this.prompt = !this.checked;
+      myStorage.storeToLS("prompt", this.prompt);
+    },
+    directory() {
+      ipcRenderer.send("direct");
+    },
+    libInstall(row) {
+      row.status = true;
+      myStorage.storeToLS("libs", this.libs);
+      ipcRenderer.send("action", "install", row.name);
+    },
+    libUninstall(row) {
+      row.status = false;
+      myStorage.storeToLS("libs", this.libs);
+      ipcRenderer.send("action", "uninstall", row.name);
+    },
+    themeChangeHandle() {
+      myEditor.setTheme(this.userOpt.editorTheme);
+      myStorage.storeToLS("userOpt", this.userOpt);
+    },
     langChangeHandle() {
-      let m = this.modes.get(this.languageOpt);
-      // 根据编程语言设置编辑器模式
-      this.aceEditor.getSession().setMode(m);
-      // this.$emit("languageChanged", this.languageOpt);
+      myEditor.setMode(this.userOpt.languageOpt);
+      myStorage.storeToLS("userOpt", this.userOpt);
     },
     setupProcess() {},
     fontSizeChangeHandle() {
-      let size = this.fontSizes.get(this.fontSizeOpt);
-      this.aceEditor.setFontSize(size);
+      myEditor.setFontSize(this.userOpt.fontSizeOpt);
+      myStorage.storeToLS("userOpt", this.userOpt);
+    },
+    addTab(tab) {
+      myTab.addTab(tab);
+      this.activeTab = tab.name;
+    },
+    handleTabsEdit(tagName, action) {
+      if (action === "add") {
+        console.log("bafore add tab, curr active: ", this.activeTab);
+        let oldActive = this.activeTab;
+        let tab = myTab.initTab();
+        this.addTab(tab);
+        //新增tab时，发生tab切换，需保存old tab数据
+        let oldTab = myTab.findTabByName(oldActive);
+        // console.log(oldtab)
+        if (oldTab != undefined) {
+          oldTab.content = myEditor.getSourceCode();
+        }
+        myEditor.setSourceCode(tab.content);
+        console.log(
+          "after add tab, old tab name: ",
+          oldActive,
+          ", new tab name: ",
+          this.activeTab
+        );
+      } else {
+        // remove
+        console.log(tagName, this.activeTab);
+        this.activeTab = myTab.removeTab(tagName, this.activeTab);
+        let curTab = myTab.findTabByName(this.activeTab);
+        if (curTab != undefined) {
+          myEditor.setSourceCode(curTab.content);
+        }
+
+        this.editableTabs = myTab.getTabs();
+        if (myTab.isEmpty()) {
+          myEditor.setSourceCode("");
+        }
+      }
+    },
+    clickTab() {
+      // tab切换时，保存原tab数据，获取新tab数据
+      let oldTab, curTab;
+      console.log("curr active tab", this.activeTab);
+      console.log("old active tab:", this.oldActiveTab);
+
+      oldTab = myTab.findTabByName(this.oldActiveTab);
+      curTab = myTab.findTabByName(this.activeTab);
+      console.log(curTab);
+      console.log(oldTab);
+
+      if (oldTab != undefined) {
+        oldTab.content = myEditor.getSourceCode();
+      }
+
+      if (curTab != undefined) {
+        myEditor.setSourceCode(curTab.content);
+      }
+    },
+    beforeLeaveHandle(newName, oldName) {
+      // console.log(newName, oldName);
+      this.oldActiveTab = oldName;
+      return true;
     },
     newFile() {
-      ipcRenderer.send("action", "new");
+      this.handleTabsEdit("", "add");
     },
     openFile() {
-      ipcRenderer.send("action", "open");
-    },
-    save() {
-      ipcRenderer.send(
-        "action",
-        "save",
-        this.aceEditor.getSession().getValue()
-      );
-    },
-    saveAs() {
-      ipcRenderer.send(
-        "action",
-        "saveAs",
-        this.aceEditor.getSession().getValue()
-      );
-    },
-    storeData() {
-      let code = this.aceEditor.getSession().getValue();
-      //内容为空或者未发生改变则不保存
-      if (
-        code === "" ||
-        code === window.sessionStorage.getItem("code" + this.problemID)
-      )
-        return;
+      dialog.showOpenDialog(
+        {
+          properties: ["openFile"]
+        },
+        dir => {
+          console.log("dir: ", dir);
+          let path = dir[0];
+          let tab = myTab.findTabByPath(path);
+          if (tab !== undefined) {
+            return this.$message.success("文件已经被打开");
+          }
 
-      window.sessionStorage.setItem("code" + this.problemID, code);
+          let fileStr = fs.readFileSync(path, { encoding: "binary" });
+          var buf = new Buffer(fileStr, "binary"); //先用二进制的方式读入, 再转utf-8
+          let data = iconv.decode(buf, "utf-8");
+          console.log("data: ", data);
+          let fileName = myFile.getFileName(path);
+          tab = myTab.setTab(fileName, data, path, true);
+          this.addTab(tab);
+          myEditor.setSourceCode(data);
+        }
+      );
     },
-    readFromStorage() {
-      let code = window.sessionStorage.getItem("code" + this.problemID);
-      if (code)
-        this.aceEditor
-          .getSession()
-          .getDocument()
-          .setValue(code);
+    saveFile(saveAs) {
+      let code = myEditor.getSourceCode();
+      let tab = myTab.findTabByName(this.activeTab);
+      if (tab === undefined) {
+        // tab全部被删除
+        console.log("tab noexist");
+        tab = myTab.setTab("", code, "", false);
+        this.addTab(tab);
+      }
+
+      // 非save_as情况下 如果已经保存 则直接保存 不需要询问保存路径
+      console.log("tab is saved: ", tab.isSave);
+      if (saveAs === false && tab.isSave) {
+        fs.writeFileSync(tab.filePath, code);
+        console.log("save as ok");
+        if (this.needRun) {
+          console.log("run: ", this.userOpt.languageOpt, "+", tab.filePath);
+          ipcRenderer.send("run", this.userOpt.languageOpt, tab.filePath);
+          this.needRun = false;
+        }
+        return;
+      }
+
+      // console.log("extensions: ", this.extensions, "lang: ", this.userOpt.languageOpt)
+      // console.log("select extension: ", this.extensions.get(this.userOpt.languageOpt))
+
+      var dir = dialog.showSaveDialog(
+        {
+          defaultPath: "main",
+          filters: this.extensions.get(this.userOpt.languageOpt)
+        },
+        rsp => {
+          if (rsp === undefined || rsp === null) {
+            return this.$message.warning("请选择文件保存路径");
+          }
+
+          let tab = myTab.findTabByName(this.activeTab);
+          if (tab === undefined) {
+            tab = myTab.initTab();
+            this.addTab(tab);
+          }
+          tab.isSave = true;
+          tab.filePath = rsp;
+          tab.title = myFile.getFileName(rsp);
+          tab.content = myEditor.getSourceCode();
+          fs.writeFileSync(tab.filePath, myEditor.getSourceCode());
+          if (this.needRun) {
+            ipcRenderer.send("run", this.userOpt.languageOpt, tab.filePath);
+            this.needRun = false;
+          }
+        }
+      );
     },
-    fileOperationProcess(e) {
-      console.log(e);
-      switch (e) {
+    fileOperProc(cmd) {
+      console.log(cmd);
+      switch (cmd) {
         case "new":
           this.newFile();
           break;
@@ -315,184 +486,91 @@ export default {
           this.openFile();
           break;
         case "save":
-          this.save();
+          this.saveFile(false);
           break;
         case "saveAs":
-          this.saveAs();
+          this.saveFile(true);
           break;
       }
     },
-    getCompiler() {
-      return this.compilers.get(this.languageOpt);
-    },
-    // 本地编译+运行
-    // run() {
-    //   // ipcRenderer.send(
-    //   //   "run",
-    //   //   this.aceEditor.getSession().getValue()
-    //   // );
-    //   // return;
-    // },
-    getSubmission(id) {
-      let clock = setInterval(() => {
-        this.$http
-          .get("/code/" + id)
-          .then(res => {
-            let data = res.data.data;
-            console.log(data);
+    // 保存编辑器内容到本地
+    storeData() {
+      let code = myEditor.getSourceCode();
+      //内容为空或者未发生改变则不保存
+      if (code === "" || code === myStorage.getFromSS("codeEditor")) return;
 
-            // 判卷完成
-            if (data.status == "完成" || data.status == "错误") {
-              if (data.status == "完成") {
-                switch (data.response.result) {
-                  case "AC":
-                    this.runResult = "恭喜, 答案正确";
-                    break;
-                  case "CE":
-                    this.runResult = "编译错误 \n ";
-                    this.runResult += data.response.test_cases[0].error_message;
-                    break;
-                  case "WA":
-                    this.runResult = "太遗憾了, 答案错误";
-                    break;
-                  case "TLE":
-                    this.runResult = "运行超时";
-                    break;
-                  case "RTE":
-                    this.runResult = "运行错误 \n ";
-                    this.runResult += data.response.test_cases[0].error_message;
-                    break;
-                  default:
-                    this.runResult = "服务器内部错误";
-                    break;
-                }
-              } else {
-                this.runResult = "运行错误";
-              }
-              clearInterval(clock);
-            }
-          })
-          .catch(res => {
-            clearInterval(clock);
-          });
-      }, 1000);
+      myStorage.storeToSS("codeEditor", code);
     },
+    readFromStorage() {
+      let code = myStorage.getFromSS("codeEditor");
+      if (code) myEditor.setSourceCode(code);
+    },
+    // 本地测试运行
     run() {
-      this.isRunning = false;
-      let code = this.aceEditor.getSession().getValue();
-      if (code.length == 0) {
-        return this.$message.warning("请输入代码");
-      }
-
-      if (this.testCases[0].stdin === "" && this.testCases[0].stdout === "") {
-        return this.$message.warning("请输入测试数据");
-      }
-
-      this.ran = true;
-      this.runResult = "运行中...";
-      this.$http
-        .post("/code", {
-          lang: this.languageConverse(),
-          source_code: code,
-          test_cases: this.testCases
-        })
-        .then(res => {
-          // console.log(res);
-          let id = res.data.data;
-          this.getSubmission(id);
-          this.testCases[0].stdin = "";
-          this.testCases[0].stdout = "";
-        });
+      this.needRun = true;
+      this.saveFile(false);
     },
-    // 获取题目对应课程节点ID
-    async getNodeID() {
-      if (this.problemID === undefined) {
-        return;
-      }
-      const { data: res } = await this.$http.get(
-        "http://study.aiknow.cn/study/api/studyCourseNode/" + this.problemID
-      );
-
-      if (res.errno !== 200) {
-        return this.$message.warning("获取课程节点信息失败");
-      }
-      // console.log(res);
-      this.nodeID = res.data;
-    },
-    languageConverse() {
-      if (this.languageOpt === "PYTHON") return "PYTHON35";
-      else return this.languageOpt;
-    },
-    //提交代码到题库
-    submit() {
-      if (this.problemID === undefined) {
-        return this.$message.warning("编辑器模式下请勿提交");
-      }
-      if (!this.$store.state.userInfo.isLogin) {
-        this.$router.push("/login");
-        return this.$message.warning("请先登入");
-      }
-      this.$message.success("温馨提示: 做好本地测试再提交可提高准确率");
-
-      let code = this.aceEditor.getSession().getValue();
-      if (code.length == 0) {
-        return this.$message.warning("请输入代码");
-      }
-
-      let path = this.$route.fullPath;
-      // let title = this.problem.title;
-      this.isSubmit = true;
-      this.$http
-        .post("/code/user", {
-          group_id: 0,
-          problem_id: this.problemID,
-          language: "",
-          lang: this.languageConverse(),
-          source_code: code,
-          contest_id: 0
-        })
-        .then(res => {
-          this.$store.commit("addSubmission", {
-            title: this.problemID,
-            url: path,
-            id: res.data.data,
-            nodeid: this.nodeID
-          });
-          this.isSubmit = false;
-        })
-        .catch(res => {
-          this.isSubmit = false;
-        });
+    keyWatcher() {
+      // js监听键盘ctrl + s快捷键保存;
+      document.addEventListener("keydown", e => {
+        if (
+          e.keyCode == 83 &&
+          (navigator.platform.match("Mac") ? e.metaKey : e.ctrlKey)
+        ) {
+          e.preventDefault();
+          console.log(e);
+          this.saveFile(false);
+        }
+      });
     },
     init() {
-      this.problemID = this.$route.params.pid;
-      this.getNodeID();
-      // 每10s保存一次编辑器中的内容
-      setInterval(this.storeData, 10000);
-      // 打开文件时获取到的文件内容
-      ipcRenderer.on("data", (event, data) => {
-        this.aceEditor
-          .getSession()
-          .getDocument()
-          .setValue(data.toString());
-      });
+      this.editableTabs = myTab.getTabs();
+      myEditor.init(this.$refs.ace);
+      this.readFromStorage();
+      let userOpt = myStorage.getFromLS("userOpt");
+      if (userOpt) {
+        this.userOpt = userOpt;
+        myEditor.setMode(this.userOpt.languageOpt);
+        myEditor.setFontSize(this.userOpt.fontSizeOpt);
+        myEditor.setTheme(this.userOpt.editorTheme);
+      }
+      console.log(this.userOpt);
+
+      let libs = myStorage.getFromLS("libs");
+      if (libs) {
+        // 版本升级后lib增加时，需要将新增的和原来的融合起来
+        console.log("libs status: ", libs);
+        for (var i = 0; i < libs.length; i++) {
+          for (var j = 0; j < this.libs.length; j++) {
+            if (
+              libs[i].name === this.libs[j].name &&
+              libs[i].status != this.libs[j].status
+            ) {
+              console.log(libs[i].name, " status changed to: ", libs[i].status);
+              this.libs[j].status = libs[i].status;
+              break;
+            }
+          }
+        }
+        // this.libs = libs;
+      }
+
+      // let prompt = myStorage.getFromLS("prompt");
+      // if (prompt) this.prompt = prompt;
+      this.keyWatcher();
     }
   },
   created() {
+    setInterval(this.storeData, 1000);
+  },
+  mounted() {
     this.init();
+    this.promptUpdate();
   }
 };
 </script>
 
 <style scoped>
-/* .el-popover--plain {
-  padding: 5px 10px !important;
-}
-
-.el-popover {
-  min-width: 100px !important;
-} */
-
 .ace-editor {
   width: 100%;
 }
@@ -504,15 +582,5 @@ export default {
   background-color: #eee;
   border: 1px solid #409eff;
   padding: 4px;
-  /* position: absolute; */
-}
-
-.el-tree-node {
-  .is-leaf + .el-checkbox .el-checkbox__inner {
-    display: inline-block !important;
-  }
-  .el-checkbox .el-checkbox__inner {
-    display: none !important;
-  }
 }
 </style>

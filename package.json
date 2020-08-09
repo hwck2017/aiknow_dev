@@ -1,8 +1,8 @@
 {
-  "name": "aiknow-dev",
-  "version": "0.0.7",
+  "name": "aiknow-editor",
+  "version": "3.6.2",
   "author": "爱知部落",
-  "description": "An electron-vue project",
+  "description": "aiknow editor for C++/C/Pyhton ",
   "license": null,
   "main": "./dist/electron/main.js",
   "scripts": {
@@ -17,7 +17,7 @@
     "postinstall": ""
   },
   "build": {
-    "productName": "aiknow-dev",
+    "productName": "AiknowEditor",
     "appId": "com.example.yourapp",
     "directories": {
       "output": "build"
@@ -40,42 +40,70 @@
         }
       ]
     },
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "http://aiknow.oss-cn-beijing.aliyuncs.com/download/cppDev/",
+        "channel": "latest"
+      }
+    ],
     "mac": {
       "icon": "build/icons/icon.icns"
     },
     "win": {
-      "icon": "build/icons/icon.ico"
+      "icon": "build/icons/icon.ico",
+      "requestedExecutionLevel": "highestAvailable",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "allowElevation": true,
+      "installerIcon": "build/icons/icon.ico",
+      "uninstallerIcon": "build/icons/icon.ico",
+      "createDesktopShortcut": true
+    },
+    "extraResources": {
+      "from": "core",
+      "to": "./"
     },
     "linux": {
       "icon": "build/icons"
     }
   },
   "dependencies": {
-    "argparse": "^1.0.10",
+    "ace-builds": "^1.4.8",
     "axios": "^0.18.0",
+    "bufferutil": "^4.0.1",
     "chart.js": "^2.9.3",
-    "date-fns": "^2.8.1",
-    "electron-updater": "^4.2.2",
-    "element-ui": "^2.12.0",
-    "quill": "^1.3.7",
+    "date-fns": "^2.10.0",
+    "electron-log": "^4.1.2",
+    "electron-updater": "^4.3.1",
+    "element-ui": "^2.13.0",
+    "iconv-lite": "^0.5.1",
     "vue": "^2.5.16",
-    "vue-codemirror": "^4.0.6",
     "vue-electron": "^1.0.6",
-    "vue-quill-editor": "^3.0.6",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1",
-    "vuex-electron": "^1.0.0",
-    "wandbox-api": "0.0.0"
+    "vuex-electron": "^1.0.0"
   },
   "devDependencies": {
-    "ace-builds": "^1.4.7",
     "ajv": "^6.5.0",
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.4",
+    "babel-minify-webpack-plugin": "^0.3.1",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.7.0",
     "babel-preset-stage-0": "^6.24.1",
     "babel-register": "^6.26.0",
+    "babel-runtime": "^6.26.0",
     "babili-webpack-plugin": "^0.1.2",
     "cfonts": "^2.1.2",
     "chalk": "^2.4.1",
@@ -84,7 +112,7 @@
     "css-loader": "^0.28.11",
     "del": "^3.0.0",
     "devtron": "^1.4.0",
-    "electron": "^2.0.18",
+    "electron": "^3.0.0",
     "electron-builder": "^20.19.2",
     "electron-debug": "^1.5.0",
     "electron-devtools-installer": "^2.2.4",
@@ -104,5 +132,9 @@
     "webpack-dev-server": "^3.1.4",
     "webpack-hot-middleware": "^2.22.2",
     "webpack-merge": "^4.1.3"
+  },
+  "optionalDependencies": {
+    "bufferutil": "^4.0.1",
+    "utf-8-validate": "^5.0.2"
   }
 }

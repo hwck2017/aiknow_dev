@@ -3,12 +3,11 @@
     <el-header>
       <el-row :gutter="5" type="flex" justify="space-between">
         <el-col :span="4">
-          <div style="display:flex; padding: 5px 0px;">
+          <div style="display:flex; padding: 10px 0px;">
             <img
-              src="static/aiknow.jpg"
-              style="width:50px; height:50px; vertical-align:middle;"
+              src="../../../static/logo.png"
+              style="width:130px; height:40px; vertical-align:middle;"
             />
-            <span class="title-style">爱知部落</span>
           </div>
         </el-col>
         <el-col :span="14">
@@ -25,7 +24,6 @@
                 <i class="el-icon-s-home"></i>
                 <span slot="title">主页</span>
               </el-menu-item>
-              <!-- <el-menu-item index="/problems" v-if="$store.state.userInfo.isLogin"> -->
               <el-menu-item index="/problems">
                 <i class="el-icon-menu"></i>
                 <span slot="title">题目</span>
@@ -83,17 +81,19 @@
       <el-main>
         <router-view></router-view>
       </el-main>
-      <el-footer height="20px">
-        <div class="footer">2019-2020 &copy; aiknow</div>
+      <el-footer height="40px">
+        <div class="footer">2019-2020 &copy; 爱知部落<br>version {{version}}</div>
       </el-footer>
     </el-container>
   </el-container>
 </template>
 
 <script>
+var pkg = require("../../../package.json")
 export default {
   data() {
     return {
+      version: "",
       circleUrl:
         "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png"
     };
@@ -111,7 +111,14 @@ export default {
     },
     regist() {
       this.$router.push("/register");
+    },
+    getVersion() {
+      this.version = pkg.version
+      console.log("process: ", pkg)
     }
+  },
+  created() {
+    this.getVersion()
   }
 };
 </script>

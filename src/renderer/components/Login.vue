@@ -34,6 +34,11 @@
             </template>
           </el-input>
         </el-form-item>
+        <!-- 记住密码 -->
+        <div class="item">
+          <label>记住密码</label>
+          <input type="checkbox" v-model="loginInfo.remember" />
+        </div>
         <el-form-item class="btns">
           <el-button @click="login">登录</el-button>
           <el-button type="info" @click="resetLoginForm()">重置</el-button>
@@ -44,37 +49,24 @@
 </template>
 
 <script>
+var myStudy = require("../../../lib/study/study");
+var myStorage = require("../../../lib/storage");
+
 export default {
   data() {
     return {
       loginMode: "passwd",
+      verifyCode: "",
       loginInfo: {
         username: "",
         password: "",
         phoneNumber: "",
-        verifyCode: ""
+        verifyCode: "",
+        remember: true
       },
       content: "发送验证码",
       totalTime: 60,
       canClick: true
-      // 这是表单的验证规则对象
-      // loginFormRules: {
-      //   // 验证用户名是否合法
-      //   username: [
-      //     { required: true, message: "请输入登录账号", trigger: "blur" },
-      //     { min: 3, max: 10, message: "长度在 3 到 10 个字符", trigger: "blur" }
-      //   ],
-      //   // 验证密码是否合法
-      //   password: [
-      //     { required: true, message: "请输入登录密码", trigger: "blur" },
-      //     { min: 6, max: 15, message: "长度在 6 到 15 个字符", trigger: "blur" }
-      //   ],
-      //   telephone: [
-      //     { required: true, message: "请输入手机号码", trigger: "blur" }
-      //     // { min: 11, max: 11, message: "请输入有效手机号码", trigger: "blur" }
-      //   ],
-      //   verify: [{ required: true, message: "请输入验证码", trigger: "blur" }]
-      // }
     };
   },
   methods: {
@@ -82,49 +74,49 @@ export default {
     resetLoginForm() {
       this.$refs.loginFormRef.resetFields();
     },
-    login() {
-      this.$refs.loginFormRef.validate(async valid => {
-        if (!valid) return;
-        let data;
-        let url;
-        if (this.loginMode === "phone") {
-          url = "http://study.aiknow.cn/study/account/sms/login";
-          data = {
-            phone: this.loginInfo.phoneNumber,
-            code: this.loginInfo.verifyCode
-          };
-        } else {
-          url = "http://study.aiknow.cn/study/account/login";
-          data = {
-            username: this.loginInfo.username,
-            password: this.loginInfo.password
-          };
-        }
+    async login() {
+      let data;
+      let url;
+      if (this.loginMode === "phone") {
+        url = "http://study.aiknow.cn/study/account/sms/login";
+        data = {
+          phone: this.loginInfo.phoneNumber,
+          code: this.loginInfo.verifyCode
+        };
+      } else {
+        url = "http://study.aiknow.cn/study/account/login";
+        data = {
+          username: this.loginInfo.username,
+          password: this.loginInfo.password
+        };
+      }
 
-        const { data: res } = await this.$http.post(url, data);
-        console.log(res);
-        if (res.errno !== 200) return this.$message.error(res.errmsg);
-        // 1. 将登录成功之后的 token，保存到客户端的 sessionStorage 中
-        //   1.1 项目中出了登录之外的其他API接口，必须在登录之后才能访问
-        //   1.2 token 只应在当前网站打开期间生效，所以将 token 保存在 sessionStorage 中
-        window.sessionStorage.setItem("token", res.data.token);
-        this.$store.dispatch("getUserInfo");
-        // 判断是否有redirect，无跳转到home
-        let redirect = this.$route.query.redirect;
-        if (redirect) {
-          this.$router.push(redirect);
-        } else {
-          this.$router.push("/home");
-        }
-        this.$message({
-          message: "登录成功",
-          type: "success",
-          duration: 1000
+      console.log("login user info: ", data)
+      const { data: res } = await this.$http.post(url, data);
+      console.log("login rsp: ", res);
+      if (res.errno !== 200) return this.$message.error(res.errmsg);
+      // 将登录成功之后的 token，保存到客户端的 sessionStorage 中
+      console.log(res.data.token);
+      myStorage.storeToSS("token", res.data.token);
+      if (this.loginInfo.remember) {
+        myStorage.storeToLS("userInfo", this.loginInfo);
+      } else {
+        myStorage.storeToLS("userInfo", {
+          username: "",
+          password: "",
+          phoneNumber: "",
+          verifyCode: "",
+          remember: false
         });
-      });
-    },
-    openEditor() {
-      this.$router.push("/editor");
+      }
+      this.$store.dispatch("getUserInfo");
+      // 判断是否有redirect，无跳转到home
+      let redirect = this.$route.query.redirect;
+      if (redirect) {
+        this.$router.push(redirect);
+      } else {
+        this.$router.push("/home");
+      }
     },
     async getVerifyCode() {
       if (this.loginInfo.phoneNumber === "") {
@@ -163,10 +155,16 @@ export default {
         type: "success",
         duration: 1000
       });
+    },
+    getLocalUserInfo() {
+      if (myStorage.getFromLS("userInfo")) {
+        this.loginInfo = myStorage.getFromLS("userInfo");
+      }
     }
   },
   created() {
     this.justNotice();
+    this.getLocalUserInfo();
   }
 };
 </script>
@@ -209,5 +207,14 @@ export default {
   position: absolute;
   left: 50%;
   transform: translate(-50%);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  line-height: 30px;
+}
+.item label {
+  width: 100px;
 }
 </style>

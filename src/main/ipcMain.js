@@ -71,23 +71,23 @@ function libManage(action, lib) {
 
 // TODO: 需拿到运行结果
 function runExec(lang, fullPath) {
-  var exePath, dir, fileName;
+  var exePath, fileName;
   exePath = path.dirname(app.getAppPath()); ///Applications/AiknowEditor.app/Contents/Resources
-  dir = myFile.getDir(fullPath);
+  // dir = myFile.getDir(fullPath);
   fileName = myFile.getFileName(fullPath);
-  console.log("app path: %s, file dir: %s, file name: %s", exePath, dir, fileName);
+  console.log("app path: %s, file name: %s", exePath, fileName);
   console.log("platform: %s", process.platform);
 
   var compiler, output, proc;
   if (process.platform === 'win32') {
     if (lang === "CPP") {
       compiler = exePath + "\\win32\\run_cpp.bat";
-      output = dir + fileName.substring(0, fileName.indexOf(".")) + ".exe";
+      output = fileName.substring(0, fileName.indexOf(".")) + ".exe";
       console.log("output file name: %s", output);
       proc = spawn('cmd', ['/c', 'start', 'call', compiler, fullPath, output])
     } else if (lang === "C") {
       compiler = exePath + "\\win32\\run_c.bat";
-      output = dir + fileName.substring(0, fileName.indexOf(".")) + ".exe";
+      output = fileName.substring(0, fileName.indexOf(".")) + ".exe";
       console.log("output file name: %s", output);
       proc = spawn('cmd', ['/c', 'start', 'call', compiler, fullPath, output])
     } else if (lang === "PYTHON") {

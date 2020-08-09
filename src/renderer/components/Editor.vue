@@ -147,9 +147,41 @@ var myTab = require("../../../lib/editor/tab");
 var myStorage = require("../../../lib/storage");
 
 //编程语言选项
-const languageOpts = ["PYTHON", "JAVA", "CPP", "C"];
+const languageOpts = ["PYTHON", "CPP", "C"];
 //字体大小选项
 const fontSizeOpts = ["超大", "大", "中", "小"];
+
+const extensions = [
+  [
+    "CPP",
+    [
+      { name: "CPP", extensions: ["cpp"] },
+      { name: "C", extensions: ["c"] },
+      { name: "Python", extensions: ["py"] },
+      { name: "All Files", extensions: ["*"] }
+    ]
+  ],
+  [
+    "C",
+    [
+      { name: "C", extensions: ["c"] },
+      { name: "CPP", extensions: ["cpp"] },
+      { name: "Python", extensions: ["py"] },
+      { name: "All Files", extensions: ["*"] }
+    ]
+  ],
+  [
+    "PYTHON",
+    [
+      { name: "Python", extensions: ["py"] },
+      { name: "CPP", extensions: ["cpp"] },
+      { name: "C", extensions: ["c"] },
+      { name: "All Files", extensions: ["*"] }
+    ]
+  ]
+];
+
+const extMap = new Map(extensions);
 
 export default {
   data() {
@@ -245,11 +277,6 @@ export default {
           status: false
         }
       ],
-      problemInfo: {
-        code: "",
-        path: "",
-        lang: "CPP"
-      },
       userOpt: {
         languageOpt: "CPP",
         fontSizeOpt: "中",
@@ -258,6 +285,7 @@ export default {
       needRun: false,
       languageOpts: languageOpts,
       fontSizeOpts: fontSizeOpts,
+      extensions: extMap,
       //激活的tab name
       activeTab: "0",
       oldActiveTab: "0",
@@ -311,8 +339,8 @@ export default {
     },
     handleTabsEdit(tagName, action) {
       if (action === "add") {
-        console.log("bafore add tab, curr active: ", this.activeTab)
-        let oldActive = this.activeTab
+        console.log("bafore add tab, curr active: ", this.activeTab);
+        let oldActive = this.activeTab;
         let tab = myTab.initTab();
         this.addTab(tab);
         //新增tab时，发生tab切换，需保存old tab数据
@@ -322,7 +350,12 @@ export default {
           oldTab.content = myEditor.getSourceCode();
         }
         myEditor.setSourceCode(tab.content);
-        console.log("after add tab, old tab name: ", oldActive, ", new tab name: ", this.activeTab)
+        console.log(
+          "after add tab, old tab name: ",
+          oldActive,
+          ", new tab name: ",
+          this.activeTab
+        );
       } else {
         // remove
         console.log(tagName, this.activeTab);
@@ -380,8 +413,8 @@ export default {
 
           let fileStr = fs.readFileSync(path, { encoding: "binary" });
           var buf = new Buffer(fileStr, "binary"); //先用二进制的方式读入, 再转utf-8
-          let data = iconv.decode(buf, "gbk");
-          console.log("data: ", data)
+          let data = iconv.decode(buf, "utf-8");
+          console.log("data: ", data);
           let fileName = myFile.getFileName(path);
           tab = myTab.setTab(fileName, data, path, true);
           this.addTab(tab);
@@ -412,15 +445,13 @@ export default {
         return;
       }
 
+      // console.log("extensions: ", this.extensions, "lang: ", this.userOpt.languageOpt)
+      // console.log("select extension: ", this.extensions.get(this.userOpt.languageOpt))
+
       var dir = dialog.showSaveDialog(
         {
           defaultPath: "main",
-          filters: [
-            { name: "CPP", extensions: ["cpp"] },
-            { name: "C", extensions: ["c"] },
-            { name: "Python", extensions: ["py"] },
-            { name: "All Files", extensions: ["*"] }
-          ]
+          filters: this.extensions.get(this.userOpt.languageOpt)
         },
         rsp => {
           if (rsp === undefined || rsp === null) {

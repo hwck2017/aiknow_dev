@@ -63,11 +63,10 @@ var iconv = require("iconv-lite");
 var { ipcRenderer } = require("electron");
 const { dialog } = require("electron").remote;
 
-const languageOpts = ["PYTHON", "JAVA", "CPP", "C"];
+const languageOpts = ["PYTHON", "CPP", "C"];
 const fontSizeOpts = ["超大", "大", "中", "小"];
 var mapMode = new Map([
   ["PYTHON", "ace/mode/python"],
-  ["JAVA", "ace/mode/java"],
   ["CPP", "ace/mode/c_cpp"],
   ["C", "ace/mode/c_cpp"]
 ]);
@@ -78,6 +77,38 @@ var mapFontSize = new Map([
   ["中", 16],
   ["小", 12]
 ]);
+
+const extensions = [
+  [
+    "CPP",
+    [
+      { name: "CPP", extensions: ["cpp"] },
+      { name: "C", extensions: ["c"] },
+      { name: "Python", extensions: ["py"] },
+      { name: "All Files", extensions: ["*"] }
+    ]
+  ],
+  [
+    "C",
+    [
+      { name: "C", extensions: ["c"] },
+      { name: "CPP", extensions: ["cpp"] },
+      { name: "Python", extensions: ["py"] },
+      { name: "All Files", extensions: ["*"] }
+    ]
+  ],
+  [
+    "PYTHON",
+    [
+      { name: "Python", extensions: ["py"] },
+      { name: "CPP", extensions: ["cpp"] },
+      { name: "C", extensions: ["c"] },
+      { name: "All Files", extensions: ["*"] }
+    ]
+  ]
+];
+
+const extMap = new Map(extensions);
 
 export default {
   data() {
@@ -98,7 +129,8 @@ export default {
       fileProp: {
         isSaved: false,
         path: ""
-      }
+      },
+      extensions: extMap
     };
   },
   methods: {
@@ -167,12 +199,7 @@ export default {
       var dir = dialog.showSaveDialog(
         {
           defaultPath: "main",
-          filters: [
-            { name: "CPP", extensions: ["cpp"] },
-            { name: "C", extensions: ["c"] },
-            { name: "Python", extensions: ["py"] },
-            { name: "All Files", extensions: ["*"] }
-          ]
+          filters: this.extensions.get(this.userOpt.languageOpt)
         },
         rsp => {
           if (rsp === undefined || rsp === null) {

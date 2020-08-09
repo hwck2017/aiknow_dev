@@ -8,6 +8,10 @@ set output=%2
 set exe_path=%cd%
 set compiler="%exe_path%\resources\MinGW64\bin\gcc.exe"
 set console="%exe_path%\resources\ConsolePauser.exe"
+set result="%exe_path%\resources\code\%output%"
 
-%compiler% %input% -o %output%
-%console% %output%
+::%compiler% %input% -o %output%
+::%console% %output%
+
+%compiler% %input% -o %result%
+%console% %result%

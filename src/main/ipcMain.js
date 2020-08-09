@@ -96,7 +96,6 @@ function runExec(lang, fullPath) {
     } else {
       // TODO
     }
-
   } else if (process.platform === 'darwin') {
     console.log("compile: ", fullPath)
     compiler = exePath + "/darwin/run.scpt"

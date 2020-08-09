@@ -329,6 +329,7 @@ export default {
       myEditor.setMode(this.userOpt.languageOpt);
       myStorage.storeToLS("userOpt", this.userOpt);
     },
+    setupProcess() {},
     fontSizeChangeHandle() {
       myEditor.setFontSize(this.userOpt.fontSizeOpt);
       myStorage.storeToLS("userOpt", this.userOpt);

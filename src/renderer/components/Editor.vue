@@ -63,6 +63,7 @@
           <el-button size="small" icon="el-icon-s-promotion" @click="run">运行</el-button>
           <el-button size="small" icon="el-icon-box" @click="libInstalling = true">Python库管理</el-button>
           <el-button size="small" icon="el-icon-question" @click="clickHelp = true">帮助</el-button>
+          <el-button size="small" icon="el-icon-edit" type="primary" v-if="userOpt.languageOpt == 'PYTHON'" @click="modeChange">模式切换</el-button>
         </el-col>
       </el-row>
     </div>
@@ -131,7 +132,15 @@
         <el-checkbox v-model="checked" @change="promptChange">不再提示</el-checkbox>
       </span>
     </el-dialog>
-    <div class="ace-editor" ref="ace"></div>
+    <div v-show="userOpt.editorMode">
+    <BlocklyComponent id="blockly" :options="options" ref="foo" v-if="userOpt.editorMode"></BlocklyComponent>
+    <p id="code">
+      <button v-on:click="showCode()">Show Python</button>
+      <pre v-html="code"></pre>
+    </p>
+    </div>
+    <div class="ace-editor" ref="ace" v-show="!userOpt.editorMode"></div>
+    <!-- <div class="ace-editor" ref="ace"></div> -->
   </div>
 </template>
  
@@ -151,7 +160,15 @@ const languageOpts = ["PYTHON", "JAVA", "CPP", "C"];
 //字体大小选项
 const fontSizeOpts = ["超大", "大", "中", "小"];
 
+import BlocklyComponent from './Blockly.vue'
+import BlocklyPy from 'blockly/python';
+
+import '../prompt';
+
 export default {
+  components: {
+    BlocklyComponent
+  },
   data() {
     return {
       clickHelp: false,
@@ -253,7 +270,8 @@ export default {
       userOpt: {
         languageOpt: "CPP",
         fontSizeOpt: "中",
-        editorTheme: "monokai"
+        editorTheme: "monokai",
+        editorMode: true
       },
       needRun: false,
       languageOpts: languageOpts,
@@ -264,10 +282,60 @@ export default {
       //创建的tab集合
       editableTabs: [],
       prompt: false,
-      checked: false
+      checked: false,
+
+      code: '',
+      options: {
+        media: 'media/',
+        grid:
+          {
+            // spacing: 25,
+            // length: 3,
+            colour: '#ccc',
+            snap: true
+          },
+        toolbox:
+        `<xml>
+          <category name="Logic" colour="%{BKY_LOGIC_HUE}">
+            <block type="controls_if"></block>
+            <block type="logic_compare"></block>
+            <block type="logic_operation"></block>
+            <block type="logic_negate"></block>
+            <block type="logic_boolean"></block>
+          </category>
+          <category name="Loops" colour="%{BKY_LOOPS_HUE}">
+            <block type="controls_repeat_ext">
+              <value name="TIMES">
+                <block type="math_number">
+                  <field name="NUM">10</field>
+                </block>
+              </value>
+            </block>
+            <block type="controls_whileUntil"></block>
+          </category>
+          <category name="Math" colour="%{BKY_MATH_HUE}">
+            <block type="math_number">
+              <field name="NUM">123</field>
+            </block>
+            <block type="math_arithmetic"></block>
+            <block type="math_single"></block>
+          </category>
+          <category name="Text" colour="%{BKY_TEXTS_HUE}">
+            <block type="text"></block>
+            <block type="text_length"></block>
+            <block type="text_print"></block>
+          </category>
+          <category name="Variables" custom="VARIABLE" colour="%{BKY_VARIABLES_HUE}">
+          </category>
+        </xml>`
+      }
     };
   },
   methods: {
+    modeChange() {
+      this.userOpt.editorMode = !this.userOpt.editorMode
+      console.log("editor Mode: ", this.userOpt.editorMode)
+    },
     promptUpdate() {
       if (process.platform === "darwin") {
         let prompt = myStorage.getFromLS("prompt");
@@ -380,7 +448,7 @@ export default {
 
           let fileStr = fs.readFileSync(path, { encoding: "binary" });
           var buf = new Buffer(fileStr, "binary"); //先用二进制的方式读入, 再转utf-8
-          let data = iconv.decode(buf, "gbk");
+          let data = iconv.decode(buf, "utf-8");
           console.log("data: ", data)
           let fileName = myFile.getFileName(path);
           tab = myTab.setTab(fileName, data, path, true);
@@ -510,11 +578,8 @@ export default {
         console.log("libs status: ", libs);
         for (var i = 0; i < libs.length; i++) {
           for (var j = 0; j < this.libs.length; j++) {
-            if (
-              libs[i].name === this.libs[j].name &&
-              libs[i].status != this.libs[j].status
-            ) {
-              console.log(libs[i].name, " status changed to: ", libs[i].status);
+            if (libs[i].name === this.libs[j].name) {
+              console.log(libs[i].name, " status changed to ", libs[i].status);
               this.libs[j].status = libs[i].status;
               break;
             }
@@ -526,6 +591,9 @@ export default {
       // let prompt = myStorage.getFromLS("prompt");
       // if (prompt) this.prompt = prompt;
       this.keyWatcher();
+    },
+    showCode() {
+      this.code = BlocklyPy.workspaceToCode(this.$refs["foo"].workspace);
     }
   },
   created() {
@@ -550,5 +618,23 @@ export default {
   background-color: #eee;
   border: 1px solid #409eff;
   padding: 4px;
+}
+
+#blockly {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 50%;
+  height: 80%;
+}
+
+#code {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 50%;
+  height: 80%;
+  margin: 0;
+  background-color: beige;
 }
 </style>

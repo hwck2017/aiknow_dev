@@ -25,7 +25,7 @@ export default {
       //     ipcRenderer.send("isUpdateNow");
       // });
       ipcRenderer.send("checkForUpdate");
-      ipcRenderer.send("common");
+      // ipcRenderer.send("common");
     }
   },
   mounted() {

@@ -1,6 +1,6 @@
 {
   "name": "aiknow-editor",
-  "version": "3.5.0",
+  "version": "3.6.0",
   "author": "爱知部落",
   "description": "aiknow editor for C++/C/Pyhton ",
   "license": null,
@@ -81,6 +81,7 @@
   "dependencies": {
     "ace-builds": "^1.4.8",
     "axios": "^0.18.0",
+    "blockly": "^3.20200625.2",
     "bufferutil": "^4.0.1",
     "chart.js": "^2.9.3",
     "date-fns": "^2.10.0",
@@ -88,6 +89,7 @@
     "electron-updater": "^4.3.1",
     "element-ui": "^2.13.0",
     "iconv-lite": "^0.5.1",
+    "sweetalert2": "^9.17.1",
     "vue": "^2.5.16",
     "vue-electron": "^1.0.6",
     "vue-router": "^3.0.1",
@@ -112,7 +114,7 @@
     "css-loader": "^0.28.11",
     "del": "^3.0.0",
     "devtron": "^1.4.0",
-    "electron": "^3.0.0",
+    "electron": "^3.1.13",
     "electron-builder": "^20.19.2",
     "electron-debug": "^1.5.0",
     "electron-devtools-installer": "^2.2.4",

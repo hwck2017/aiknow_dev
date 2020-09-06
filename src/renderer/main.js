@@ -41,6 +41,9 @@ axios.interceptors.request.use(config => {
   return config
 })
 
+//Add unimported components to ignore list to prevent warnings.
+Vue.config.ignoredElements = ['field','block','category','xml','mutation','value','sep']
+
 //可通过此方式设置elementUI全局参数
 //Vue.use(Element, { size: 'small', zIndex: 3000 });
 Vue.use(ElementUI)

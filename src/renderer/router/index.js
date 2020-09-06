@@ -124,6 +124,7 @@ router.beforeEach((to, from, next) => {
   // next 是一个函数，表示放行
   //     next()  放行    next('/login')  强制跳转
   if (to.path === '/login' || to.path === '/register' || to.path === '/editor') return next()
+  // if (to.path === '/login' || to.path === '/register') return next()
   // 获取token
   const tokenStr = window.sessionStorage.getItem('token')
   if (!tokenStr) {

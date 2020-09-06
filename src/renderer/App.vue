@@ -8,7 +8,7 @@
 var { ipcRenderer } = require("electron");
 
 export default {
-  name: "aiknow-dev",
+  name: "AiknowEditor",
   methods: {
     Watcher() {
       ipcRenderer.on("message", (event, text) => {

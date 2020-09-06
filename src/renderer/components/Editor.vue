@@ -577,6 +577,7 @@ export default {
         // 版本升级后lib增加时，需要将新增的和原来的融合起来
         console.log("libs status: ", libs);
         for (var i = 0; i < libs.length; i++) {
+          console.log("status of python lib ", libs[i].name, " is ", libs[i])
           for (var j = 0; j < this.libs.length; j++) {
             if (libs[i].name === this.libs[j].name) {
               console.log(libs[i].name, " status changed to ", libs[i].status);
@@ -585,11 +586,8 @@ export default {
             }
           }
         }
-        // this.libs = libs;
       }
 
-      // let prompt = myStorage.getFromLS("prompt");
-      // if (prompt) this.prompt = prompt;
       this.keyWatcher();
     },
     showCode() {

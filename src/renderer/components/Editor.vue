@@ -63,7 +63,9 @@
           <el-button size="small" icon="el-icon-s-promotion" @click="run">运行</el-button>
           <el-button size="small" icon="el-icon-box" @click="libInstalling = true">Python库管理</el-button>
           <el-button size="small" icon="el-icon-question" @click="clickHelp = true">帮助</el-button>
-          <el-button size="small" icon="el-icon-edit" type="primary" v-if="userOpt.languageOpt == 'PYTHON'" @click="modeChange">模式切换</el-button>
+          <!-- <el-button size="small" icon="el-icon-edit" type="primary" v-if="userOpt.languageOpt == 'PYTHON'" @click="modeChange">模式切换</el-button> -->
+          <el-button size="small" icon="el-icon-edit" type="primary" @click="modeChange">模式切换</el-button>
+
         </el-col>
       </el-row>
     </div>
@@ -132,14 +134,14 @@
         <el-checkbox v-model="checked" @change="promptChange">不再提示</el-checkbox>
       </span>
     </el-dialog>
-    <div v-show="userOpt.editorMode">
+    <div>
     <BlocklyComponent id="blockly" :options="options" ref="foo" v-if="userOpt.editorMode"></BlocklyComponent>
-    <p id="code">
-      <button v-on:click="showCode()">Show Python</button>
-      <pre v-html="code"></pre>
-    </p>
+    <div id="code" ref="code">
+      <!-- <button v-on:click="showCode()">Show Python</button>
+      <pre v-html="code"></pre> -->
+        <div class="ace-editor" ref="ace"></div>
     </div>
-    <div class="ace-editor" ref="ace" v-show="!userOpt.editorMode"></div>
+    </div>
     <!-- <div class="ace-editor" ref="ace"></div> -->
   </div>
 </template>
@@ -335,6 +337,14 @@ export default {
     modeChange() {
       this.userOpt.editorMode = !this.userOpt.editorMode
       console.log("editor Mode: ", this.userOpt.editorMode)
+        console.log("code样式: ", this.$refs["code"])
+
+      if (this.userOpt.editorMode) {
+          this.$refs["code"].style.width = '50%'
+      }else {
+          this.$refs["code"].style.width = '100%'
+      }
+
     },
     promptUpdate() {
       if (process.platform === "darwin") {

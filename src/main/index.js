@@ -23,7 +23,7 @@ function createWindow() {
     height: 800,
     useContentSize: true,
     width: 1000,
-    webPreferences: { webSecurity: false, nodeIntegration: true },ßßßßßßßßßßß
+    webPreferences: { webSecurity: false, nodeIntegration: true },
   })
 
   mainWindow.loadURL(winURL)

@@ -63,9 +63,13 @@
           <el-button size="small" icon="el-icon-s-promotion" @click="run">运行</el-button>
           <el-button size="small" icon="el-icon-box" @click="libInstalling = true">Python库管理</el-button>
           <el-button size="small" icon="el-icon-question" @click="clickHelp = true">帮助</el-button>
-          <!-- <el-button size="small" icon="el-icon-edit" type="primary" v-if="userOpt.languageOpt == 'PYTHON'" @click="modeChange">模式切换</el-button> -->
-          <el-button size="small" icon="el-icon-edit" type="primary" @click="modeChange">模式切换</el-button>
-
+          <el-button
+            size="small"
+            icon="el-icon-edit"
+            type="primary"
+            v-if="userOpt.languageOpt == 'PYTHON'"
+            @click="modeChange"
+          >模式切换</el-button>
         </el-col>
       </el-row>
     </div>
@@ -135,12 +139,12 @@
       </span>
     </el-dialog>
     <div>
-    <BlocklyComponent id="blockly" :options="options" ref="foo" v-if="userOpt.editorMode"></BlocklyComponent>
-    <div id="code" ref="code">
-      <!-- <button v-on:click="showCode()">Show Python</button>
-      <pre v-html="code"></pre> -->
+      <BlocklyComponent id="blockly" :options="options" ref="foo" v-if="userOpt.editorMode"></BlocklyComponent>
+      <div id="code" ref="code">
+        <!-- <button v-on:click="showCode()">Show Python</button>
+        <pre v-html="code"></pre>-->
         <div class="ace-editor" ref="ace"></div>
-    </div>
+      </div>
     </div>
     <!-- <div class="ace-editor" ref="ace"></div> -->
   </div>
@@ -162,14 +166,14 @@ const languageOpts = ["PYTHON", "JAVA", "CPP", "C"];
 //字体大小选项
 const fontSizeOpts = ["超大", "大", "中", "小"];
 
-import BlocklyComponent from './Blockly.vue'
-import BlocklyPy from 'blockly/python';
+import BlocklyComponent from "./Blockly.vue";
+import BlocklyPy from "blockly/python";
 
-import '../prompt';
+import "../prompt";
 
 export default {
   components: {
-    BlocklyComponent
+    BlocklyComponent,
   },
   data() {
     return {
@@ -179,101 +183,101 @@ export default {
         {
           name: "openpyxl",
           desc: "openpyxl是用于读写Excel 2010文档的Python库",
-          status: false
+          status: false,
         },
         {
           name: "pygame",
           desc: "pygame是用于开发2D游戏的python库",
-          status: false
+          status: false,
         },
         {
           name: "pgzero",
           desc: "pygame Zero是无需模板的游戏开发python库",
-          status: false
+          status: false,
         },
         {
           name: "PyPDF2",
           desc:
             "PyPDF2是用于处理pdf文件的python库, 它提供了读、写、分割、合并、文件转换等多种操作",
-          status: false
+          status: false,
         },
         {
           name: "python-docx",
           desc: "python-docx是用于操作word文档的python库",
-          status: false
+          status: false,
         },
         {
           name: "matplotlib",
           desc: "matplotlib是基于python的图表绘图系统",
-          status: false
+          status: false,
         },
         {
           name: "seaborn",
           desc: "seaborn是基于python且建立在matplotlib之上的制作统计图形的库",
-          status: false
+          status: false,
         },
         {
           name: "pandas",
           desc:
             "pandas是用于数据挖掘和数据分析，同时也提供数据清洗功能的python库，它的使用基础是Numpy",
-          status: false
+          status: false,
         },
         {
           name: "numpy",
           desc:
             "numpy是python的一个扩展程序库，支持大量的维度数组与矩阵运算，此外也针对数组运算提供大量的数学函数库",
-          status: false
+          status: false,
         },
         {
           name: "wordcloud",
           desc: "wordcloud是基于python的词云展示第三方库",
-          status: false
+          status: false,
         },
         {
           name: "jieba",
           desc: "jieba是一款优秀的Python第三方中文分词库",
-          status: false
+          status: false,
         },
         {
           name: "pillow",
           desc:
             "pillow是基于Python的图像处理工具包，它提供了基本的图像处理功能",
-          status: false
+          status: false,
         },
         {
           name: "pyautogui",
           desc:
             "pyautogui是纯Python的GUI自动化工具，使用pyautogui可以用程序自动控制鼠标和键盘操作",
-          status: false
+          status: false,
         },
         {
           name: "pyperclip",
           desc: "基于python实现读写剪贴板",
-          status: false
+          status: false,
         },
         {
           name: "pytesseract",
           desc:
             "tesseract是python的光学字符识别（OCR）工具，可识别并读取嵌入图像中的文本。",
-          status: false
+          status: false,
         },
         {
           name: "shutil",
           desc:
             "shutil提供了许多关于文件和文件集合的高级操作，特别提供了支持文件复制和删除的功能",
-          status: false
-        }
+          status: false,
+        },
       ],
       problemInfo: {
         code: "",
         path: "",
-        lang: "CPP"
+        lang: "CPP",
       },
       userOpt: {
         languageOpt: "CPP",
         fontSizeOpt: "中",
         editorTheme: "monokai",
-        editorMode: true
+        editorMode: true,
       },
       needRun: false,
       languageOpts: languageOpts,
@@ -285,66 +289,363 @@ export default {
       editableTabs: [],
       prompt: false,
       checked: false,
-
-      code: '',
       options: {
-        media: 'media/',
-        grid:
-          {
-            // spacing: 25,
-            // length: 3,
-            colour: '#ccc',
-            snap: true
-          },
-        toolbox:
-        `<xml>
-          <category name="Logic" colour="%{BKY_LOGIC_HUE}">
-            <block type="controls_if"></block>
-            <block type="logic_compare"></block>
-            <block type="logic_operation"></block>
-            <block type="logic_negate"></block>
-            <block type="logic_boolean"></block>
-          </category>
-          <category name="Loops" colour="%{BKY_LOOPS_HUE}">
-            <block type="controls_repeat_ext">
-              <value name="TIMES">
-                <block type="math_number">
-                  <field name="NUM">10</field>
+        media: "media/",
+        grid: {
+          // spacing: 25,
+          // length: 3,
+          colour: "#ccc",
+          snap: true,
+        },
+        toolbox: `
+  <xml>
+    <category name="logic" colour="%{BKY_LOGIC_HUE}">
+      <block type="logic_boolean"></block>
+      <block type="logic_compare"></block>
+      <block type="logic_operation"></block>
+      <block type="logic_negate"></block>
+      <block type="logic_null"></block>
+      <block type="logic_ternary"></block>
+      <block type="controls_if"></block>
+      <block type="controls_ifelse"></block>
+      <block type="controls_if_if"></block>
+      <block type="controls_if_elseif"></block>
+      <block type="controls_if_else"></block>
+    </category>
+    <sep gap="32"></sep>
+    <category name="loops" colour="%{BKY_LOOPS_HUE}">
+        <!-- <block type="controls_repeat"></block> -->
+        <block type="controls_repeat_ext">
+            <value name="TIMES">
+                <shadow type="math_number">
+                    <field name="NUM">10</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="controls_whileUntil"></block>
+        <block type="controls_for">
+            <value name="FROM">
+                <shadow type="math_number">
+                    <field name="NUM">1</field>
+                </shadow>
+            </value>
+            <value name="TO">
+                <shadow type="math_number">
+                    <field name="NUM">10</field>
+                </shadow>
+            </value>
+            <value name="BY">
+                <shadow type="math_number">
+                    <field name="NUM">1</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="controls_forEach"></block>
+        <block type="controls_flow_statements"></block>
+    </category>
+    <sep gap="32"></sep>
+    <category name="math" colour="%{BKY_MATH_HUE}">
+        <block type="math_number"></block>
+        <block type="math_arithmetic">
+            <value name="A">
+                <shadow type="math_number">
+                    <field name="NUM">1</field>
+                </shadow>
+            </value>
+            <value name="B">
+                <shadow type="math_number">
+                    <field name="NUM">1</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="math_single">
+            <value name="NUM">
+                <shadow type="math_number">
+                    <field name="NUM">9</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="math_trig">
+            <value name="NUM">
+                <shadow type="math_number">
+                    <field name="NUM">45</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="math_constant"></block>
+        <block type="math_number_property">
+            <value name="NUMBER_TO_CHECK">
+                <shadow type="math_number">
+                    <field name="NUM">0</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="math_round">
+            <value name="NUM">
+                <shadow type="math_number">
+                    <field name="NUM">3.1</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="math_on_list"></block>
+        <block type="math_modulo">
+            <value name="DIVIDEND">
+                <shadow type="math_number">
+                    <field name="NUM">64</field>
+                </shadow>
+            </value>
+            <value name="DIVISOR">
+                <shadow type="math_number">
+                    <field name="NUM">10</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="math_constrain">
+            <value name="VALUE">
+                <shadow type="math_number">
+                    <field name="NUM">50</field>
+                </shadow>
+            </value>
+            <value name="LOW">
+                <shadow type="math_number">
+                    <field name="NUM">1</field>
+                </shadow>
+            </value>
+            <value name="HIGH">
+                <shadow type="math_number">
+                    <field name="NUM">100</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="math_random_int">
+            <value name="FROM">
+                <shadow type="math_number">
+                    <field name="NUM">1</field>
+                </shadow>
+            </value>
+            <value name="TO">
+                <shadow type="math_number">
+                    <field name="NUM">100</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="math_random_float"></block>
+        <block type="math_atan2"></block>
+    </category>
+    <sep gap="32"></sep>
+    <category name="text" colour="%{BKY_TEXTS_HUE}">
+        <block type="text"></block>
+        <!-- <block type="text_multiline"></block> -->
+        <block type="text_join"></block>
+        <block type="text_create_join_container"></block>
+        <block type="text_create_join_item"></block>
+        <block type="text_append">
+            <value name="TEXT">
+                <shadow type="text"></shadow>
+            </value>
+        </block>
+        <block type="text_length">
+            <value name="VALUE">
+                <shadow type="text">
+                    <field name="TEXT">abc</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="text_isEmpty">
+            <value name="VALUE">
+                <shadow type="text">
+                    <field name="TEXT"></field>
+                </shadow>
+            </value>
+        </block>
+        <block type="text_indexOf">
+            <value name="VALUE">
+                <block type="variables_get">
+                    <field name="VAR">{{varText}}</field>
                 </block>
-              </value>
-            </block>
-            <block type="controls_whileUntil"></block>
-          </category>
-          <category name="Math" colour="%{BKY_MATH_HUE}">
-            <block type="math_number">
-              <field name="NUM">123</field>
-            </block>
-            <block type="math_arithmetic"></block>
-            <block type="math_single"></block>
-          </category>
-          <category name="Text" colour="%{BKY_TEXTS_HUE}">
-            <block type="text"></block>
-            <block type="text_length"></block>
-            <block type="text_print"></block>
-          </category>
-          <category name="Variables" custom="VARIABLE" colour="%{BKY_VARIABLES_HUE}">
-          </category>
-        </xml>`
-      }
+            </value>
+            <value name="FIND">
+                <shadow type="text">
+                    <field name="TEXT">abc</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="text_charAt">
+            <value name="VALUE">
+                <block type="variables_get">
+                    <field name="VAR">{{varText}}</field>
+                </block>
+            </value>
+        </block>
+        <block type="text_getSubstring">
+            <value name="STRING">
+                <block type="variables_get">
+                    <field name="VAR">{{varText}}</field>
+                </block>
+            </value>
+        </block>
+        <block type="text_changeCase">
+            <value name="TEXT">
+                <shadow type="text">
+                    <field name="TEXT">abc</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="text_trim">
+            <value name="TEXT">
+                <shadow type="text">
+                    <field name="TEXT">abc</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="text_print">
+            <value name="TEXT">
+                <shadow type="text">
+                    <field name="TEXT">abc</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="text_prompt_ext">
+            <value name="TEXT">
+                <shadow type="text">
+                    <field name="TEXT">abc</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="text_prompt"></block>
+        <block type="text_count"></block>
+        <block type="text_replace"></block>
+        <block type="text_reverse"></block>
+    </category>
+    <sep gap="32"></sep>
+    <category name="list" colour="%{BKY_LISTS_HUE}">
+        <block type="lists_create_empty"></block>
+        <block type="lists_repeat">
+            <value name="NUM">
+                <shadow type="math_number">
+                    <field name="NUM">5</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="lists_reverse"></block>
+        <block type="lists_isEmpty"></block>
+        <block type="lists_length"></block>
+        <block type="lists_create_with"></block>
+        <block type="lists_create_with_container"></block>
+        <block type="lists_create_with_item"></block>
+        <block type="lists_indexOf">
+            <value name="VALUE">
+                <block type="variables_get">
+                    <field name="VAR">{{varList}}</field>
+                </block>
+            </value>
+        </block>
+        <block type="lists_getIndex">
+            <value name="VALUE">
+                <block type="variables_get">
+                    <field name="VAR">{{varList}}</field>
+                </block>
+            </value>
+        </block>
+        <block type="lists_setIndex">
+            <value name="LIST">
+                <block type="variables_get">
+                    <field name="VAR">{{varList}}</field>
+                </block>
+            </value>
+        </block>
+        <block type="lists_getSublist">
+            <value name="LIST">
+                <block type="variables_get">
+                    <field name="VAR">{{varList}}</field>
+                </block>
+            </value>
+        </block>
+        <block type="lists_sort"></block>
+        <block type="lists_split">
+            <value name="DELIM">
+                <shadow type="text">
+                    <field name="TEXT">,</field>
+                </shadow>
+            </value>
+        </block>
+    </category>
+    <sep gap="32"></sep>
+    <category name="colour" colour="%{BKY_COLOUR_HUE}">
+        <block type="colour_picker"></block>
+        <block type="colour_random"></block>
+        <block type="colour_rgb">
+            <value name="RED">
+                <shadow type="math_number">
+                    <field name="NUM">100</field>
+                </shadow>
+            </value>
+            <value name="GREEN">
+                <shadow type="math_number">
+                    <field name="NUM">50</field>
+                </shadow>
+            </value>
+            <value name="BLUE">
+                <shadow type="math_number">
+                    <field name="NUM">0</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="colour_blend">
+            <value name="COLOUR1">
+                <shadow type="colour_picker">
+                    <field name="COLOUR">#ff0000</field>
+                </shadow>
+            </value>
+            <value name="COLOUR2">
+                <shadow type="colour_picker">
+                    <field name="COLOUR">#3333ff</field>
+                </shadow>
+            </value>
+            <value name="RATIO">
+                <shadow type="math_number">
+                    <field name="NUM">0.5</field>
+                </shadow>
+            </value>
+        </block>
+    </category>
+    <sep gap="32"></sep>
+    <category name="vars" colour="%{BKY_VARIABLES_HUE}" custom="VARIABLE">
+        <!-- <block type="variables_get"></block>
+          <block type="variables_set"></block>
+          <block type="math_change"></block>
+          <block type="variables_get_dynamic"></block>
+          <block type="variables_set_dynamic"></block>-->
+    </category>
+    <sep gap="32"></sep>
+    <category name="functions" colour="290" custom="PROCEDURE">
+        <!-- <block type="procedures_defnoreturn"></block>
+          <block type="procedures_defreturn"></block>
+          <block type="procedures_mutatorcontainer"></block>
+          <block type="procedures_mutatorarg"></block>
+          <block type="procedures_callnoreturn"></block>
+          <block type="procedures_callreturn"></block>
+          <block type="procedures_ifreturn"></block>-->
+    </category>
+  </xml>`,
+      },
     };
   },
   methods: {
+    showCode() {
+      let code = BlocklyPy.workspaceToCode(this.$refs["foo"].workspace);
+      myEditor.setSourceCode(code);
+    },
     modeChange() {
-      this.userOpt.editorMode = !this.userOpt.editorMode
-      console.log("editor Mode: ", this.userOpt.editorMode)
-        console.log("code样式: ", this.$refs["code"])
+      this.userOpt.editorMode = !this.userOpt.editorMode;
+      console.log("editor Mode: ", this.userOpt.editorMode);
+      console.log("code样式: ", this.$refs["code"]);
 
       if (this.userOpt.editorMode) {
-          this.$refs["code"].style.width = '50%'
-      }else {
-          this.$refs["code"].style.width = '100%'
+        this.$refs["code"].style.width = "40%";
+      } else {
+        this.$refs["code"].style.width = "100%";
       }
-
     },
     promptUpdate() {
       if (process.platform === "darwin") {
@@ -378,6 +679,9 @@ export default {
     langChangeHandle() {
       myEditor.setMode(this.userOpt.languageOpt);
       myStorage.storeToLS("userOpt", this.userOpt);
+      if (this.userOpt.languageOpt != "PYTHON") {
+        this.$refs["code"].style.width = "100%";
+      }
     },
     fontSizeChangeHandle() {
       myEditor.setFontSize(this.userOpt.fontSizeOpt);
@@ -389,8 +693,8 @@ export default {
     },
     handleTabsEdit(tagName, action) {
       if (action === "add") {
-        console.log("bafore add tab, curr active: ", this.activeTab)
-        let oldActive = this.activeTab
+        console.log("bafore add tab, curr active: ", this.activeTab);
+        let oldActive = this.activeTab;
         let tab = myTab.initTab();
         this.addTab(tab);
         //新增tab时，发生tab切换，需保存old tab数据
@@ -400,7 +704,12 @@ export default {
           oldTab.content = myEditor.getSourceCode();
         }
         myEditor.setSourceCode(tab.content);
-        console.log("after add tab, old tab name: ", oldActive, ", new tab name: ", this.activeTab)
+        console.log(
+          "after add tab, old tab name: ",
+          oldActive,
+          ", new tab name: ",
+          this.activeTab
+        );
       } else {
         // remove
         console.log(tagName, this.activeTab);
@@ -446,9 +755,9 @@ export default {
     openFile() {
       dialog.showOpenDialog(
         {
-          properties: ["openFile"]
+          properties: ["openFile"],
         },
-        dir => {
+        (dir) => {
           console.log("dir: ", dir);
           let path = dir[0];
           let tab = myTab.findTabByPath(path);
@@ -459,7 +768,7 @@ export default {
           let fileStr = fs.readFileSync(path, { encoding: "binary" });
           var buf = new Buffer(fileStr, "binary"); //先用二进制的方式读入, 再转utf-8
           let data = iconv.decode(buf, "utf-8");
-          console.log("data: ", data)
+          console.log("data: ", data);
           let fileName = myFile.getFileName(path);
           tab = myTab.setTab(fileName, data, path, true);
           this.addTab(tab);
@@ -497,10 +806,10 @@ export default {
             { name: "CPP", extensions: ["cpp"] },
             { name: "C", extensions: ["c"] },
             { name: "Python", extensions: ["py"] },
-            { name: "All Files", extensions: ["*"] }
-          ]
+            { name: "All Files", extensions: ["*"] },
+          ],
         },
-        rsp => {
+        (rsp) => {
           if (rsp === undefined || rsp === null) {
             return this.$message.warning("请选择文件保存路径");
           }
@@ -558,7 +867,7 @@ export default {
     },
     keyWatcher() {
       // js监听键盘ctrl + s快捷键保存;
-      document.addEventListener("keydown", e => {
+      document.addEventListener("keydown", (e) => {
         if (
           e.keyCode == 83 &&
           (navigator.platform.match("Mac") ? e.metaKey : e.ctrlKey)
@@ -587,7 +896,7 @@ export default {
         // 版本升级后lib增加时，需要将新增的和原来的融合起来
         console.log("libs status: ", libs);
         for (var i = 0; i < libs.length; i++) {
-          console.log("status of python lib ", libs[i].name, " is ", libs[i])
+          console.log("status of python lib ", libs[i].name, " is ", libs[i]);
           for (var j = 0; j < this.libs.length; j++) {
             if (libs[i].name === this.libs[j].name) {
               console.log(libs[i].name, " status changed to ", libs[i].status);
@@ -600,17 +909,15 @@ export default {
 
       this.keyWatcher();
     },
-    showCode() {
-      this.code = BlocklyPy.workspaceToCode(this.$refs["foo"].workspace);
-    }
   },
   created() {
     setInterval(this.storeData, 1000);
+    setInterval(this.showCode, 1000);
   },
   mounted() {
     this.init();
     this.promptUpdate();
-  }
+  },
 };
 </script>
 
@@ -632,7 +939,7 @@ export default {
   position: absolute;
   left: 0;
   bottom: 0;
-  width: 50%;
+  width: 60%;
   height: 80%;
 }
 
@@ -640,7 +947,7 @@ export default {
   position: absolute;
   right: 0;
   bottom: 0;
-  width: 50%;
+  width: 40%;
   height: 80%;
   margin: 0;
   background-color: beige;

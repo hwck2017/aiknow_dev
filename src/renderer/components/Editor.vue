@@ -681,6 +681,10 @@ export default {
       myStorage.storeToLS("userOpt", this.userOpt);
       if (this.userOpt.languageOpt != "PYTHON") {
         this.$refs["code"].style.width = "100%";
+        this.userOpt.editorMode = false;
+      }else {
+        this.$refs["code"].style.width = "40%";
+        this.userOpt.editorMode = true;
       }
     },
     fontSizeChangeHandle() {

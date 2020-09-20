@@ -1,5 +1,4 @@
 @echo off
-@chcp 65001
 set input=%1
 
 set exe_path=%cd%

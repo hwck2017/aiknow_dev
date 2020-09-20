@@ -158,8 +158,8 @@ const extensions = [
       { name: "CPP", extensions: ["cpp"] },
       { name: "C", extensions: ["c"] },
       { name: "Python", extensions: ["py"] },
-      { name: "All Files", extensions: ["*"] }
-    ]
+      { name: "All Files", extensions: ["*"] },
+    ],
   ],
   [
     "C",
@@ -167,8 +167,8 @@ const extensions = [
       { name: "C", extensions: ["c"] },
       { name: "CPP", extensions: ["cpp"] },
       { name: "Python", extensions: ["py"] },
-      { name: "All Files", extensions: ["*"] }
-    ]
+      { name: "All Files", extensions: ["*"] },
+    ],
   ],
   [
     "PYTHON",
@@ -176,9 +176,9 @@ const extensions = [
       { name: "Python", extensions: ["py"] },
       { name: "CPP", extensions: ["cpp"] },
       { name: "C", extensions: ["c"] },
-      { name: "All Files", extensions: ["*"] }
-    ]
-  ]
+      { name: "All Files", extensions: ["*"] },
+    ],
+  ],
 ];
 
 const extMap = new Map(extensions);
@@ -192,95 +192,95 @@ export default {
         {
           name: "openpyxl",
           desc: "openpyxl是用于读写Excel 2010文档的Python库",
-          status: false
+          status: false,
         },
         {
           name: "pygame",
           desc: "pygame是用于开发2D游戏的python库",
-          status: false
+          status: false,
         },
         {
           name: "pgzero",
           desc: "pygame Zero是无需模板的游戏开发python库",
-          status: false
+          status: false,
         },
         {
           name: "PyPDF2",
           desc:
             "PyPDF2是用于处理pdf文件的python库, 它提供了读、写、分割、合并、文件转换等多种操作",
-          status: false
+          status: false,
         },
         {
           name: "python-docx",
           desc: "python-docx是用于操作word文档的python库",
-          status: false
+          status: false,
         },
         {
           name: "matplotlib",
           desc: "matplotlib是基于python的图表绘图系统",
-          status: false
+          status: false,
         },
         {
           name: "seaborn",
           desc: "seaborn是基于python且建立在matplotlib之上的制作统计图形的库",
-          status: false
+          status: false,
         },
         {
           name: "pandas",
           desc:
             "pandas是用于数据挖掘和数据分析，同时也提供数据清洗功能的python库，它的使用基础是Numpy",
-          status: false
+          status: false,
         },
         {
           name: "numpy",
           desc:
             "numpy是python的一个扩展程序库，支持大量的维度数组与矩阵运算，此外也针对数组运算提供大量的数学函数库",
-          status: false
+          status: false,
         },
         {
           name: "wordcloud",
           desc: "wordcloud是基于python的词云展示第三方库",
-          status: false
+          status: false,
         },
         {
           name: "jieba",
           desc: "jieba是一款优秀的Python第三方中文分词库",
-          status: false
+          status: false,
         },
         {
           name: "pillow",
           desc:
             "pillow是基于Python的图像处理工具包，它提供了基本的图像处理功能",
-          status: false
+          status: false,
         },
         {
           name: "pyautogui",
           desc:
             "pyautogui是纯Python的GUI自动化工具，使用pyautogui可以用程序自动控制鼠标和键盘操作",
-          status: false
+          status: false,
         },
         {
           name: "pyperclip",
           desc: "基于python实现读写剪贴板",
-          status: false
+          status: false,
         },
         {
           name: "pytesseract",
           desc:
             "tesseract是python的光学字符识别（OCR）工具，可识别并读取嵌入图像中的文本。",
-          status: false
+          status: false,
         },
         {
           name: "shutil",
           desc:
             "shutil提供了许多关于文件和文件集合的高级操作，特别提供了支持文件复制和删除的功能",
-          status: false
-        }
+          status: false,
+        },
       ],
       userOpt: {
         languageOpt: "CPP",
         fontSizeOpt: "中",
-        editorTheme: "monokai"
+        editorTheme: "monokai",
       },
       needRun: false,
       languageOpts: languageOpts,
@@ -292,7 +292,7 @@ export default {
       //创建的tab集合
       editableTabs: [],
       prompt: false,
-      checked: false
+      checked: false,
     };
   },
   methods: {
@@ -402,9 +402,9 @@ export default {
     openFile() {
       dialog.showOpenDialog(
         {
-          properties: ["openFile"]
+          properties: ["openFile"],
         },
-        dir => {
+        (dir) => {
           console.log("dir: ", dir);
           let path = dir[0];
           let tab = myTab.findTabByPath(path);
@@ -452,9 +452,9 @@ export default {
       var dir = dialog.showSaveDialog(
         {
           defaultPath: "main",
-          filters: this.extensions.get(this.userOpt.languageOpt)
+          filters: this.extensions.get(this.userOpt.languageOpt),
         },
-        rsp => {
+        (rsp) => {
           if (rsp === undefined || rsp === null) {
             return this.$message.warning("请选择文件保存路径");
           }
@@ -512,7 +512,7 @@ export default {
     },
     keyWatcher() {
       // js监听键盘ctrl + s快捷键保存;
-      document.addEventListener("keydown", e => {
+      document.addEventListener("keydown", (e) => {
         if (
           e.keyCode == 83 &&
           (navigator.platform.match("Mac") ? e.metaKey : e.ctrlKey)
@@ -541,24 +541,31 @@ export default {
         // 版本升级后lib增加时，需要将新增的和原来的融合起来
         console.log("libs status: ", libs);
         for (var i = 0; i < libs.length; i++) {
+          console.log(
+            "stored status of python lib ",
+            libs[i].name,
+            " is ",
+            libs[i].status
+          );
           for (var j = 0; j < this.libs.length; j++) {
-            if (
-              libs[i].name === this.libs[j].name &&
-              libs[i].status != this.libs[j].status
-            ) {
-              console.log(libs[i].name, " status changed to: ", libs[i].status);
+            if (libs[i].name === this.libs[j].name) {
+              console.log(
+                "status of python lib ",
+                libs[i].name,
+                " change from ",
+                this.libs[j].status,
+                " to ",
+                libs[i].status
+              );
               this.libs[j].status = libs[i].status;
               break;
             }
           }
         }
-        // this.libs = libs;
       }
 
-      // let prompt = myStorage.getFromLS("prompt");
-      // if (prompt) this.prompt = prompt;
       this.keyWatcher();
-    }
+    },
   },
   created() {
     setInterval(this.storeData, 1000);
@@ -566,7 +573,7 @@ export default {
   mounted() {
     this.init();
     this.promptUpdate();
-  }
+  },
 };
 </script>
 

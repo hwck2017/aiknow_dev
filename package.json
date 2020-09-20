@@ -68,7 +68,8 @@
       "allowElevation": true,
       "installerIcon": "build/icons/icon.ico",
       "uninstallerIcon": "build/icons/icon.ico",
-      "createDesktopShortcut": true
+      "createDesktopShortcut": true,
+      "include": "build/script/installer.nsh"
     },
     "extraResources": {
       "from": "core",

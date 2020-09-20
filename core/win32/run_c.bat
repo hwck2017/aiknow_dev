@@ -4,14 +4,16 @@
 set input=%1
 set output=%2
 
-::set exec_path=%~dp0
+
 set exe_path=%cd%
 set compiler="%exe_path%\resources\MinGW64\bin\gcc.exe"
 set console="%exe_path%\resources\ConsolePauser.exe"
-set result="%exe_path%\resources\code\%output%"
 
-::%compiler% %input% -o %output%
-::%console% %output%
+set folder="C:\Users\Administrator\AppData\Local\Programs"
+if not exist %folder% (
+  @md %folder%
+)
+set result="%folder%\%output%"
 
 %compiler% %input% -o %result%
 %console% %result%

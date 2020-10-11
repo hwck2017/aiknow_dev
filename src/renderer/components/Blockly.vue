@@ -33,6 +33,7 @@
  */
 
 import Blockly from 'blockly';
+import * as zh from "blockly/msg/zh-hans.js";
 
 export default {
   name: 'BlocklyComponent',
@@ -43,11 +44,15 @@ export default {
     }
   },
   mounted() {
+    Blockly.setLocale(zh);
     var options = this.$props.options || {};
     if (!options.toolbox) {
       options.toolbox = this.$refs["blocklyToolbox"];
     }
     this.workspace = Blockly.inject(this.$refs["blocklyDiv"], options);
+
+    // setTimeout(BlocklyStorage.restoreBlocks, 0);
+    // BlocklyStorage.backupOnUnload();
   }
 }
 </script>

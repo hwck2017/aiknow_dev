@@ -3,26 +3,44 @@
     <div class="tool-bar">
       <el-row :gutter="4">
         <el-col :span="4">
-          <el-popover placement="top-start" trigger="hover" content="选择编程语言">
+          <el-popover
+            placement="top-start"
+            trigger="hover"
+            content="选择编程语言"
+          >
             <el-select
               v-model="userOpt.languageOpt"
               size="small"
               slot="reference"
               @change="langChangeHandle"
             >
-              <el-option v-for="(item, idx) in languageOpts" :key="idx" :label="item" :value="item"></el-option>
+              <el-option
+                v-for="(item, idx) in languageOpts"
+                :key="idx"
+                :label="item"
+                :value="item"
+              ></el-option>
             </el-select>
           </el-popover>
         </el-col>
         <el-col :span="2">
-          <el-popover placement="top-start" trigger="hover" content="调整字体大小">
+          <el-popover
+            placement="top-start"
+            trigger="hover"
+            content="调整字体大小"
+          >
             <el-select
               v-model="userOpt.fontSizeOpt"
               size="small"
               slot="reference"
               @change="fontSizeChangeHandle"
             >
-              <el-option v-for="(item, idx) in fontSizeOpts" :key="idx" :label="item" :value="item"></el-option>
+              <el-option
+                v-for="(item, idx) in fontSizeOpts"
+                :key="idx"
+                :label="item"
+                :value="item"
+              ></el-option>
             </el-select>
           </el-popover>
         </el-col>
@@ -39,7 +57,12 @@
               <el-dropdown-item command="saveAs">另存为</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
-          <el-button size="small" icon="el-icon-s-order" @click="saveFile(false)">保存</el-button>
+          <el-button
+            size="small"
+            icon="el-icon-s-order"
+            @click="saveFile(false)"
+            >保存</el-button
+          >
           <el-dropdown size="small">
             <el-button size="small">
               <i class="el-icon-setting"></i>
@@ -60,16 +83,29 @@
               </el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
-          <el-button size="small" icon="el-icon-s-promotion" @click="run">运行</el-button>
-          <el-button size="small" icon="el-icon-box" @click="libInstalling = true">Python库管理</el-button>
-          <el-button size="small" icon="el-icon-question" @click="clickHelp = true">帮助</el-button>
+          <el-button size="small" icon="el-icon-s-promotion" @click="run"
+            >运行</el-button
+          >
+          <el-button
+            size="small"
+            icon="el-icon-box"
+            @click="libInstalling = true"
+            >Python库管理</el-button
+          >
+          <el-button
+            size="small"
+            icon="el-icon-question"
+            @click="clickHelp = true"
+            >帮助</el-button
+          >
           <el-button
             size="small"
             icon="el-icon-edit"
             type="primary"
             v-if="userOpt.languageOpt == 'PYTHON'"
             @click="modeChange"
-          >模式切换</el-button>
+            >模式切换</el-button
+          >
         </el-col>
       </el-row>
     </div>
@@ -92,8 +128,16 @@
     </div>
     <el-dialog title="库管理" width="80%" :visible.sync="libInstalling">
       <el-table :data="libs">
-        <el-table-column property="name" label="名称" width="150"></el-table-column>
-        <el-table-column property="desc" label="描述" width="500"></el-table-column>
+        <el-table-column
+          property="name"
+          label="名称"
+          width="150"
+        ></el-table-column>
+        <el-table-column
+          property="desc"
+          label="描述"
+          width="500"
+        ></el-table-column>
         <el-table-column property="status" label="状态">
           <template slot-scope="scope">
             <el-button
@@ -101,13 +145,15 @@
               @click="libInstall(scope.row)"
               v-if="scope.row.status === false"
               size="small"
-            >安装</el-button>
+              >安装</el-button
+            >
             <el-button
               type="info"
               @click="libUninstall(scope.row)"
               v-if="scope.row.status"
               size="small"
-            >卸载</el-button>
+              >卸载</el-button
+            >
           </template>
         </el-table-column>
       </el-table>
@@ -118,28 +164,47 @@
         <h4>windows版本</h4>
         <ol>
           <li>点击"跳转安装目录"跳转</li>
-          <li>执行命令"pip3.exe install python库名称"自行安装python第三方库，例如需要安装pygame，则执行 pip3.exe install pygame</li>
+          <li>
+            执行命令"pip3.exe install
+            python库名称"自行安装python第三方库，例如需要安装pygame，则执行
+            pip3.exe install pygame
+          </li>
           <li>执行命令"pip3.exe uninstall python库名称"卸载python第三方库</li>
           <el-button type="text" @click="directory">跳转安装目录</el-button>
         </ol>
         <h4>MAC版本</h4>
         <ol>
-          <li>查看本地是否已安装python3。查看方法：打开终端窗口，执行python3，如果显示已经安装，请跳到第二步；否则复制链接下载安装包：http://aiknow.oss-cn-beijing.aliyuncs.com/download/python3/python-3.8.3-macosx10.9.pkg</li>
-          <li>打开终端，执行命令"pip3 install python库名称"自行安装python第三方库，例如需要安装pyzero，则执行 pip3 install pyzero</li>
+          <li>
+            查看本地是否已安装python3。查看方法：打开终端窗口，执行python3，如果显示已经安装，请跳到第二步；否则复制链接下载安装包：http://aiknow.oss-cn-beijing.aliyuncs.com/download/python3/python-3.8.3-macosx10.9.pkg
+          </li>
+          <li>
+            打开终端，执行命令"pip3 install
+            python库名称"自行安装python第三方库，例如需要安装pyzero，则执行 pip3
+            install pyzero
+          </li>
           <li>执行命令"pip3 uninstall python库名称"卸载python第三方库</li>
         </ol>
       </span>
     </el-dialog>
     <el-dialog title="温馨提示" width="80%" :visible.sync="prompt">
       <span>
-        <h3>为保证使用体验，请检查本地是否已安装Python3，检查方法参考"帮助"。如果未安装请复制链接下载安装包并安装：http://aiknow.oss-cn-beijing.aliyuncs.com/download/python3/python-3.8.3-macosx10.9.pkg</h3>
+        <h3>
+          为保证使用体验，请检查本地是否已安装Python3，检查方法参考"帮助"。如果未安装请复制链接下载安装包并安装：http://aiknow.oss-cn-beijing.aliyuncs.com/download/python3/python-3.8.3-macosx10.9.pkg
+        </h3>
       </span>
       <span slot="footer" class="dialog-footer">
-        <el-checkbox v-model="checked" @change="promptChange">不再提示</el-checkbox>
+        <el-checkbox v-model="checked" @change="promptChange"
+          >不再提示</el-checkbox
+        >
       </span>
     </el-dialog>
     <div>
-      <BlocklyComponent id="blockly" :options="options" ref="foo" v-if="userOpt.editorMode"></BlocklyComponent>
+      <BlocklyComponent
+        id="blockly"
+        :options="options"
+        ref="foo"
+        v-if="userOpt.editorMode"
+      ></BlocklyComponent>
       <div id="code" ref="code">
         <!-- <button v-on:click="showCode()">Show Python</button>
         <pre v-html="code"></pre>-->
@@ -177,6 +242,7 @@ export default {
   },
   data() {
     return {
+      workspace: null,
       clickHelp: false,
       libInstalling: false,
       libs: [
@@ -290,16 +356,22 @@ export default {
       prompt: false,
       checked: false,
       options: {
-        media: "media/",
-        grid: {
-          // spacing: 25,
-          // length: 3,
-          colour: "#ccc",
-          snap: true,
+        media: "../../node_modules/blockly/media/",
+        // grid: {
+        //   spacing: 25,
+        //   length: 3,
+        //   colour: "#ccc",
+        //   snap: true,
+        // },
+        zoom: {
+          controls: true,
+          wheel: true,
+          startScale: 1.5,
+          pinch: true,
         },
         toolbox: `
   <xml>
-    <category name="logic" colour="%{BKY_LOGIC_HUE}">
+    <category name="逻辑" colour="%{BKY_LOGIC_HUE}">
       <block type="logic_boolean"></block>
       <block type="logic_compare"></block>
       <block type="logic_operation"></block>
@@ -313,7 +385,7 @@ export default {
       <block type="controls_if_else"></block>
     </category>
     <sep gap="32"></sep>
-    <category name="loops" colour="%{BKY_LOOPS_HUE}">
+    <category name="循环" colour="%{BKY_LOOPS_HUE}">
         <!-- <block type="controls_repeat"></block> -->
         <block type="controls_repeat_ext">
             <value name="TIMES">
@@ -344,7 +416,7 @@ export default {
         <block type="controls_flow_statements"></block>
     </category>
     <sep gap="32"></sep>
-    <category name="math" colour="%{BKY_MATH_HUE}">
+    <category name="运算" colour="%{BKY_MATH_HUE}">
         <block type="math_number"></block>
         <block type="math_arithmetic">
             <value name="A">
@@ -433,7 +505,7 @@ export default {
         <block type="math_atan2"></block>
     </category>
     <sep gap="32"></sep>
-    <category name="text" colour="%{BKY_TEXTS_HUE}">
+    <category name="文本" colour="%{BKY_TEXTS_HUE}">
         <block type="text"></block>
         <!-- <block type="text_multiline"></block> -->
         <block type="text_join"></block>
@@ -518,7 +590,7 @@ export default {
         <block type="text_reverse"></block>
     </category>
     <sep gap="32"></sep>
-    <category name="list" colour="%{BKY_LISTS_HUE}">
+    <category name="列表" colour="%{BKY_LISTS_HUE}">
         <block type="lists_create_empty"></block>
         <block type="lists_repeat">
             <value name="NUM">
@@ -571,7 +643,7 @@ export default {
         </block>
     </category>
     <sep gap="32"></sep>
-    <category name="colour" colour="%{BKY_COLOUR_HUE}">
+    <category name="颜色" colour="%{BKY_COLOUR_HUE}">
         <block type="colour_picker"></block>
         <block type="colour_random"></block>
         <block type="colour_rgb">
@@ -610,7 +682,7 @@ export default {
         </block>
     </category>
     <sep gap="32"></sep>
-    <category name="vars" colour="%{BKY_VARIABLES_HUE}" custom="VARIABLE">
+    <category name="变量" colour="%{BKY_VARIABLES_HUE}" custom="VARIABLE">
         <!-- <block type="variables_get"></block>
           <block type="variables_set"></block>
           <block type="math_change"></block>
@@ -618,7 +690,7 @@ export default {
           <block type="variables_set_dynamic"></block>-->
     </category>
     <sep gap="32"></sep>
-    <category name="functions" colour="290" custom="PROCEDURE">
+    <category name="函数" colour="290" custom="PROCEDURE">
         <!-- <block type="procedures_defnoreturn"></block>
           <block type="procedures_defreturn"></block>
           <block type="procedures_mutatorcontainer"></block>
@@ -682,7 +754,7 @@ export default {
       if (this.userOpt.languageOpt != "PYTHON") {
         this.$refs["code"].style.width = "100%";
         this.userOpt.editorMode = false;
-      }else {
+      } else {
         this.$refs["code"].style.width = "40%";
         this.userOpt.editorMode = true;
       }
@@ -882,10 +954,15 @@ export default {
         }
       });
     },
+    onFirstComment(event) {
+      console.log(event);
+    },
     init() {
       this.editableTabs = myTab.getTabs();
       myEditor.init(this.$refs.ace);
       this.readFromStorage();
+
+      // 恢复用户设置
       let userOpt = myStorage.getFromLS("userOpt");
       if (userOpt) {
         this.userOpt = userOpt;
@@ -895,6 +972,7 @@ export default {
       }
       console.log(this.userOpt);
 
+      // 恢复python库安装情况
       let libs = myStorage.getFromLS("libs");
       if (libs) {
         // 版本升级后lib增加时，需要将新增的和原来的融合起来
@@ -911,12 +989,19 @@ export default {
         }
       }
 
+      // 监听保存事件
       this.keyWatcher();
+
+      // 监听blockly块改变事件 进而实时生成对应代码
+      this.workspace = this.$refs["foo"].workspace;
+      console.log(this.workspace);
+      this.workspace.addChangeListener(this.showCode);
+
+      this.workspace.addChangeListener(this.onFirstComment);
     },
   },
   created() {
     setInterval(this.storeData, 1000);
-    setInterval(this.showCode, 1000);
   },
   mounted() {
     this.init();

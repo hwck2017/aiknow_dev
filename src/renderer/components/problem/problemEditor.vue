@@ -249,7 +249,7 @@ export default {
         return;
       }
       const { data: res } = await this.$http.get(
-        "http://study.aiknow.cn/study/api/studyCourseNode/" + this.problemID
+        "https://aiknow.cn/study/api/studyCourseNode/" + this.problemID
       );
       if (res.errno !== 200) {
         return this.$message.warning("获取课程节点信息失败");

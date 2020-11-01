@@ -78,13 +78,13 @@ export default {
       let data;
       let url;
       if (this.loginMode === "phone") {
-        url = "http://study.aiknow.cn/study/account/sms/login";
+        url = "https://aiknow.cn/study/account/sms/login";
         data = {
           phone: this.loginInfo.phoneNumber,
           code: this.loginInfo.verifyCode
         };
       } else {
-        url = "http://study.aiknow.cn/study/account/login";
+        url = "https://aiknow.cn/study/account/login";
         data = {
           username: this.loginInfo.username,
           password: this.loginInfo.password
@@ -126,7 +126,7 @@ export default {
       if (!this.canClick) return;
       this.canClick = false;
       const { data: res } = await this.$http.post(
-        "http://study.aiknow.cn/study/sms",
+        "https://aiknow.cn/study/sms",
         {
           phone: this.loginInfo.phoneNumber
         }

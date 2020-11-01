@@ -204,10 +204,12 @@
         :options="options"
         ref="foo"
         v-if="userOpt.editorMode"
+        :style="{width: blocklyWidth}"
       ></BlocklyComponent>
       <div id="code" ref="code">
         <!-- <button v-on:click="showCode()">Show Python</button>
         <pre v-html="code"></pre>-->
+        <div class="packupBtn" @click="packupCodeDiv" v-show="isCanHideCode"></div>
         <div class="ace-editor" ref="ace"></div>
       </div>
     </div>
@@ -243,6 +245,9 @@ export default {
   },
   data() {
     return {
+      blocklyWidth: '60%',
+      isHideCode: false,
+      isCanHideCode: true,
       workspace: null,
       clickHelp: false,
       libInstalling: false,
@@ -670,6 +675,24 @@ export default {
       let code = BlocklyPy.workspaceToCode(this.workspace);
       myEditor.setSourceCode(code);
     },
+
+    packupCodeDiv() {
+      this.isHideCode = !this.isHideCode;
+      if (this.isHideCode) {
+        this.$refs["code"].style.width = "0%";
+        this.blocklyWidth = "100%";
+        this.userOpt.editorMode = false;
+      }else {
+        this.$refs["code"].style.width = "40%";
+        this.blocklyWidth = "60%";
+        this.userOpt.editorMode = false;
+      }
+        setTimeout(() => {
+          this.userOpt.editorMode = true;
+        }, 100);
+
+    },
+
     modeChange() {
       this.userOpt.editorMode = !this.userOpt.editorMode;
       // console.log("editor Mode: ", this.userOpt.editorMode);
@@ -677,8 +700,12 @@ export default {
 
       if (this.userOpt.editorMode) {
         this.$refs["code"].style.width = "40%";
+        this.isCanHideCode = true;
       } else {
         this.$refs["code"].style.width = "100%";
+        this.isCanHideCode = false;
+        // this.$forceUpdate();
+
       }
     },
     promptUpdate() {
@@ -1009,9 +1036,7 @@ export default {
 </script>
 
 <style scoped>
-.ace-editor {
-  width: 100%;
-}
+
 
 .tool-bar {
   margin: 10px 0;
@@ -1026,17 +1051,40 @@ export default {
   position: absolute;
   left: 0;
   bottom: 0;
+  top: 180px;
   width: 60%;
-  height: 80%;
+  height: calc(100vh - 210);
 }
 
 #code {
   position: absolute;
+  top: 180px;
   right: 0;
   bottom: 0;
-  width: 100%;
-  height: 80%;
+  width: 40%;
   margin: 0;
+  height: calc(100vh - 210);
   background-color: beige;
+
 }
+
+.packupBtn {
+    width: 50px;
+    height: 50px;
+    background-color: #999;
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 9;
+}
+</style>
+
+<style>
+  .ace_print-margin {
+    position: initial
+  }
+
+  .ace_editor {
+    height: calc(100vh - 10);
+  }
 </style>

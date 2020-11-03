@@ -209,7 +209,11 @@
       <div id="code" ref="code">
         <!-- <button v-on:click="showCode()">Show Python</button>
         <pre v-html="code"></pre>-->
-        <div class="packupBtn" @click="packupCodeDiv" v-show="isCanHideCode"></div>
+        <div class="packupBtn" @click="packupCodeDiv" v-show="isCanHideCode">
+          <img class="packupBtnImg" src="../assets/images/shouqi.png" alt="" v-show="!isHideCode">
+          <img class="packupBtnImg" src="../assets/images/zhankai.png" alt="" v-show="isHideCode">
+
+        </div>
         <div class="ace-editor" ref="ace"></div>
       </div>
     </div>
@@ -1071,14 +1075,24 @@ export default {
 }
 
 .packupBtn {
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
     background-color: #999;
     position: absolute;
     top: 0;
-    right: 0;
+    right: 10px;
     z-index: 9;
+    text-align: center;
+    align-items: center;
+    display: flex;
 }
+
+.packupBtnImg {
+  width: 60%;
+  height: 60%;
+  margin: auto;
+}
+
 </style>
 
 <style>

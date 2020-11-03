@@ -233,12 +233,13 @@ var myTab = require("../../../lib/editor/tab");
 var myStorage = require("../../../lib/storage");
 
 //编程语言选项
-const languageOpts = ["PYTHON", "JAVA", "CPP", "C"];
+const languageOpts = ["PYTHON", "CPP", "C"];
 //字体大小选项
 const fontSizeOpts = ["超大", "大", "中", "小"];
 
 import BlocklyComponent from "./Blockly.vue";
 import BlocklyPy from "blockly/python";
+import bs from "../store/blocklyStorage";
 
 import "../prompt";
 
@@ -352,7 +353,7 @@ export default {
         languageOpt: "CPP",
         fontSizeOpt: "中",
         editorTheme: "monokai",
-        editorMode: true,
+        editorMode: false,
       },
       needRun: false,
       languageOpts: languageOpts,
@@ -652,45 +653,6 @@ export default {
         </block>
     </category>
     <sep gap="32"></sep>
-    <category name="颜色" colour="%{BKY_COLOUR_HUE}">
-        <block type="colour_picker"></block>
-        <block type="colour_random"></block>
-        <block type="colour_rgb">
-            <value name="RED">
-                <shadow type="math_number">
-                    <field name="NUM">100</field>
-                </shadow>
-            </value>
-            <value name="GREEN">
-                <shadow type="math_number">
-                    <field name="NUM">50</field>
-                </shadow>
-            </value>
-            <value name="BLUE">
-                <shadow type="math_number">
-                    <field name="NUM">0</field>
-                </shadow>
-            </value>
-        </block>
-        <block type="colour_blend">
-            <value name="COLOUR1">
-                <shadow type="colour_picker">
-                    <field name="COLOUR">#ff0000</field>
-                </shadow>
-            </value>
-            <value name="COLOUR2">
-                <shadow type="colour_picker">
-                    <field name="COLOUR">#3333ff</field>
-                </shadow>
-            </value>
-            <value name="RATIO">
-                <shadow type="math_number">
-                    <field name="NUM">0.5</field>
-                </shadow>
-            </value>
-        </block>
-    </category>
-    <sep gap="32"></sep>
     <category name="变量" colour="%{BKY_VARIABLES_HUE}" custom="VARIABLE">
         <!-- <block type="variables_get"></block>
           <block type="variables_set"></block>
@@ -714,7 +676,7 @@ export default {
   },
   methods: {
     showCode() {
-      let code = BlocklyPy.workspaceToCode(this.$refs["foo"].workspace);
+      let code = BlocklyPy.workspaceToCode(this.workspace);
       myEditor.setSourceCode(code);
     },
 
@@ -737,8 +699,8 @@ export default {
 
     modeChange() {
       this.userOpt.editorMode = !this.userOpt.editorMode;
-      console.log("editor Mode: ", this.userOpt.editorMode);
-      console.log("code样式: ", this.$refs["code"]);
+      // console.log("editor Mode: ", this.userOpt.editorMode);
+      // console.log("code样式: ", this.$refs["code"]);
 
       if (this.userOpt.editorMode) {
         this.$refs["code"].style.width = "40%";
@@ -746,7 +708,7 @@ export default {
       } else {
         this.$refs["code"].style.width = "100%";
         this.isCanHideCode = false;
-        this.$forceUpdate();
+        // this.$forceUpdate();
 
       }
     },
@@ -800,17 +762,28 @@ export default {
     },
     handleTabsEdit(tagName, action) {
       if (action === "add") {
-        console.log("bafore add tab, curr active: ", this.activeTab);
+        console.log("before add tab, curr active: ", this.activeTab);
         let oldActive = this.activeTab;
         let tab = myTab.initTab();
         this.addTab(tab);
         //新增tab时，发生tab切换，需保存old tab数据
-        let oldTab = myTab.findTabByName(oldActive);
-        // console.log(oldtab)
+        var oldTab = myTab.findTabByName(oldActive);
         if (oldTab != undefined) {
-          oldTab.content = myEditor.getSourceCode();
+          console.log(this.userOpt.editorMode);
+          if (this.userOpt.editorMode === false) {
+            oldTab.content = myEditor.getSourceCode();
+          } else {
+            oldTab.content = bs.BlocklyStorage.blocksToText(this.workspace);
+          }
         }
-        myEditor.setSourceCode(tab.content);
+
+        if (this.userOpt.editorMode === false) {
+          //clear editor workspace
+          myEditor.setSourceCode(tab.content);
+        } else {
+          // clear all blocks in workspace
+          bs.BlocklyStorage.textToBlocks(tab.content, this.workspace);
+        }
         console.log(
           "after add tab, old tab name: ",
           oldActive,
@@ -823,12 +796,20 @@ export default {
         this.activeTab = myTab.removeTab(tagName, this.activeTab);
         let curTab = myTab.findTabByName(this.activeTab);
         if (curTab != undefined) {
-          myEditor.setSourceCode(curTab.content);
+          if (this.userOpt.editorMode === false) {
+            myEditor.setSourceCode(curTab.content);
+          } else {
+            bs.BlocklyStorage.textToBlocks(curTab.content, this.workspace);
+          }
         }
 
         this.editableTabs = myTab.getTabs();
         if (myTab.isEmpty()) {
-          myEditor.setSourceCode("");
+          if (this.userOpt.editorMode === false) {
+            myEditor.setSourceCode("");
+          } else {
+            bs.BlocklyStorage.textToBlocks("", this.workspace);
+          }
         }
       }
     },
@@ -844,11 +825,19 @@ export default {
       console.log(oldTab);
 
       if (oldTab != undefined) {
-        oldTab.content = myEditor.getSourceCode();
+        if (this.userOpt.editorMode === false) {
+          oldTab.content = myEditor.getSourceCode();
+        } else {
+          oldTab.content = bs.BlocklyStorage.blocksToText(this.workspace);
+        }
       }
 
       if (curTab != undefined) {
-        myEditor.setSourceCode(curTab.content);
+        if (this.userOpt.editorMode === false) {
+          myEditor.setSourceCode(curTab.content);
+        } else {
+          bs.BlocklyStorage.textToBlocks(curTab.content, this.workspace);
+        }
       }
     },
     beforeLeaveHandle(newName, oldName) {
@@ -963,9 +952,15 @@ export default {
 
       myStorage.storeToSS("codeEditor", code);
     },
+    storeBlockly() {
+      bs.BlocklyStorage.backupOnUnload(this.workspace, "blockEditor");
+    },
     readFromStorage() {
       let code = myStorage.getFromSS("codeEditor");
       if (code) myEditor.setSourceCode(code);
+    },
+    readBlocksFromLS() {
+      bs.BlocklyStorage.restoreBlocks(this.workspace, "blockEditor");
     },
     // 本地测试运行
     run() {
@@ -992,7 +987,7 @@ export default {
       this.editableTabs = myTab.getTabs();
       myEditor.init(this.$refs.ace);
       this.readFromStorage();
-
+      this.readBlocksFromLS();
       // 恢复用户设置
       let userOpt = myStorage.getFromLS("userOpt");
       if (userOpt) {
@@ -1022,21 +1017,24 @@ export default {
 
       // 监听保存事件
       this.keyWatcher();
-
-      // 监听blockly块改变事件 进而实时生成对应代码
-      this.workspace = this.$refs["foo"].workspace;
-      console.log(this.workspace);
-      this.workspace.addChangeListener(this.showCode);
-
-      this.workspace.addChangeListener(this.onFirstComment);
     },
   },
   created() {
     setInterval(this.storeData, 1000);
+    setInterval(this.storeBlockly, 1000);
+    console.log(bs);
   },
   mounted() {
     this.init();
     this.promptUpdate();
+  },
+  updated() {
+    // 监听blockly块改变事件 进而实时生成对应代码
+    // 在mounted阶段 refs可能未被渲染
+    this.workspace = this.$refs["foo"].workspace;
+    if (this.workspace != undefined) {
+      this.workspace.addChangeListener(this.showCode);
+    }
   },
 };
 </script>

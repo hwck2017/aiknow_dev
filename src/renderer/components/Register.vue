@@ -150,7 +150,7 @@ export default {
       this.$refs.addFormRef.validate(async valid => {
         if (!valid) return;
         const { data: res } = await this.$http.post(
-          "http://study.aiknow.cn/study/account/register",
+          "https://aiknow.cn/study/account/register",
           this.addForm
         );
 
@@ -164,7 +164,7 @@ export default {
     },
     async getOrigination() {
       const { data: res } = await this.$http.get(
-        "http://study.aiknow.cn/study/studycmsAlliancess/api/allAlliancesList"
+        "https://aiknow.cn/study/studycmsAlliancess/api/allAlliancesList"
       );
 
       if (res.errno !== 200) {

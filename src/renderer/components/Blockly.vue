@@ -34,6 +34,7 @@
 
 import Blockly from 'blockly';
 import * as zh from "blockly/msg/zh-hans.js";
+import "../store/blocklyStorage";
 
 export default {
   name: 'BlocklyComponent',
@@ -50,9 +51,6 @@ export default {
       options.toolbox = this.$refs["blocklyToolbox"];
     }
     this.workspace = Blockly.inject(this.$refs["blocklyDiv"], options);
-
-    // setTimeout(BlocklyStorage.restoreBlocks, 0);
-    // BlocklyStorage.backupOnUnload();
   }
 }
 </script>

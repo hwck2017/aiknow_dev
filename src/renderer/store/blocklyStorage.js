@@ -198,16 +198,17 @@ BlocklyStorage.blocksToText = function (workspace) {
 
 BlocklyStorage.textToBlocks = function (text, workspace) {
   if (workspace == undefined) {
+    console.log("textToBlocks: workspace is undefined")
     return
   }
 
   if (text === "") {
+    console.log("textToBlocks: text is empty")
     workspace.clear()
     return
   }
   var xml = Blockly.Xml.textToDom(text);
-  Blockly.Xml.clearWorkspaceAndLoadFromXml(xml, workspace)
-  // Blockly.Xml.domToWorkspace(xml, workspace);
+  var s = Blockly.Xml.clearWorkspaceAndLoadFromXml(xml, workspace)
 }
 
 /**

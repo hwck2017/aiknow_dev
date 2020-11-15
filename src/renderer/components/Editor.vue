@@ -203,13 +203,14 @@
         id="blockly"
         :options="options"
         ref="foo"
-        v-if="userOpt.editorMode"
-        :style="{width: blocklyWidth}"
+        v-if="userOpt.blocklyMode"
       ></BlocklyComponent>
       <div id="code" ref="code">
-        <!-- <button v-on:click="showCode()">Show Python</button>
-        <pre v-html="code"></pre>-->
-        <div class="packupBtn" @click="packupCodeDiv" v-show="isCanHideCode"></div>
+        <!-- <div
+          class="packupBtn"
+          @click="packupCodeDiv"
+          v-show="isCanHideCode"
+        ></div> -->
         <div class="ace-editor" ref="ace"></div>
       </div>
     </div>
@@ -245,9 +246,9 @@ export default {
   },
   data() {
     return {
-      blocklyWidth: '60%',
-      isHideCode: false,
-      isCanHideCode: true,
+      // blocklyWidth: "60%",
+      // isHideCode: false,
+      // isCanHideCode: true,
       workspace: null,
       clickHelp: false,
       libInstalling: false,
@@ -349,7 +350,8 @@ export default {
         languageOpt: "CPP",
         fontSizeOpt: "中",
         editorTheme: "monokai",
-        editorMode: false,
+        // false: just editor; true: editor & blockly
+        blocklyMode: false,
       },
       needRun: false,
       languageOpts: languageOpts,
@@ -386,9 +388,6 @@ export default {
       <block type="logic_ternary"></block>
       <block type="controls_if"></block>
       <block type="controls_ifelse"></block>
-      <block type="controls_if_if"></block>
-      <block type="controls_if_elseif"></block>
-      <block type="controls_if_else"></block>
     </category>
     <sep gap="32"></sep>
     <category name="循环" colour="%{BKY_LOOPS_HUE}">
@@ -515,8 +514,6 @@ export default {
         <block type="text"></block>
         <!-- <block type="text_multiline"></block> -->
         <block type="text_join"></block>
-        <block type="text_create_join_container"></block>
-        <block type="text_create_join_item"></block>
         <block type="text_append">
             <value name="TEXT">
                 <shadow type="text"></shadow>
@@ -675,37 +672,46 @@ export default {
       let code = BlocklyPy.workspaceToCode(this.workspace);
       myEditor.setSourceCode(code);
     },
-
     packupCodeDiv() {
       this.isHideCode = !this.isHideCode;
       if (this.isHideCode) {
         this.$refs["code"].style.width = "0%";
         this.blocklyWidth = "100%";
-        this.userOpt.editorMode = false;
-      }else {
+        // this.userOpt.blocklyMode = false;
+      } else {
         this.$refs["code"].style.width = "40%";
         this.blocklyWidth = "60%";
-        this.userOpt.editorMode = false;
+        // this.userOpt.blocklyMode = false;
       }
-        setTimeout(() => {
-          this.userOpt.editorMode = true;
-        }, 100);
-
+      // setTimeout(() => {
+      //   this.userOpt.blocklyMode = true;
+      // }, 100);
     },
-
     modeChange() {
-      this.userOpt.editorMode = !this.userOpt.editorMode;
-      // console.log("editor Mode: ", this.userOpt.editorMode);
+      // blocks -> editor mode
+      if (this.userOpt.blocklyMode) {
+        // store blocks in current tab
+        let t = myTab.findTabByName(this.activeTab);
+        t.blocks = bs.BlocklyStorage.blocksToText(this.workspace);
+        t.content = myEditor.getSourceCode();
+      }
+      this.userOpt.blocklyMode = !this.userOpt.blocklyMode;
+      console.log("editor Mode: ", this.userOpt.blocklyMode);
       // console.log("code样式: ", this.$refs["code"]);
 
-      if (this.userOpt.editorMode) {
+      if (this.userOpt.blocklyMode) {
         this.$refs["code"].style.width = "40%";
-        this.isCanHideCode = true;
+        let t = myTab.findTabByName(this.activeTab);
+        console.log("workspace: ", this.workspace, "text: ", t.blocks);
+        window.setTimeout(() => {
+          bs.BlocklyStorage.textToBlocks(t.blocks, this.workspace);
+        }, 0);
+
+        // this.isCanHideCode = true;
       } else {
         this.$refs["code"].style.width = "100%";
-        this.isCanHideCode = false;
+        // this.isCanHideCode = false;
         // this.$forceUpdate();
-
       }
     },
     promptUpdate() {
@@ -742,10 +748,14 @@ export default {
       myStorage.storeToLS("userOpt", this.userOpt);
       if (this.userOpt.languageOpt != "PYTHON") {
         this.$refs["code"].style.width = "100%";
-        this.userOpt.editorMode = false;
+        this.userOpt.blocklyMode = false;
       } else {
         this.$refs["code"].style.width = "40%";
-        this.userOpt.editorMode = true;
+        this.userOpt.blocklyMode = true;
+        let t = myTab.findTabByName(this.activeTab);
+        window.setTimeout(() => {
+          bs.BlocklyStorage.textToBlocks(t.blocks, this.workspace);
+        }, 0);
       }
     },
     fontSizeChangeHandle() {
@@ -765,20 +775,19 @@ export default {
         //新增tab时，发生tab切换，需保存old tab数据
         var oldTab = myTab.findTabByName(oldActive);
         if (oldTab != undefined) {
-          console.log(this.userOpt.editorMode);
-          if (this.userOpt.editorMode === false) {
-            oldTab.content = myEditor.getSourceCode();
-          } else {
-            oldTab.content = bs.BlocklyStorage.blocksToText(this.workspace);
+          console.log(this.userOpt.blocklyMode);
+          oldTab.content = myEditor.getSourceCode();
+          if (this.userOpt.blocklyMode) {
+            oldTab.blocks = bs.BlocklyStorage.blocksToText(this.workspace);
           }
         }
 
-        if (this.userOpt.editorMode === false) {
+        if (this.userOpt.blocklyMode === false) {
           //clear editor workspace
           myEditor.setSourceCode(tab.content);
         } else {
           // clear all blocks in workspace
-          bs.BlocklyStorage.textToBlocks(tab.content, this.workspace);
+          bs.BlocklyStorage.textToBlocks(tab.blocks, this.workspace);
         }
         console.log(
           "after add tab, old tab name: ",
@@ -792,16 +801,16 @@ export default {
         this.activeTab = myTab.removeTab(tagName, this.activeTab);
         let curTab = myTab.findTabByName(this.activeTab);
         if (curTab != undefined) {
-          if (this.userOpt.editorMode === false) {
+          if (this.userOpt.blocklyMode === false) {
             myEditor.setSourceCode(curTab.content);
           } else {
-            bs.BlocklyStorage.textToBlocks(curTab.content, this.workspace);
+            bs.BlocklyStorage.textToBlocks(curTab.blocks, this.workspace);
           }
         }
 
         this.editableTabs = myTab.getTabs();
         if (myTab.isEmpty()) {
-          if (this.userOpt.editorMode === false) {
+          if (this.userOpt.blocklyMode === false) {
             myEditor.setSourceCode("");
           } else {
             bs.BlocklyStorage.textToBlocks("", this.workspace);
@@ -821,18 +830,17 @@ export default {
       console.log(oldTab);
 
       if (oldTab != undefined) {
-        if (this.userOpt.editorMode === false) {
-          oldTab.content = myEditor.getSourceCode();
-        } else {
-          oldTab.content = bs.BlocklyStorage.blocksToText(this.workspace);
+        oldTab.content = myEditor.getSourceCode();
+        if (this.userOpt.blocklyMode) {
+          oldTab.blocks = bs.BlocklyStorage.blocksToText(this.workspace);
         }
       }
 
       if (curTab != undefined) {
-        if (this.userOpt.editorMode === false) {
+        if (this.userOpt.blocklyMode === false) {
           myEditor.setSourceCode(curTab.content);
         } else {
-          bs.BlocklyStorage.textToBlocks(curTab.content, this.workspace);
+          bs.BlocklyStorage.textToBlocks(curTab.blocks, this.workspace);
         }
       }
     },
@@ -1036,7 +1044,9 @@ export default {
 </script>
 
 <style scoped>
-
+.ace-editor {
+  width: 100%;
+}
 
 .tool-bar {
   margin: 10px 0;
@@ -1051,40 +1061,32 @@ export default {
   position: absolute;
   left: 0;
   bottom: 0;
-  top: 180px;
+  /* top: 180px; */
   width: 60%;
-  height: calc(100vh - 210);
+  height: 80%;
+  /* height: calc(100vh - 210); */
 }
 
 #code {
   position: absolute;
-  top: 180px;
+  /* top: 180px; */
   right: 0;
   bottom: 0;
-  width: 40%;
+  width: 100%;
   margin: 0;
-  height: calc(100vh - 210);
+  height: 80%;
+  /* height: calc(100vh - 210); */
   background-color: beige;
-
 }
 
 .packupBtn {
-    width: 50px;
-    height: 50px;
-    background-color: #999;
-    position: absolute;
-    top: 0;
-    right: 0;
-    z-index: 9;
+  width: 50px;
+  height: 50px;
+  background-color: #999;
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 9;
 }
 </style>
 
-<style>
-  .ace_print-margin {
-    position: initial
-  }
-
-  .ace_editor {
-    height: calc(100vh - 10);
-  }
-</style>

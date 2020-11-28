@@ -1,34 +1,10 @@
 <template>
   <div>
     <div class="tool-bar">
-      <el-row :gutter="4">
-        <el-col :span="4">
-          <el-popover placement="top-start" trigger="hover" content="选择编程语言">
-            <el-select
-              v-model="userOpt.languageOpt"
-              size="small"
-              slot="reference"
-              @change="langChangeHandle"
-            >
-              <el-option v-for="(item, idx) in languageOpts" :key="idx" :label="item" :value="item"></el-option>
-            </el-select>
-          </el-popover>
-        </el-col>
-        <el-col :span="2">
-          <el-popover placement="top-start" trigger="hover" content="调整字体大小">
-            <el-select
-              v-model="userOpt.fontSizeOpt"
-              size="small"
-              slot="reference"
-              @change="fontSizeChangeHandle"
-            >
-              <el-option v-for="(item, idx) in fontSizeOpts" :key="idx" :label="item" :value="item"></el-option>
-            </el-select>
-          </el-popover>
-        </el-col>
-        <el-col :span="18">
-          <el-dropdown size="small" @command="fileOperProc">
-            <el-button size="small">
+      <el-row :gutter="10">
+        <el-col :span="21">
+          <el-dropdown size="medium" @command="fileOperProc">
+            <el-button size="medium">
               <i class="el-icon-folder-opened"></i>
               文件
               <i class="el-icon-arrow-down el-icon--right"></i>
@@ -36,18 +12,26 @@
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item command="new">新建</el-dropdown-item>
               <el-dropdown-item command="open">打开</el-dropdown-item>
+              <el-dropdown-item command="save">保存</el-dropdown-item>
               <el-dropdown-item command="saveAs">另存为</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
-          <el-button size="small" icon="el-icon-s-order" @click="saveFile(false)">保存</el-button>
-          <el-dropdown size="small">
-            <el-button size="small">
+          <el-button size="medium" icon="el-icon-s-promotion" @click="run"
+            >运行</el-button
+          >
+        </el-col>
+        <el-col :span="3">
+          <el-dropdown size="medium" @command="setCmdHandle">
+            <el-button size="medium">
               <i class="el-icon-setting"></i>
               设置
               <i class="el-icon-arrow-down el-icon--right"></i>
             </el-button>
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item command="theme">
+              <el-dropdown-item command="frontSize">
+                字体大小
+              </el-dropdown-item>
+              <el-dropdown-item divided command="theme">
                 夜间模式
                 <el-switch
                   v-model="userOpt.editorTheme"
@@ -58,11 +42,12 @@
                   @change="themeChangeHandle"
                 ></el-switch>
               </el-dropdown-item>
+              <el-dropdown-item divided command="libs">
+                Python库管理
+              </el-dropdown-item>
+              <el-dropdown-item divided command="help"> 帮助 </el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
-          <el-button size="small" icon="el-icon-s-promotion" @click="run">运行</el-button>
-          <el-button size="small" icon="el-icon-box" @click="libInstalling = true">Python库管理</el-button>
-          <el-button size="small" icon="el-icon-question" @click="clickHelp = true">帮助</el-button>
         </el-col>
       </el-row>
     </div>
@@ -85,8 +70,16 @@
     </div>
     <el-dialog title="库管理" width="80%" :visible.sync="libInstalling">
       <el-table :data="libs">
-        <el-table-column property="name" label="名称" width="150"></el-table-column>
-        <el-table-column property="desc" label="描述" width="500"></el-table-column>
+        <el-table-column
+          property="name"
+          label="名称"
+          width="150"
+        ></el-table-column>
+        <el-table-column
+          property="desc"
+          label="描述"
+          width="500"
+        ></el-table-column>
         <el-table-column property="status" label="状态">
           <template slot-scope="scope">
             <el-button
@@ -94,13 +87,15 @@
               @click="libInstall(scope.row)"
               v-if="scope.row.status === false"
               size="small"
-            >安装</el-button>
+              >安装</el-button
+            >
             <el-button
               type="info"
               @click="libUninstall(scope.row)"
               v-if="scope.row.status"
               size="small"
-            >卸载</el-button>
+              >卸载</el-button
+            >
           </template>
         </el-table-column>
       </el-table>
@@ -111,24 +106,62 @@
         <h4>windows版本</h4>
         <ol>
           <li>点击"跳转安装目录"跳转</li>
-          <li>执行命令"pip3.exe install python库名称"自行安装python第三方库，例如需要安装pygame，则执行 pip3.exe install pygame</li>
+          <li>
+            执行命令"pip3.exe install
+            python库名称"自行安装python第三方库，例如需要安装pygame，则执行
+            pip3.exe install pygame
+          </li>
           <li>执行命令"pip3.exe uninstall python库名称"卸载python第三方库</li>
           <el-button type="text" @click="directory">跳转安装目录</el-button>
         </ol>
         <h4>MAC版本</h4>
         <ol>
-          <li>查看本地是否已安装python3。查看方法：打开终端窗口，执行python3，如果显示已经安装，请跳到第二步；否则复制链接下载安装包：http://aiknow.oss-cn-beijing.aliyuncs.com/download/python3/python-3.8.3-macosx10.9.pkg</li>
-          <li>打开终端，执行命令"pip3 install python库名称"自行安装python第三方库，例如需要安装pyzero，则执行 pip3 install pyzero</li>
+          <li>
+            查看本地是否已安装python3。查看方法：打开终端窗口，执行python3，如果显示已经安装，请跳到第二步；否则复制链接下载安装包：http://aiknow.oss-cn-beijing.aliyuncs.com/download/python3/python-3.8.3-macosx10.9.pkg
+          </li>
+          <li>
+            打开终端，执行命令"pip3 install
+            python库名称"自行安装python第三方库，例如需要安装pyzero，则执行 pip3
+            install pyzero
+          </li>
           <li>执行命令"pip3 uninstall python库名称"卸载python第三方库</li>
         </ol>
       </span>
     </el-dialog>
     <el-dialog title="温馨提示" width="80%" :visible.sync="prompt">
       <span>
-        <h3>为保证使用体验，请检查本地是否已安装Python3，检查方法参考"帮助"。如果未安装请复制链接下载安装包并安装：http://aiknow.oss-cn-beijing.aliyuncs.com/download/python3/python-3.8.3-macosx10.9.pkg</h3>
+        <h3>
+          为保证使用体验，请检查本地是否已安装Python3，检查方法参考"帮助"。如果未安装请复制链接下载安装包并安装：http://aiknow.oss-cn-beijing.aliyuncs.com/download/python3/python-3.8.3-macosx10.9.pkg
+        </h3>
       </span>
       <span slot="footer" class="dialog-footer">
-        <el-checkbox v-model="checked" @change="promptChange">不再提示</el-checkbox>
+        <el-checkbox v-model="checked" @change="promptChange"
+          >不再提示</el-checkbox
+        >
+      </span>
+    </el-dialog>
+    <el-dialog
+      title="请输入字体大小, 取值[10, 100]"
+      width="30%"
+      :visible.sync="setSize"
+    >
+      <el-input v-model="userOpt.fontSize"></el-input>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="setSize = false">取 消</el-button>
+        <el-button type="primary" @click="fontSizeChangeHandle"
+          >确 定</el-button
+        >
+      </span>
+    </el-dialog>
+    <el-dialog title="请选择编程语言" width="40%" :visible.sync="selectLang">
+      <el-radio-group v-model="userOpt.languageOpt">
+        <el-radio label="cpp" border>CPP</el-radio>
+        <el-radio label="c" border>C</el-radio>
+        <el-radio label="py" border>PYTHON</el-radio>
+      </el-radio-group>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="selectLang = false">取 消</el-button>
+        <el-button type="primary" @click="selectLang = false">确 定</el-button>
       </span>
     </el-dialog>
     <div class="ace-editor" ref="ace"></div>
@@ -137,6 +170,7 @@
  
 <script>
 var fs = require("fs");
+var jschardet = require("jschardet");
 var iconv = require("iconv-lite");
 var { ipcRenderer } = require("electron");
 const { dialog } = require("electron").remote;
@@ -148,35 +182,33 @@ var myStorage = require("../../../lib/storage");
 
 //编程语言选项
 const languageOpts = ["PYTHON", "CPP", "C"];
-//字体大小选项
-const fontSizeOpts = ["超大", "大", "中", "小"];
 
 const extensions = [
   [
-    "CPP",
+    "cpp",
     [
       { name: "CPP", extensions: ["cpp"] },
-      { name: "C", extensions: ["c"] },
-      { name: "Python", extensions: ["py"] },
-      { name: "All Files", extensions: ["*"] },
+      // { name: "C", extensions: ["c"] },
+      // { name: "Python", extensions: ["py"] },
+      // { name: "All Files", extensions: ["*"] },
     ],
   ],
   [
-    "C",
+    "c",
     [
       { name: "C", extensions: ["c"] },
-      { name: "CPP", extensions: ["cpp"] },
-      { name: "Python", extensions: ["py"] },
-      { name: "All Files", extensions: ["*"] },
+      // { name: "CPP", extensions: ["cpp"] },
+      // { name: "Python", extensions: ["py"] },
+      // { name: "All Files", extensions: ["*"] },
     ],
   ],
   [
-    "PYTHON",
+    "py",
     [
       { name: "Python", extensions: ["py"] },
-      { name: "CPP", extensions: ["cpp"] },
-      { name: "C", extensions: ["c"] },
-      { name: "All Files", extensions: ["*"] },
+      // { name: "CPP", extensions: ["cpp"] },
+      // { name: "C", extensions: ["c"] },
+      // { name: "All Files", extensions: ["*"] },
     ],
   ],
 ];
@@ -187,6 +219,8 @@ export default {
   data() {
     return {
       clickHelp: false,
+      setSize: false,
+      selectLang: false,
       libInstalling: false,
       libs: [
         {
@@ -278,13 +312,12 @@ export default {
         },
       ],
       userOpt: {
-        languageOpt: "CPP",
-        fontSizeOpt: "中",
+        languageOpt: "cpp",
+        fontSize: 20,
         editorTheme: "monokai",
       },
       needRun: false,
       languageOpts: languageOpts,
-      fontSizeOpts: fontSizeOpts,
       extensions: extMap,
       //激活的tab name
       activeTab: "0",
@@ -296,6 +329,20 @@ export default {
     };
   },
   methods: {
+    setCmdHandle(cmd) {
+      console.log("set command: ", cmd);
+      switch (cmd) {
+        case "help":
+          this.clickHelp = true;
+          break;
+        case "libs":
+          this.libInstalling = true;
+          break;
+        case "frontSize":
+          this.setSize = true;
+          break;
+      }
+    },
     promptUpdate() {
       if (process.platform === "darwin") {
         let prompt = myStorage.getFromLS("prompt");
@@ -330,9 +377,29 @@ export default {
       myStorage.storeToLS("userOpt", this.userOpt);
     },
     setupProcess() {},
+    checkSuffixValid(suffix) {
+      if (
+        suffix == "cpp" ||
+        suffix == "cc" ||
+        suffix == "c" ||
+        suffix == "py"
+      ) {
+        return true;
+      } else {
+        console.log("invalid file name suffix: ", suffix);
+        return false;
+      }
+    },
     fontSizeChangeHandle() {
-      myEditor.setFontSize(this.userOpt.fontSizeOpt);
+      console.log(this.userOpt.fontSize);
+      if (this.userOpt.fontSize > 100) {
+        this.userOpt.fontSize = 100;
+      } else if (this.userOpt.fontSize < 10) {
+        this.userOpt.fontSize = 10;
+      }
+      myEditor.setFontSize(this.userOpt.fontSize);
       myStorage.storeToLS("userOpt", this.userOpt);
+      this.setSize = false;
     },
     addTab(tab) {
       myTab.addTab(tab);
@@ -342,14 +409,17 @@ export default {
       if (action === "add") {
         console.log("bafore add tab, curr active: ", this.activeTab);
         let oldActive = this.activeTab;
-        let tab = myTab.initTab();
+        let tab = myTab.initTab(this.userOpt.languageOpt);
         this.addTab(tab);
         //新增tab时，发生tab切换，需保存old tab数据
         let oldTab = myTab.findTabByName(oldActive);
         // console.log(oldtab)
+        // 旧tab存在则保存已有代码内容
         if (oldTab != undefined) {
           oldTab.content = myEditor.getSourceCode();
         }
+        // 设置编辑器模式 c_cpp or python
+        myEditor.setMode(this.userOpt.languageOpt);
         myEditor.setSourceCode(tab.content);
         console.log(
           "after add tab, old tab name: ",
@@ -363,6 +433,7 @@ export default {
         this.activeTab = myTab.removeTab(tagName, this.activeTab);
         let curTab = myTab.findTabByName(this.activeTab);
         if (curTab != undefined) {
+          myEditor.setMode(curTab.suffix);
           myEditor.setSourceCode(curTab.content);
         }
 
@@ -388,6 +459,7 @@ export default {
       }
 
       if (curTab != undefined) {
+        myEditor.setMode(curTab.suffix);
         myEditor.setSourceCode(curTab.content);
       }
     },
@@ -397,6 +469,7 @@ export default {
       return true;
     },
     newFile() {
+      this.selectLang = true;
       this.handleTabsEdit("", "add");
     },
     openFile() {
@@ -412,13 +485,24 @@ export default {
             return this.$message.success("文件已经被打开");
           }
 
-          let fileStr = fs.readFileSync(path, { encoding: "binary" });
-          var buf = new Buffer(fileStr, "binary"); //先用二进制的方式读入, 再转utf-8
-          let data = iconv.decode(buf, "utf-8");
+          var buff = fs.readFileSync(path);
+          var info = jschardet.detect(buff);
+          console.log(info.encoding);
+          // ISO-8859 -> GB2312 -> GBK -> GB18030 编码方式依次扩展, 而且符合向下兼容的规律
+          if (info.encoding == "ISO-8859-2") {
+            info.encoding = "gbk";
+          }
+          var data = iconv.decode(buff, info.encoding);
           console.log("data: ", data);
           let fileName = myFile.getFileName(path);
-          tab = myTab.setTab(fileName, data, path, true);
+          let suffix = myFile.getSuffix(fileName);
+          if (!this.checkSuffixValid(suffix)) {
+            this.$message.success("不支持该文件类型");
+            suffix = "cpp";
+          }
+          tab = myTab.setTab(fileName, data, path, true, suffix);
           this.addTab(tab);
+          myEditor.setMode(suffix);
           myEditor.setSourceCode(data);
         }
       );
@@ -427,9 +511,10 @@ export default {
       let code = myEditor.getSourceCode();
       let tab = myTab.findTabByName(this.activeTab);
       if (tab === undefined) {
-        // tab全部被删除
+        // tab全部被删除, 但编辑器中还有内容
         console.log("tab noexist");
-        tab = myTab.setTab("", code, "", false);
+        // TODO: 文件后缀填什么
+        tab = myTab.setTab("", code, "", false, "cpp");
         this.addTab(tab);
       }
 
@@ -439,20 +524,29 @@ export default {
         fs.writeFileSync(tab.filePath, code);
         console.log("save as ok");
         if (this.needRun) {
-          console.log("run: ", this.userOpt.languageOpt, "+", tab.filePath);
-          ipcRenderer.send("run", this.userOpt.languageOpt, tab.filePath);
+          console.log("run: ", tab.suffix, "+", tab.filePath);
+          ipcRenderer.send("run", tab.suffix, tab.filePath);
           this.needRun = false;
         }
         return;
       }
 
-      // console.log("extensions: ", this.extensions, "lang: ", this.userOpt.languageOpt)
-      // console.log("select extension: ", this.extensions.get(this.userOpt.languageOpt))
-
+      var filter;
+      //另存为 可改变文件格式, 需要支持全部文件类型选择
+      if (saveAs) {
+        filter = [
+          { name: "CPP", extensions: ["cpp"] },
+          { name: "C", extensions: ["c"] },
+          { name: "Python", extensions: ["py"] },
+          { name: "All Files", extensions: ["*"] },
+        ];
+      } else {
+        filter = this.extensions.get(tab.suffix);
+      }
       var dir = dialog.showSaveDialog(
         {
           defaultPath: "main",
-          filters: this.extensions.get(this.userOpt.languageOpt),
+          filters: filter,
         },
         (rsp) => {
           if (rsp === undefined || rsp === null) {
@@ -468,9 +562,12 @@ export default {
           tab.filePath = rsp;
           tab.title = myFile.getFileName(rsp);
           tab.content = myEditor.getSourceCode();
+          //另存为可改变文件类型 如1.cpp -> 1.py
+          tab.suffix = myFile.getSuffix(tab.title);
+          myEditor.setMode(tab.suffix);
           fs.writeFileSync(tab.filePath, myEditor.getSourceCode());
           if (this.needRun) {
-            ipcRenderer.send("run", this.userOpt.languageOpt, tab.filePath);
+            ipcRenderer.send("run", tab.suffix, tab.filePath);
             this.needRun = false;
           }
         }
@@ -531,7 +628,7 @@ export default {
       if (userOpt) {
         this.userOpt = userOpt;
         myEditor.setMode(this.userOpt.languageOpt);
-        myEditor.setFontSize(this.userOpt.fontSizeOpt);
+        myEditor.setFontSize(this.userOpt.fontSize);
         myEditor.setTheme(this.userOpt.editorTheme);
       }
       console.log(this.userOpt);
@@ -585,7 +682,7 @@ export default {
 .tool-bar {
   margin: 10px 0;
   width: 99%;
-  height: 30px;
+  height: 37px;
   background-color: #eee;
   border: 1px solid #409eff;
   padding: 4px;

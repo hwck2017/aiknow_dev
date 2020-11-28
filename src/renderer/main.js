@@ -15,9 +15,6 @@ import './assets/css/global.css'
 import ace from 'ace-builds'
 Vue.use(ace)
 
-// import blockly from 'blockly'
-// Vue.use(blockly)
-
 // 如果存在token密钥，进行用户自动登入，并且获取信息
 if (window.sessionStorage.getItem('token')) {
   store.dispatch('getUserInfo')
@@ -37,7 +34,6 @@ Vue.prototype.$getAvatar = function (aid) {
 axios.defaults.baseURL = 'http://oj.aiknow.cn/aiqb'
 axios.interceptors.request.use(config => {
   config.headers.Authorization = window.sessionStorage.getItem('token')
-  // config.headers.Authorization = "eyJhbGciOiJIUzI1NiJ9.eyJMT0dJTl9VU0VSX1RJTUUiOjE1ODczOTUyOTM1ODAsIkxPR0lOX1VTRVJfS0VZIjoyMjgwfQ.TkF7g5WwFbJvsl96oczboG6tq2SuLJPUqhcDuXJF074"
   return config
 })
 

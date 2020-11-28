@@ -2,15 +2,15 @@
   <el-container class="home-container">
     <el-header>
       <el-row :gutter="5" type="flex" justify="space-between">
-        <el-col :span="4">
-          <div style="display:flex; padding: 10px 0px;">
+        <el-col :span="5">
+          <div style="display: flex; padding: 10px 0px">
             <img
               src="../../../static/logo.png"
-              style="width:130px; height:40px; vertical-align:middle;"
+              style="width: 130px; height: 40px; vertical-align: middle"
             />
           </div>
         </el-col>
-        <el-col :span="14">
+        <el-col :span="16">
           <div>
             <el-menu
               :default-active="$route.path"
@@ -47,32 +47,33 @@
             </el-menu>
           </div>
         </el-col>
-        <el-col :span="6">
-          <div v-if="$store.state.userInfo.isLogin" style="padding: 15px 20px;">
+        <el-col :span="4">
+          <div v-if="$store.state.userInfo.isLogin" style="padding: 15px 20px">
             <!-- <el-avatar
               :size="30"
               :src="$getAvatar($store.state.userInfo.uid)"
               style="vertical-align:middle;"
             ></el-avatar>-->
-            <el-avatar :size="35" :src="circleUrl" style="vertical-align:middle;"></el-avatar>
+            <el-avatar
+              :size="35"
+              :src="circleUrl"
+              style="vertical-align: middle"
+            ></el-avatar>
             <span>
               <el-dropdown @command="handleCommand">
                 <span class="el-dropdown-link">
-                  {{$store.state.userInfo.nickname}}
+                  {{ $store.state.userInfo.nickname }}
                   <i class="el-icon-arrow-down el-icon--right"></i>
                 </span>
                 <el-dropdown-menu slot="dropdown">
-                  <el-dropdown-item command="/user">个人中心</el-dropdown-item>
+                  <el-dropdown-item command="profile">个人中心</el-dropdown-item>
                   <el-dropdown-item command="logout">退出</el-dropdown-item>
                 </el-dropdown-menu>
               </el-dropdown>
             </span>
           </div>
-          <div v-else style="padding: 10px 0px;">
-            <el-button-group round>
-              <el-button plain @click="login">登录</el-button>
-              <el-button plain @click="regist">注册</el-button>
-            </el-button-group>
+          <div v-else style="padding: 10px 0px">
+            <el-button plain @click="login">登录</el-button>
           </div>
         </el-col>
       </el-row>
@@ -82,20 +83,22 @@
         <router-view></router-view>
       </el-main>
       <el-footer height="40px">
-        <div class="footer">2019-2020 &copy; 爱知部落<br>version {{version}}</div>
+        <div class="footer">
+          2019-2020 &copy; 爱知部落<br />version {{ version }}
+        </div>
       </el-footer>
     </el-container>
   </el-container>
 </template>
 
 <script>
-var pkg = require("../../../package.json")
+var pkg = require("../../../package.json");
 export default {
   data() {
     return {
       version: "",
       circleUrl:
-        "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png"
+        "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png",
     };
   },
   methods: {
@@ -103,23 +106,24 @@ export default {
       if (command === "logout") {
         this.$store.commit("logout");
       } else {
-        this.$router.push(command);
+        // this.$router.push(command);
+        this.$router.push("/profile/" + this.$store.state.userInfo.uid);
       }
     },
     login() {
       this.$router.push("/login");
     },
-    regist() {
-      this.$router.push("/register");
-    },
+    // regist() {
+    //   this.$router.push("/register");
+    // },
     getVersion() {
-      this.version = pkg.version
-      console.log("process: ", pkg)
+      this.version = pkg.version;
+      console.log("process: ", pkg);
     }
   },
   created() {
-    this.getVersion()
-  }
+    this.getVersion();
+  },
 };
 </script>
 

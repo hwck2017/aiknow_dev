@@ -84,7 +84,7 @@ export default new Vuex.Store({
           }
 
           if (data.status === '完成' && data.response.result === 'AC' && obj.nodeid !== null) {
-            axios.post('http://study.aiknow.cn/study/studyProcess/updateProcess', {
+            axios.post('https://aiknow.cn/study/studyProcess/updateProcess', {
               "nodeid": obj.nodeid
             })
           }

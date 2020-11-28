@@ -17,14 +17,14 @@ pwd="/Applications/AiknowEditor.app/Contents/Resources/darwin"
 get_timer=$pwd/time_now_ns
 # echo $get_timer
 start_time=`$get_timer`
-if [[ $compiler = "PYTHON" ]]; then
+if [[ $compiler = "py" ]]; then
     exec_file=$source_file
     python3 $exec_file
-elif [[ $compiler = "CPP" ]]; then
+elif [[ $compiler = "cpp" ]]; then
     exec_file=$path/$filename
     g++ $source_file -o $exec_file
     $exec_file
-elif [[ $compiler = "C" ]]; then
+elif [[ $compiler = "c" ]]; then
     exec_file=$path/$filename
     gcc $source_file -o $exec_file
     $exec_file

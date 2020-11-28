@@ -137,6 +137,7 @@
  
 <script>
 var fs = require("fs");
+var jschardet = require("jschardet");
 var iconv = require("iconv-lite");
 var { ipcRenderer } = require("electron");
 const { dialog } = require("electron").remote;
@@ -412,9 +413,11 @@ export default {
             return this.$message.success("文件已经被打开");
           }
 
-          let fileStr = fs.readFileSync(path, { encoding: "binary" });
-          var buf = new Buffer(fileStr, "binary"); //先用二进制的方式读入, 再转utf-8
-          let data = iconv.decode(buf, "utf-8");
+          let buff = fs.readFileSync(path);
+          var info = jschardet.detect(buff);
+          console.log(info.encoding)
+          // var buff = new Buffer(fileStr, "binary"); //先用二进制的方式读入, 再转utf-8
+          let data = iconv.decode(buff, info.encoding);
           console.log("data: ", data);
           let fileName = myFile.getFileName(path);
           tab = myTab.setTab(fileName, data, path, true);

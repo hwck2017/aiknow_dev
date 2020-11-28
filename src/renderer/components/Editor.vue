@@ -493,7 +493,7 @@ export default {
             info.encoding = "gbk";
           }
           var data = iconv.decode(buff, info.encoding);
-          console.log("data: ", data);
+          // console.log("data: ", data);
           let fileName = myFile.getFileName(path);
           let suffix = myFile.getSuffix(fileName);
           if (!this.checkSuffixValid(suffix)) {

@@ -160,8 +160,8 @@
         <el-radio label="py" border>PYTHON</el-radio>
       </el-radio-group>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="selectLang = false">取 消</el-button>
-        <el-button type="primary" @click="selectLang = false">确 定</el-button>
+        <el-button @click="addLangTab">取 消</el-button>
+        <el-button type="primary" @click="addLangTab">确 定</el-button>
       </span>
     </el-dialog>
     <div class="ace-editor" ref="ace"></div>
@@ -419,6 +419,7 @@ export default {
           oldTab.content = myEditor.getSourceCode();
         }
         // 设置编辑器模式 c_cpp or python
+        console.log(this.userOpt.languageOpt);
         myEditor.setMode(this.userOpt.languageOpt);
         myEditor.setSourceCode(tab.content);
         console.log(
@@ -468,9 +469,12 @@ export default {
       this.oldActiveTab = oldName;
       return true;
     },
+    addLangTab() {
+      this.selectLang = false;
+      this.handleTabsEdit("", "add");
+    },
     newFile() {
       this.selectLang = true;
-      this.handleTabsEdit("", "add");
     },
     openFile() {
       dialog.showOpenDialog(

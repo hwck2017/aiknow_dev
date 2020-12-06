@@ -493,11 +493,18 @@ export default {
           var info = jschardet.detect(buff);
           console.log(info.encoding);
           // ISO-8859 -> GB2312 -> GBK -> GB18030 编码方式依次扩展, 而且符合向下兼容的规律
-          if (info.encoding == "ISO-8859-2") {
-            info.encoding = "gbk";
+          if (
+            info.encoding == "ISO-8859-2" ||
+            info.encoding == "windows-1252"
+          ) {
+            info.encoding = "GB18030";
           }
+
+          console.log(
+            "encoding support? ",
+            iconv.encodingExists(info.encoding)
+          );
           var data = iconv.decode(buff, info.encoding);
-          // console.log("data: ", data);
           let fileName = myFile.getFileName(path);
           let suffix = myFile.getSuffix(fileName);
           if (!this.checkSuffixValid(suffix)) {

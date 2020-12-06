@@ -98,6 +98,12 @@ export default {
       // 将登录成功之后的 token，保存到客户端的 sessionStorage 中
       console.log(res.data.token);
       myStorage.storeToSS("token", res.data.token);
+      // 获取机构名称和ID
+      // http://passport.aiknow.cn/passport/external/user/1
+      var userInfo = await this.$http.get("http://passport.aiknow.cn/passport/external/user/" + res.data.id)
+      console.log("ID: ", userInfo.data.data.alliances)
+      console.log("name: ", userInfo.data.data.allianceName)
+      
       if (this.loginInfo.remember) {
         myStorage.storeToLS("userInfo", this.loginInfo);
       } else {

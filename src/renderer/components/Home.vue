@@ -4,10 +4,18 @@
       <el-row :gutter="5" type="flex" justify="space-between">
         <el-col :span="5">
           <div style="display: flex; padding: 10px 0px">
-            <img
-              src="../../../static/logo.png"
-              style="width: 130px; height: 40px; vertical-align: middle"
-            />
+            <div v-if="headImgUrl == ''">
+              <img
+                src="../../../static/logo.png"
+                style="width: 130px; height: 40px; vertical-align: middle"
+              />
+            </div>
+            <div v-else>
+              <img
+                :src="headImgUrl"
+                style="width: 130px; height: 40px; vertical-align: middle"
+              />
+            </div>
           </div>
         </el-col>
         <el-col :span="16">
@@ -66,7 +74,9 @@
                   <i class="el-icon-arrow-down el-icon--right"></i>
                 </span>
                 <el-dropdown-menu slot="dropdown">
-                  <el-dropdown-item command="profile">个人中心</el-dropdown-item>
+                  <el-dropdown-item command="profile"
+                    >个人中心</el-dropdown-item
+                  >
                   <el-dropdown-item command="logout">退出</el-dropdown-item>
                 </el-dropdown-menu>
               </el-dropdown>
@@ -93,12 +103,15 @@
 
 <script>
 var pkg = require("../../../package.json");
+var myStorage = require("../../../lib/storage");
+
 export default {
   data() {
     return {
       version: "",
       circleUrl:
         "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png",
+      headImgUrl: "",
     };
   },
   methods: {
@@ -119,10 +132,19 @@ export default {
     getVersion() {
       this.version = pkg.version;
       console.log("process: ", pkg);
-    }
+    },
+    getHeadImgUrl() {
+      // noexist is null
+      this.headImgUrl = myStorage.getFromLS("headimgurl");
+      console.log("headimgurl: ", this.headImgUrl);
+    },
   },
   created() {
     this.getVersion();
+    console.log($store.state.userInfo.isLogin)
+  },
+  mounted() {
+    this.getHeadImgUrl();
   },
 };
 </script>
@@ -139,12 +161,12 @@ export default {
 
 .el-header {
   /* background-color: #f11c40; */
-  background-color: #000;
+  background-color: rgb(0, 0, 0);
   height: 70px;
 }
 
 .el-button {
-  background: #000 !important;
+  background: rgb(0, 0, 0) !important;
   color: #fff;
 }
 

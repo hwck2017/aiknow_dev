@@ -8,11 +8,20 @@
       </el-radio-group>
 
       <!-- :rules="loginFormRules" -->
-      <el-form class="login_form" ref="loginFormRef" label-width="0px" :model="loginInfo">
-        <el-form-item v-if="loginMode==='passwd'" prop="username">
-          <el-input v-model="loginInfo.username" prefix-icon="el-icon-user" placeholder="请输入登录账号"></el-input>
+      <el-form
+        class="login_form"
+        ref="loginFormRef"
+        label-width="0px"
+        :model="loginInfo"
+      >
+        <el-form-item v-if="loginMode === 'passwd'" prop="username">
+          <el-input
+            v-model="loginInfo.username"
+            prefix-icon="el-icon-user"
+            placeholder="请输入登录账号"
+          ></el-input>
         </el-form-item>
-        <el-form-item v-if="loginMode==='passwd'" prop="password">
+        <el-form-item v-if="loginMode === 'passwd'" prop="password">
           <el-input
             v-model="loginInfo.password"
             prefix-icon="el-icon-lock"
@@ -20,17 +29,23 @@
             :show-password="true"
           ></el-input>
         </el-form-item>
-        <el-form-item v-if="loginMode==='phone'" prop="telephone">
+        <el-form-item v-if="loginMode === 'phone'" prop="telephone">
           <el-input
             v-model="loginInfo.phoneNumber"
             prefix-icon="el-icon-mobile-phone"
             placeholder="请输入手机号码"
           ></el-input>
         </el-form-item>
-        <el-form-item v-if="loginMode==='phone'" prop="verify">
-          <el-input v-model="loginInfo.verifyCode" prefix-icon="el-icon-key" placeholder="请输入验证码">
+        <el-form-item v-if="loginMode === 'phone'" prop="verify">
+          <el-input
+            v-model="loginInfo.verifyCode"
+            prefix-icon="el-icon-key"
+            placeholder="请输入验证码"
+          >
             <template slot="append">
-              <el-button type="primary" plain @click="getVerifyCode">{{content}}</el-button>
+              <el-button type="primary" plain @click="getVerifyCode">{{
+                content
+              }}</el-button>
             </template>
           </el-input>
         </el-form-item>
@@ -62,11 +77,11 @@ export default {
         password: "",
         phoneNumber: "",
         verifyCode: "",
-        remember: true
+        remember: true,
       },
       content: "发送验证码",
       totalTime: 60,
-      canClick: true
+      canClick: true,
     };
   },
   methods: {
@@ -78,20 +93,20 @@ export default {
       let data;
       let url;
       if (this.loginMode === "phone") {
-        url = "https://aiknow.cn/study/account/sms/login";
+        url = "https://aiknow.cn/study/account/sms/login?end=c_plus_client";
         data = {
           phone: this.loginInfo.phoneNumber,
-          code: this.loginInfo.verifyCode
+          code: this.loginInfo.verifyCode,
         };
       } else {
-        url = "https://aiknow.cn/study/account/login";
+        url = "https://aiknow.cn/study/account/login?end=c_plus_client";
         data = {
           username: this.loginInfo.username,
-          password: this.loginInfo.password
+          password: this.loginInfo.password,
         };
       }
 
-      console.log("login user info: ", data)
+      console.log("login user info: ", data);
       const { data: res } = await this.$http.post(url, data);
       console.log("login rsp: ", res);
       if (res.errno !== 200) return this.$message.error(res.errmsg);
@@ -100,10 +115,13 @@ export default {
       myStorage.storeToSS("token", res.data.token);
       // 获取机构名称和ID
       // http://passport.aiknow.cn/passport/external/user/1
-      var userInfo = await this.$http.get("http://passport.aiknow.cn/passport/external/user/" + res.data.id)
-      console.log("ID: ", userInfo.data.data.alliances)
-      console.log("name: ", userInfo.data.data.allianceName)
-      
+      var passportUrl = "http://passport.aiknow.cn/passport/external/user/";
+      var userInfo = await this.$http.get(passportUrl + res.data.id);
+      var alliance = await this.$http.get(
+        passportUrl + userInfo.data.data.alliances
+      );
+      console.log("headimgurl: ", alliance.data.data.headimgurl);
+
       if (this.loginInfo.remember) {
         myStorage.storeToLS("userInfo", this.loginInfo);
       } else {
@@ -112,10 +130,13 @@ export default {
           password: "",
           phoneNumber: "",
           verifyCode: "",
-          remember: false
+          remember: false,
         });
       }
+      myStorage.storeToLS("headimgurl", alliance.data.data.headimgurl);
       this.$store.dispatch("getUserInfo");
+      location.reload(false)
+      // this.$router.go(0);
       // 判断是否有redirect，无跳转到home
       let redirect = this.$route.query.redirect;
       if (redirect) {
@@ -134,7 +155,7 @@ export default {
       const { data: res } = await this.$http.post(
         "https://aiknow.cn/study/sms",
         {
-          phone: this.loginInfo.phoneNumber
+          phone: this.loginInfo.phoneNumber,
         }
       );
 
@@ -159,19 +180,19 @@ export default {
       this.$message({
         message: "请登录",
         type: "success",
-        duration: 1000
+        duration: 1000,
       });
     },
     getLocalUserInfo() {
       if (myStorage.getFromLS("userInfo")) {
         this.loginInfo = myStorage.getFromLS("userInfo");
       }
-    }
+    },
   },
   created() {
     this.justNotice();
     this.getLocalUserInfo();
-  }
+  },
 };
 </script>
 

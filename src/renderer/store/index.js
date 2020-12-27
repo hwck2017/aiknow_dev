@@ -2,12 +2,13 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
 import router from '../router'
+import { stat } from 'fs'
 
 Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    userInfo: {
+    userInfo: JSON.parse(sessionStorage.getItem("loginUserInfo")) || {
       isLogin: false,
     },
     submissions: [
@@ -29,6 +30,10 @@ export default new Vuex.Store({
       state.userInfo = payload
       state.userInfo.isLogin = true
       // console.log(state.userInfo)
+      sessionStorage.setItem('loginUserInfo', JSON.stringify(state.userInfo))
+    },
+    setHeadImg(state, url) {
+      state.userInfo.headimgurl = url
     },
     logout(state) {
       state.userInfo = {}
@@ -107,9 +112,9 @@ export default new Vuex.Store({
   actions: {
     getUserInfo() {
       axios.get('/user').then(res => {
-        console.log(res)
+        console.log("getUserInfo: ", res)
         this.commit('login', res.data.data)
       })
-    },
+    }
   }
 })

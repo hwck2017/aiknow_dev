@@ -35,10 +35,10 @@
                 夜间模式
                 <el-switch
                   v-model="userOpt.editorTheme"
-                  active-color="#13ce66"
-                  inactive-color="#eee"
-                  active-value="monokai"
-                  inactive-value="clouds"
+                  active-color="#eee" 
+                  inactive-color="#13ce66"
+                  active-value="clouds"
+                  inactive-value="monokai"
                   @change="themeChangeHandle"
                 ></el-switch>
               </el-dropdown-item>
@@ -314,7 +314,7 @@ export default {
       userOpt: {
         languageOpt: "cpp",
         fontSize: 20,
-        editorTheme: "monokai",
+        editorTheme: "clouds",
       },
       needRun: false,
       languageOpts: languageOpts,

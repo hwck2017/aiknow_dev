@@ -135,7 +135,7 @@ export default {
       }
       myStorage.storeToLS("headimgurl", alliance.data.data.headimgurl);
       this.$store.dispatch("getUserInfo");
-      location.reload(false)
+      // location.reload(false)
       // this.$router.go(0);
       // 判断是否有redirect，无跳转到home
       let redirect = this.$route.query.redirect;

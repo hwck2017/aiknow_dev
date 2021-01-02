@@ -3,19 +3,19 @@
     <el-header>
       <el-row :gutter="5" type="flex" justify="space-between">
         <el-col :span="5">
-          <div style="display: flex; padding: 10px 0px">
-            <div v-if="headImgUrl == ''">
+          <div style="display: flex; padding: 5px 0px">
+            <!-- <div v-if="headImgUrl == ''"> -->
               <img
-                src="../../../static/logo.png"
-                style="width: 130px; height: 40px; vertical-align: middle"
+                src="https://aiknow.oss-cn-beijing.aliyuncs.com/image/540880fe-1d93-4861-9e28-d158fc5a156d.jpg"
+                style="width: 130px; height: 50px; vertical-align: middle"
               />
-            </div>
+            <!-- </div>
             <div v-else>
               <img
                 :src="headImgUrl"
                 style="width: 130px; height: 40px; vertical-align: middle"
               />
-            </div>
+            </div> -->
           </div>
         </el-col>
         <el-col :span="16">
@@ -23,7 +23,7 @@
             <el-menu
               :default-active="$route.path"
               mode="horizontal"
-              background-color="#000"
+              background-color="rgb(253, 155, 64)"
               text-color="#fff"
               active-text-color="#409EFF"
               router
@@ -55,7 +55,7 @@
             </el-menu>
           </div>
         </el-col>
-        <el-col :span="4">
+        <el-col :span="6">
           <div v-if="$store.state.userInfo.isLogin" style="padding: 15px 20px">
             <!-- <el-avatar
               :size="30"
@@ -94,7 +94,7 @@
       </el-main>
       <el-footer height="40px">
         <div class="footer">
-          2019-2020 &copy; 爱知部落<br />version {{ version }}
+          2019-2021 &copy; 爱知部落<br />version {{ version }}
         </div>
       </el-footer>
     </el-container>
@@ -131,7 +131,7 @@ export default {
     // },
     getVersion() {
       this.version = pkg.version;
-      console.log("process: ", pkg);
+      // console.log("process: ", pkg);
     },
     getHeadImgUrl() {
       // noexist is null
@@ -141,7 +141,7 @@ export default {
   },
   created() {
     this.getVersion();
-    console.log($store.state.userInfo.isLogin)
+    // console.log($store.state.userInfo.isLogin)
   },
   mounted() {
     this.getHeadImgUrl();
@@ -161,12 +161,12 @@ export default {
 
 .el-header {
   /* background-color: #f11c40; */
-  background-color: rgb(0, 0, 0);
+  background-color: rgb(253, 155, 64);
   height: 70px;
 }
 
 .el-button {
-  background: rgb(0, 0, 0) !important;
+  background: rgb(253, 155, 64) !important;
   color: #fff;
 }
 
@@ -195,7 +195,7 @@ export default {
   text-align: center;
   height: 20px;
   line-height: 20px;
-  color: #f11c40;
+  color: rgb(253, 155, 64);
 }
 
 /* .father .child {

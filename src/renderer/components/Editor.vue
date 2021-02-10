@@ -35,7 +35,7 @@
                 夜间模式
                 <el-switch
                   v-model="userOpt.editorTheme"
-                  active-color="#eee" 
+                  active-color="#eee"
                   inactive-color="#13ce66"
                   active-value="clouds"
                   inactive-value="monokai"
@@ -164,7 +164,19 @@
         <el-button type="primary" @click="addLangTab">确 定</el-button>
       </span>
     </el-dialog>
+    <el-dialog title="输出结果" width="80%" :visible.sync="opencmd" top="60vh">
+      <span>
+        <h2>
+          {{ output }}
+        </h2>
+      </span>
+      <!-- <span slot="footer" class="dialog-footer">
+        <el-button @click="opencmd = false">关 闭</el-button>
+      </span> -->
+    </el-dialog>
     <div class="ace-editor" ref="ace"></div>
+    <!-- for terminal -->
+    <div ref="terminal" :style="{ width: width, height: height }"></div>
   </div>
 </template>
  
@@ -179,39 +191,24 @@ var myEditor = require("../../../lib/editor/toolbar");
 var myFile = require("../../../lib/file");
 var myTab = require("../../../lib/editor/tab");
 var myStorage = require("../../../lib/storage");
-
-//编程语言选项
-const languageOpts = ["PYTHON", "CPP", "C"];
+var myRunner = require("../../../lib/runner");
 
 const extensions = [
-  [
-    "cpp",
-    [
-      { name: "CPP", extensions: ["cpp"] },
-      // { name: "C", extensions: ["c"] },
-      // { name: "Python", extensions: ["py"] },
-      // { name: "All Files", extensions: ["*"] },
-    ],
-  ],
-  [
-    "c",
-    [
-      { name: "C", extensions: ["c"] },
-      // { name: "CPP", extensions: ["cpp"] },
-      // { name: "Python", extensions: ["py"] },
-      // { name: "All Files", extensions: ["*"] },
-    ],
-  ],
-  [
-    "py",
-    [
-      { name: "Python", extensions: ["py"] },
-      // { name: "CPP", extensions: ["cpp"] },
-      // { name: "C", extensions: ["c"] },
-      // { name: "All Files", extensions: ["*"] },
-    ],
-  ],
+  ["cpp", [{ name: "CPP", extensions: ["cpp"] }]],
+  ["c", [{ name: "C", extensions: ["c"] }]],
+  ["py", [{ name: "Python", extensions: ["py"] }]],
 ];
+
+// for terminal
+import { Terminal } from "xterm";
+import os from "os";
+import "xterm/dist/xterm.css";
+import * as fit from "xterm/lib/addons/fit/fit";
+import * as attach from "xterm/lib/addons/attach/attach";
+// import {ipcRenderer} from 'electron'
+const pty = require("node-pty");
+Terminal.applyAddon(fit);
+Terminal.applyAddon(attach);
 
 const extMap = new Map(extensions);
 
@@ -222,6 +219,7 @@ export default {
       setSize: false,
       selectLang: false,
       libInstalling: false,
+      opencmd: false,
       libs: [
         {
           name: "openpyxl",
@@ -317,7 +315,6 @@ export default {
         editorTheme: "clouds",
       },
       needRun: false,
-      languageOpts: languageOpts,
       extensions: extMap,
       //激活的tab name
       activeTab: "0",
@@ -326,6 +323,20 @@ export default {
       editableTabs: [],
       prompt: false,
       checked: false,
+      output: "",
+      resultErr: "",
+      resultOut: "",
+      errno: 0,
+
+      // for terminal
+      xterm: null,
+      ptyProcess: null,
+      rows: 20,
+      cols: 120,
+      cwd: os.homedir(),
+      isInit: false,
+      foreground: "rgb(254,239,143)",
+      background: "rgb(22,102,47)",
     };
   },
   methods: {
@@ -536,9 +547,10 @@ export default {
         console.log("save as ok");
         if (this.needRun) {
           console.log("run: ", tab.suffix, "+", tab.filePath);
-          ipcRenderer.send("run", tab.suffix, tab.filePath);
+          this.execRun(tab.suffix, tab.filePath);
           this.needRun = false;
         }
+
         return;
       }
 
@@ -578,7 +590,7 @@ export default {
           myEditor.setMode(tab.suffix);
           fs.writeFileSync(tab.filePath, myEditor.getSourceCode());
           if (this.needRun) {
-            ipcRenderer.send("run", tab.suffix, tab.filePath);
+            this.execRun(tab.suffix, tab.filePath);
             this.needRun = false;
           }
         }
@@ -617,6 +629,47 @@ export default {
     run() {
       this.needRun = true;
       this.saveFile(false);
+    },
+    execRun(language, filePath) {
+      // console.log("exec run, language: ", language, " file path: ", filePath);
+      // this.opencmd = true;
+      // //编译
+      // let execFile = myRunner.compile(
+      //   language,
+      //   filePath,
+      //   (err, stdout, stderr) => {
+      //     this.resultOut = stdout;
+      //     this.resultErr = stderr;
+      //     if (err !== undefined) this.errno = err.code;
+      //     else this.errno = 0;
+
+      //     if (this.errno !== 0) {
+      //       this.output = this.resultErr;
+      //       console.log("compile result: ", this.output);
+      //       return;
+      //     }
+      //   }
+      // );
+
+      // //运行
+      // myRunner.run(language, execFile, (err, stdout, stderr) => {
+      //   this.resultOut = stdout;
+      //   this.resultErr = stderr;
+      //   if (err !== undefined) this.errno = err.code;
+      //   else this.errno = 0;
+
+      //   console.log("stdout: ", this.resultOut);
+      //   console.log("stderr: ", this.resultErr);
+      //   console.log("errno: ", this.errno);
+      //   if (this.errno !== 0) {
+      //     this.output = this.resultErr;
+      //   } else {
+      //     this.output = this.resultOut;
+      //   }
+
+      //   console.log("run result: ", this.output);
+      // });
+      this.ptyProcess.write("python3 " + filePath + "\n");
     },
     keyWatcher() {
       // js监听键盘ctrl + s快捷键保存;
@@ -673,6 +726,88 @@ export default {
       }
 
       this.keyWatcher();
+      // for terminal
+      this.initTerminal();
+    },
+
+    // for terminal
+    handleResize() {
+      this.$nextTick(() => {
+        let rect = this.$refs.main.getBoundingClientRect();
+        console.log(rect.width, rect.height, "resize");
+        this.resizeBySize(rect.width < 200 ? 200 : rect.width, rect.height);
+      });
+    },
+    reinit(options = {}) {
+      if (this.xterm || this.ptyProcess) {
+        this.xterm.destroy();
+        this.ptyProcess.destroy();
+        this.xterm = null;
+        this.ptyProcess = null;
+      }
+      this.cwd = options.cwd || this.cwd;
+      this.rows = options.rows || this.rows;
+      this.cols = options.cols || this.cols;
+      this.initTerminal();
+    },
+    initTerminal() {
+      // 判断terminal是否显示，没有显示的话，不做初始化操作（没有显示初始化会卡死）
+      // if (this.$refs.main.offsetParent === null) return;
+      if (!this.xterm || !this.ptyProcess) {
+        this.isInit = true;
+        const shell =
+          process.env[os.platform() === "win32" ? "COMSPEC" : "SHELL"];
+        let env = process.env;
+        env["LC_ALL"] = "zh_CN.UTF-8";
+        env["LANG"] = "zh_CN.UTF-8";
+        env["LC_CTYPE"] = "zh_CN.UTF-8";
+        this.ptyProcess = pty.spawn(shell, [], {
+          name: "xterm-color",
+          cols: this.cols,
+          rows: this.rows,
+          cwd: this.cwd,
+          env: env,
+          encoding: "utf8",
+        });
+        this.xterm = new Terminal({
+          cols: this.cols,
+          rows: this.rows,
+          theme: {
+            foreground: this.foreground,
+            background: this.background,
+            cursor: this.foreground,
+          },
+          cursorBlink: 5,
+        });
+        this.xterm.open(this.$refs.terminal);
+        this.xterm.fit();
+        this.xterm.on("data", (data) => {
+          console.log("xterm:", JSON.stringify(data));
+          this.ptyProcess.write(data);
+        });
+        this.ptyProcess.on("data", (data) => {
+          console.log("ptyProcess:", JSON.stringify(data), typeof data);
+          this.xterm.write(data);
+        });
+      }
+    },
+    execute(cmd) {
+      this.ptyProcess.write(cmd + "\n");
+    },
+    resize(cols, rows) {
+      this.cols = cols;
+      this.rows = rows;
+      this.xterm.resize(cols, rows);
+      this.ptyProcess.resize(cols, rows);
+    },
+    resizeBySize(width, height) {
+      let cols = Math.floor((width - 20) / 9);
+      let rows = Math.floor(height / 17);
+      this.resize(cols, rows);
+    },
+    resizeHeight(height) {
+      let rows = Math.floor(height / 17);
+      this.resize(this.cols, rows);
     },
   },
   created() {
@@ -681,6 +816,14 @@ export default {
   mounted() {
     this.init();
     this.promptUpdate();
+  },
+  computed: {
+    width() {
+      return this.cols * 9 + 20 + "px";
+    },
+    height() {
+      return this.rows * 17 + "px";
+    },
   },
 };
 </script>

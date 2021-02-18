@@ -169,7 +169,6 @@ function spawn(command, args, callback) {
     }
 
     if (error) {
-      console.log("-----:", error)
       if (error.code == null) error.code = code;
       if (error.stdout == null) error.stdout = stdout;
     }

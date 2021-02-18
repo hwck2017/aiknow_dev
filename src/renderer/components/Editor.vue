@@ -191,7 +191,7 @@ var myEditor = require("../../../lib/editor/toolbar");
 var myFile = require("../../../lib/file");
 var myTab = require("../../../lib/editor/tab");
 var myStorage = require("../../../lib/storage");
-var myRunner = require("../../../lib/runner");
+// var myRunner = require("../../../lib/runner");
 
 const extensions = [
   ["cpp", [{ name: "CPP", extensions: ["cpp"] }]],
@@ -333,7 +333,7 @@ export default {
       ptyProcess: null,
       rows: 20,
       cols: 120,
-      cwd: os.homedir(),
+      cwd: os.homedir(), // /var/root
       isInit: false,
       foreground: "rgb(254,239,143)",
       background: "rgb(22,102,47)",
@@ -631,45 +631,24 @@ export default {
       this.saveFile(false);
     },
     execRun(language, filePath) {
-      // console.log("exec run, language: ", language, " file path: ", filePath);
-      // this.opencmd = true;
-      // //编译
-      // let execFile = myRunner.compile(
-      //   language,
-      //   filePath,
-      //   (err, stdout, stderr) => {
-      //     this.resultOut = stdout;
-      //     this.resultErr = stderr;
-      //     if (err !== undefined) this.errno = err.code;
-      //     else this.errno = 0;
+      let cmd;
+      console.log("exec run, language: ", language, " file path: ", filePath);
+      switch (language) {
+        case "py":
+          cmd = "python3 " + filePath;
+          break;
+        case "cpp":
+          cmd = "g++ " + filePath + " -o ./a.out; ./a.out";
+          break;
+        case "c":
+          cmd = "gcc " + filePath + " -o ./a.out; ./a.out";
+          break;
+        default:
+          //nothing to do
+          break;
+      }
 
-      //     if (this.errno !== 0) {
-      //       this.output = this.resultErr;
-      //       console.log("compile result: ", this.output);
-      //       return;
-      //     }
-      //   }
-      // );
-
-      // //运行
-      // myRunner.run(language, execFile, (err, stdout, stderr) => {
-      //   this.resultOut = stdout;
-      //   this.resultErr = stderr;
-      //   if (err !== undefined) this.errno = err.code;
-      //   else this.errno = 0;
-
-      //   console.log("stdout: ", this.resultOut);
-      //   console.log("stderr: ", this.resultErr);
-      //   console.log("errno: ", this.errno);
-      //   if (this.errno !== 0) {
-      //     this.output = this.resultErr;
-      //   } else {
-      //     this.output = this.resultOut;
-      //   }
-
-      //   console.log("run result: ", this.output);
-      // });
-      this.ptyProcess.write("python3 " + filePath + "\n");
+      this.ptyProcess.write(cmd + "\n");
     },
     keyWatcher() {
       // js监听键盘ctrl + s快捷键保存;
@@ -756,19 +735,27 @@ export default {
       if (!this.xterm || !this.ptyProcess) {
         this.isInit = true;
         const shell =
-          process.env[os.platform() === "win32" ? "COMSPEC" : "SHELL"];
+          process.env[
+            os.platform() === "win32" ? process.env.COMSPEC : process.env.SHELL
+          ];
         let env = process.env;
         env["LC_ALL"] = "zh_CN.UTF-8";
         env["LANG"] = "zh_CN.UTF-8";
         env["LC_CTYPE"] = "zh_CN.UTF-8";
+        // TODO: 环境变量增加python库路径
+        env["PATH"] =
+          env["PATH"] + ":/usr/local/lib/python3.9:/usr/local/bin";
         this.ptyProcess = pty.spawn(shell, [], {
           name: "xterm-color",
           cols: this.cols,
           rows: this.rows,
-          cwd: this.cwd,
+          cwd: process.env.HOME,
           env: env,
           encoding: "utf8",
+          uid: 0,
         });
+
+        console.log("cwd: ", this.cwd);
         this.xterm = new Terminal({
           cols: this.cols,
           rows: this.rows,
@@ -782,11 +769,11 @@ export default {
         this.xterm.open(this.$refs.terminal);
         this.xterm.fit();
         this.xterm.on("data", (data) => {
-          console.log("xterm:", JSON.stringify(data));
+          // console.log("xterm:", JSON.stringify(data));
           this.ptyProcess.write(data);
         });
         this.ptyProcess.on("data", (data) => {
-          console.log("ptyProcess:", JSON.stringify(data), typeof data);
+          // console.log("ptyProcess:", JSON.stringify(data), typeof data);
           this.xterm.write(data);
         });
       }

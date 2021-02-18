@@ -1,14 +1,23 @@
 <template>
   <div id="app">
     <router-view></router-view>
+    <!-- <headerComponent class="headerBg"></headerComponent> -->
+
   </div>
 </template>
 
 <script>
 var { ipcRenderer } = require("electron");
 
+// import headerComponent from './components/header.vue'
+
 export default {
   name: "AiknowEditor",
+
+  // components: {
+  //   headerComponent,
+  // },
+
   methods: {
     Watcher() {
       ipcRenderer.on("message", (event, text) => {
@@ -33,3 +42,10 @@ export default {
   }
 };
 </script>
+
+<style>
+  .headerBg {
+    width: 100%;
+    height: 60px;
+  }
+</style>

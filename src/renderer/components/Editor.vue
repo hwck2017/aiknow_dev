@@ -185,7 +185,8 @@ var fs = require("fs");
 var jschardet = require("jschardet");
 var iconv = require("iconv-lite");
 var { ipcRenderer } = require("electron");
-const { dialog } = require("electron").remote;
+var path = require("path");
+const { dialog, app } = require("electron").remote;
 
 var myEditor = require("../../../lib/editor/toolbar");
 var myFile = require("../../../lib/file");
@@ -630,25 +631,71 @@ export default {
       this.needRun = true;
       this.saveFile(false);
     },
-    execRun(language, filePath) {
+    execRunPy(filePath) {
       let cmd;
+      let appDir = path.dirname(app.getAppPath());
+
+      if (process.platform === "darwin") {
+        cmd = "python3 " + filePath;
+      } else if (process.platform === "win32") {
+        let compiler = appDir + "\\resources\\Python\\python.exe";
+        cmd = compiler + " " + filePath + " -o ./a.out; ./a.out";
+      } else {
+        // nothing to do
+      }
+
+      this.ptyProcess.write(cmd + "\n");
+    },
+    execRunCpp(filePath) {
+      let cmd;
+      let appDir = path.dirname(app.getAppPath());
+
+      if (process.platform === "darwin") {
+        cmd = "g++ " + filePath + " -o ./a.out; ./a.out";
+      } else if (process.platform === "win32") {
+        let compiler = appDir + "\\resources\\MinGW64\\bin\\g++.exe";
+        let console = appDir + "\\resources\\ConsolePauser.exe";
+        cmd =
+          compiler + " " + filePath + " -o ./a.out; " + console + " ./a.out";
+      } else {
+        // nothing to do
+      }
+
+      this.ptyProcess.write(cmd + "\n");
+    },
+    execRunC(filePath) {
+      let cmd;
+      let appDir = path.dirname(app.getAppPath());
+
+      if (process.platform === "darwin") {
+        cmd = "gcc " + filePath + " -o ./a.out; ./a.out";
+      } else if (process.platform === "win32") {
+        let compiler = appDir + "\\resources\\MinGW64\\bin\\gcc.exe";
+        let console = appDir + "\\resources\\ConsolePauser.exe";
+        cmd =
+          compiler + " " + filePath + " -o ./a.out; " + console + " ./a.out";
+      } else {
+        // nothing to do
+      }
+
+      this.ptyProcess.write(cmd + "\n");
+    },
+    execRun(language, filePath) {
       console.log("exec run, language: ", language, " file path: ", filePath);
       switch (language) {
         case "py":
-          cmd = "python3 " + filePath;
+          this.execRunPy(filePath);
           break;
         case "cpp":
-          cmd = "g++ " + filePath + " -o ./a.out; ./a.out";
+          this.execRunCpp(filePath);
           break;
         case "c":
-          cmd = "gcc " + filePath + " -o ./a.out; ./a.out";
+          this.execRunC(filePath);
           break;
         default:
           //nothing to do
           break;
       }
-
-      this.ptyProcess.write(cmd + "\n");
     },
     keyWatcher() {
       // js监听键盘ctrl + s快捷键保存;
@@ -742,9 +789,7 @@ export default {
         env["LC_ALL"] = "zh_CN.UTF-8";
         env["LANG"] = "zh_CN.UTF-8";
         env["LC_CTYPE"] = "zh_CN.UTF-8";
-        // TODO: 环境变量增加python库路径
-        env["PATH"] =
-          env["PATH"] + ":/usr/local/lib/python3.9:/usr/local/bin";
+
         this.ptyProcess = pty.spawn(shell, [], {
           name: "xterm-color",
           cols: this.cols,

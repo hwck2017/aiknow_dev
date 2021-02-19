@@ -1,6 +1,6 @@
 var { ipcMain, dialog, app } = require('electron');
 var path = require("path");
-// const { spawn } = require('child_process');
+const { spawn } = require('child_process');
 const ChildProcess = require('child_process');
 
 var myFile = require("../../lib/file")
@@ -22,10 +22,10 @@ ipcMain.on('action', (event, action, data) => {
   }
 })
 
-ipcMain.on('run', (event, lang, fullPath) => {
-  console.log("compile and run: ", fullPath)
-  runExec(lang, fullPath)
-})
+// ipcMain.on('run', (event, lang, fullPath) => {
+//   console.log("compile and run: ", fullPath)
+//   runExec(lang, fullPath)
+// })
 
 //判断文件是否需要保存, 保存则执行保存操作
 function askSaveDialog() {
@@ -72,51 +72,51 @@ function libManage(action, lib) {
 }
 
 // TODO: 需拿到运行结果
-function runExec(lang, fullPath) {
-  var exePath, fileName;
-  exePath = path.dirname(app.getAppPath()); ///Applications/AiknowEditor.app/Contents/Resources
-  // dir = myFile.getDir(fullPath);
-  fileName = myFile.getFileName(fullPath);
-  console.log("app path: %s, file name: %s", exePath, fileName);
-  console.log("platform: %s", process.platform);
+// function runExec(lang, fullPath) {
+//   var exePath, fileName;
+//   exePath = path.dirname(app.getAppPath()); ///Applications/AiknowEditor.app/Contents/Resources
+//   // dir = myFile.getDir(fullPath);
+//   fileName = myFile.getFileName(fullPath);
+//   console.log("app path: %s, file name: %s", exePath, fileName);
+//   console.log("platform: %s", process.platform);
 
-  var compiler, output, proc;
-  if (process.platform === 'win32') {
-    if (lang === "cpp") {
-      compiler = exePath + "\\win32\\run_cpp.bat";
-      output = fileName.substring(0, fileName.indexOf(".")) + ".exe";
-      console.log("output file name: %s", output);
-      spawn('cmd', ['/c', 'start', 'call', compiler, fullPath, output], (err, stdout) => {
-        console.log(err, stdout)
-      })
-    } else if (lang === "c") {
-      compiler = exePath + "\\win32\\run_c.bat";
-      output = fileName.substring(0, fileName.indexOf(".")) + ".exe";
-      console.log("output file name: %s", output);
-      spawn('cmd', ['/c', 'start', 'call', compiler, fullPath, output], (err, stdout) => {
-        console.log(err, stdout)
-      })
-    } else if (lang === "py") {
-      compiler = exePath + "\\win32\\run_py.bat";
-      spawn('cmd', ['/c', 'start', 'call', compiler, fullPath], (err, stdout) => {
-        console.log(err, stdout)
-      })
-    } else {
-      // TODO
-    }
-  } else if (process.platform === 'darwin') {
-    console.log("compile: ", fullPath)
-    // compiler = exePath + "/darwin/run.scpt"
-    // spawn('osascript', [compiler, fullPath, lang], (err, stdout) => {
-    //   console.log(err, stdout)
-    // });
-    spawn('python', [fullPath], (err, stdout, stderr) => {
-        console.log("err: ", err, "stdout123: ", stdout, "stderr123: ", stderr)
-      })
-  } else {
-    // TODO
-  }
-}
+//   var compiler, output, proc;
+//   if (process.platform === 'win32') {
+//     if (lang === "cpp") {
+//       compiler = exePath + "\\win32\\run_cpp.bat";
+//       output = fileName.substring(0, fileName.indexOf(".")) + ".exe";
+//       console.log("output file name: %s", output);
+//       spawn('cmd', ['/c', 'start', 'call', compiler, fullPath, output], (err, stdout) => {
+//         console.log(err, stdout)
+//       })
+//     } else if (lang === "c") {
+//       compiler = exePath + "\\win32\\run_c.bat";
+//       output = fileName.substring(0, fileName.indexOf(".")) + ".exe";
+//       console.log("output file name: %s", output);
+//       spawn('cmd', ['/c', 'start', 'call', compiler, fullPath, output], (err, stdout) => {
+//         console.log(err, stdout)
+//       })
+//     } else if (lang === "py") {
+//       compiler = exePath + "\\win32\\run_py.bat";
+//       spawn('cmd', ['/c', 'start', 'call', compiler, fullPath], (err, stdout) => {
+//         console.log(err, stdout)
+//       })
+//     } else {
+//       // TODO
+//     }
+//   } else if (process.platform === 'darwin') {
+//     console.log("compile: ", fullPath)
+//     compiler = exePath + "/darwin/run.scpt"
+//     spawn('osascript', [compiler, fullPath, lang], (err, stdout) => {
+//       console.log(err, stdout)
+//     });
+//     // spawn('python', [fullPath], (err, stdout, stderr) => {
+//     //     console.log("err: ", err, "stdout123: ", stdout, "stderr123: ", stderr)
+//     //   })
+//   } else {
+//     // TODO
+//   }
+// }
 
 ipcMain.on('direct', () => {
   if (process.platform === 'win32') {
@@ -141,42 +141,42 @@ ipcMain.on('common', () => {
   }
 })
 
-function spawn(command, args, callback) {
-  let error;
-  let spawnedProcess;
-  let stdout = '';
-  let stderr = '';
+// function spawn(command, args, callback) {
+//   let error;
+//   let spawnedProcess;
+//   let stdout = '';
+//   let stderr = '';
 
-  try {
-    spawnedProcess = ChildProcess.spawn(command, args);
-  } catch (error) {
-    process.nextTick(() => callback && callback(error, stdout));
-    return;
-  }
+//   try {
+//     spawnedProcess = ChildProcess.spawn(command, args);
+//   } catch (error) {
+//     process.nextTick(() => callback && callback(error, stdout));
+//     return;
+//   }
 
-  spawnedProcess.stdout.on('data', data => {
-    stdout += data;
-  });
-  spawnedProcess.stderr.on('data', data=> {
-    stderr += data;
-  });
-  spawnedProcess.on('error', processError => {
-    error = processError;
-  });
-  spawnedProcess.on('close', (code, signal) => {
-    if (!error && code !== 0) {
-      error = new Error(`Command failed: ${signal != null ? signal : code}`);
-    }
+//   spawnedProcess.stdout.on('data', data => {
+//     stdout += data;
+//   });
+//   spawnedProcess.stderr.on('data', data=> {
+//     stderr += data;
+//   });
+//   spawnedProcess.on('error', processError => {
+//     error = processError;
+//   });
+//   spawnedProcess.on('close', (code, signal) => {
+//     if (!error && code !== 0) {
+//       error = new Error(`Command failed: ${signal != null ? signal : code}`);
+//     }
 
-    if (error) {
-      if (error.code == null) error.code = code;
-      if (error.stdout == null) error.stdout = stdout;
-    }
+//     if (error) {
+//       if (error.code == null) error.code = code;
+//       if (error.stdout == null) error.stdout = stdout;
+//     }
 
-    callback && callback(error, stdout, stderr);
-  });
+//     callback && callback(error, stdout, stderr);
+//   });
 
-  // This is necessary if using Powershell 2 on Windows 7 to get the events to raise
-  // http://stackoverflow.com/questions/9155289/calling-powershell-from-nodejs
-  return spawnedProcess.stdin.end();
-}
+//   // This is necessary if using Powershell 2 on Windows 7 to get the events to raise
+//   // http://stackoverflow.com/questions/9155289/calling-powershell-from-nodejs
+//   return spawnedProcess.stdin.end();
+// }

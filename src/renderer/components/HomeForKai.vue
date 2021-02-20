@@ -1,11 +1,67 @@
 <template>
   <el-container class="home-container">
     <el-header>
-      <img class="headerBgImg" src="https://aiknow.cn/res/python.png" alt="">
-
       <el-row :gutter="5" type="flex" justify="space-between">
         <el-col :span="5">
+          <div style="display: flex; padding: 5px 0px">
+            <!-- <div v-if="headImgUrl == ''"> -->
+              <img
+                src="https://aiknow.oss-cn-beijing.aliyuncs.com/image/540880fe-1d93-4861-9e28-d158fc5a156d.jpg"
+                style="width: 130px; height: 50px; vertical-align: middle"
+              />
+            <!-- </div>
+            <div v-else>
+              <img
+                :src="headImgUrl"
+                style="width: 130px; height: 40px; vertical-align: middle"
+              />
+            </div> -->
+          </div>
+        </el-col>
+        <el-col :span="16">
+          <div>
+            <el-menu
+              :default-active="$route.path"
+              mode="horizontal"
+              background-color="rgb(253, 155, 64)"
+              text-color="#fff"
+              active-text-color="#409EFF"
+              router
+            >
+              <el-menu-item index="/dashboard">
+                <i class="el-icon-s-home"></i>
+                <span slot="title">主页</span>
+              </el-menu-item>
+              <el-menu-item index="/problems">
+                <i class="el-icon-menu"></i>
+                <span slot="title">题目</span>
+              </el-menu-item>
+              <el-menu-item index="/editor">
+                <i class="el-icon-edit"></i>
+                <span slot="title">编辑器</span>
+              </el-menu-item>
+              <!-- <el-menu-item index="/contest" disabled>
+                <i class="el-icon-s-flag"></i>
+                <span slot="title">比赛</span>
+              </el-menu-item>
+              <el-menu-item index="/groups" disabled>
+                <i class="el-icon-user"></i>
+                <span slot="title">小组</span>
+              </el-menu-item>
+              <el-menu-item index="/ranklist" disabled>
+                <i class="el-icon-trophy"></i>
+                <span slot="title">排行榜</span>
+              </el-menu-item>-->
+            </el-menu>
+          </div>
+        </el-col>
+        <el-col :span="6">
           <div v-if="$store.state.userInfo.isLogin" style="padding: 15px 20px">
+            <!-- <el-avatar
+              :size="30"
+              :src="$getAvatar($store.state.userInfo.uid)"
+              style="vertical-align:middle;"
+            ></el-avatar>-->
             <el-avatar
               :size="35"
               :src="circleUrl"
@@ -26,67 +82,11 @@
               </el-dropdown>
             </span>
           </div>
-          <div v-else style="">
-            <el-button class="loginBtn" plain @click="login">登录</el-button>
+          <div v-else style="padding: 10px 0px">
+            <el-button plain @click="login">登录</el-button>
           </div>
-        </el-col>
-        <el-col :span="16">
-          <div>
-            <!-- <el-menu
-              :default-active="$route.path"
-              mode="horizontal"
-              text-color="#fff"
-              active-text-color="#1E4796"
-              router
-            >
-
-
-              <el-menu-item index="/dashboard">
-                <i class="el-icon-s-home"></i>
-                <span slot="title">主页</span>
-              </el-menu-item>
-              <el-menu-item index="/editor">
-                <i class="el-icon-edit"></i>
-                <span slot="title">编辑器</span>
-              </el-menu-item>
-              <el-menu-item index="/problems">
-                <i class="el-icon-menu"></i>
-                <span slot="title">题目</span>
-              </el-menu-item>
-              <el-menu-item index="/contest" disabled>
-                <i class="el-icon-s-flag"></i>
-                <span slot="title">比赛</span>
-              </el-menu-item>
-              <el-menu-item index="/groups" disabled>
-                <i class="el-icon-user"></i>
-                <span slot="title">小组</span>
-              </el-menu-item>
-              <el-menu-item index="/ranklist" disabled>
-                <i class="el-icon-trophy"></i>
-                <span slot="title">排行榜</span>
-              </el-menu-item>
-            </el-menu> -->
-
-            <div class="elMenuBg">
-              <div :class="headerItemSelectedIndex == 0 ? 'elMenuItemSelected' : 'elMenuItem'" @click="jump(0, '/dashboard')">
-                <span class="itemTitle">主页</span>
-              </div>
-              <div :class="headerItemSelectedIndex == 1 ? 'elMenuItemSelected' : 'elMenuItem'" @click="jump(1, '/editor')">
-                <span class="itemTitle">编辑器</span>
-              </div>
-              <div :class="headerItemSelectedIndex == 2 ? 'elMenuItemSelected' : 'elMenuItem'" @click="jump(2, '/problems')">
-                <span class="itemTitle">题目</span>
-              </div>
-            </div>
-
-
-          </div>
-        </el-col>
-        <el-col :span="6">
-
         </el-col>
       </el-row>
-
     </el-header>
     <el-container>
       <el-main>
@@ -112,7 +112,6 @@ export default {
       circleUrl:
         "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png",
       headImgUrl: "",
-      headerItemSelectedIndex: 0,
     };
   },
   methods: {
@@ -139,11 +138,6 @@ export default {
       this.headImgUrl = myStorage.getFromLS("headimgurl");
       console.log("headimgurl: ", this.headImgUrl);
     },
-
-    jump(index, path) {
-      this.headerItemSelectedIndex = index;
-      this.$router.push({ path: path });      
-    }
   },
   created() {
     this.getVersion();
@@ -167,19 +161,8 @@ export default {
 
 .el-header {
   /* background-color: #f11c40; */
-  /* background-color: rgb(253, 155, 64); */
-  height: auto;
-  /* background: url('https://aiknow.cn/res/python.png') no-repeat 100% 100%; */
-  position: relative;;
-}
-
-.headerBgImg {
-  position: absolute;
-  width: 100%;
-  height: 130px;
-  object-fit: initial;
-  top: 0;
-  left: 0;
+  background-color: rgb(253, 155, 64);
+  height: 70px;
 }
 
 .el-button {
@@ -205,46 +188,7 @@ export default {
 }
 
 .el-menu-item {
-}
-
-.elMenuBg {
-  display: flex;
-  float: right;
-}
-
-.elMenuItem {
-  padding: 0 30px;
-  height: 40px;
-  line-height: 40px;
-  background-color: none;
-  margin-top: 15px;
-  color: #fff;
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.elMenuItemSelected {
-  padding: 0 30px;
-  height: 40px;
-  line-height: 40px;
-  background-color: #fff;
-  margin-top: 15px;
-  color: #1E4796;
-  border-radius: 6px;
-  font-size: 18px;
-  font-weight: bold;
-}
-
-
-.loginBtn {
-  height: 40px;
-  line-height: 40px;
-  background: none !important;
-  border: none;
-  color: #fff;
-  font-size: 18px;
-  font-weight: bold;
-  margin-top: 4px;
+  font-size: 18px !important;
 }
 
 .footer {

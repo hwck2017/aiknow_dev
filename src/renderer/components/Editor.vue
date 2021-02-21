@@ -633,11 +633,12 @@ export default {
     },
     execRunPy(filePath) {
       let cmd;
-      let appDir = path.dirname(app.getAppPath());
+      // let appDir = path.dirname(app.getAppPath());
 
       if (process.platform === "darwin") {
         cmd = "python3 " + filePath;
       } else if (process.platform === "win32") {
+        let appDir = "E:\\Program Files\\AiknowEditor";
         let compiler = appDir + "\\resources\\Python\\python.exe";
         cmd = compiler + " " + filePath + " -o ./a.out; ./a.out";
       } else {
@@ -648,15 +649,16 @@ export default {
     },
     execRunCpp(filePath) {
       let cmd;
-      let appDir = path.dirname(app.getAppPath());
+      // let appDir = path.dirname(app.getAppPath());
 
       if (process.platform === "darwin") {
         cmd = "g++ " + filePath + " -o ./a.out; ./a.out";
       } else if (process.platform === "win32") {
+        let appDir = "E:\\Program Files\\AiknowEditor";
         let compiler = appDir + "\\resources\\MinGW64\\bin\\g++.exe";
         let console = appDir + "\\resources\\ConsolePauser.exe";
         cmd =
-          compiler + " " + filePath + " -o ./a.out; " + console + " ./a.out";
+          '"' + compiler + '" "' + filePath + '" -o "C:\\Users\\Administrator\\Desktop\\a.out"; ' + '"' + console + '"' + ' "C:\\Users\\Administrator\\Desktop\\a.out"';
       } else {
         // nothing to do
       }
@@ -665,11 +667,12 @@ export default {
     },
     execRunC(filePath) {
       let cmd;
-      let appDir = path.dirname(app.getAppPath());
+      // let appDir = path.dirname(app.getAppPath());
 
       if (process.platform === "darwin") {
         cmd = "gcc " + filePath + " -o ./a.out; ./a.out";
       } else if (process.platform === "win32") {
+        let appDir = "E:\\Program Files\\AiknowEditor";
         let compiler = appDir + "\\resources\\MinGW64\\bin\\gcc.exe";
         let console = appDir + "\\resources\\ConsolePauser.exe";
         cmd =
@@ -791,13 +794,13 @@ export default {
         env["LC_CTYPE"] = "zh_CN.UTF-8";
 
         this.ptyProcess = pty.spawn(shell, [], {
-          name: "xterm-color",
+          name: "Terminal",
           cols: this.cols,
           rows: this.rows,
           cwd: process.env.HOME,
           env: env,
           encoding: "utf8",
-          uid: 0,
+          // uid: 0,
         });
 
         console.log("cwd: ", this.cwd);
@@ -814,11 +817,11 @@ export default {
         this.xterm.open(this.$refs.terminal);
         this.xterm.fit();
         this.xterm.on("data", (data) => {
-          // console.log("xterm:", JSON.stringify(data));
+          console.log("xterm:", JSON.stringify(data));
           this.ptyProcess.write(data);
         });
         this.ptyProcess.on("data", (data) => {
-          // console.log("ptyProcess:", JSON.stringify(data), typeof data);
+          console.log("ptyProcess:", JSON.stringify(data), typeof data);
           this.xterm.write(data);
         });
       }

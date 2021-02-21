@@ -1,13 +1,13 @@
 <template>
   <el-container class="home-container">
-    <el-header>
+    <el-header style="height: 70px">
       <img class="headerBgImg" src="https://aiknow.cn/res/python.png" alt="">
 
       <el-row :gutter="5" type="flex" justify="space-between">
         <el-col :span="5">
-          <div v-if="$store.state.userInfo.isLogin" style="padding: 15px 20px">
+          <div class="loginInfoBg" v-if="$store.state.userInfo.isLogin">
             <el-avatar
-              :size="35"
+              :size="48"
               :src="circleUrl"
               style="vertical-align: middle"
             ></el-avatar>
@@ -27,7 +27,7 @@
             </span>
           </div>
           <div v-else style="">
-            <el-button class="loginBtn" plain @click="login">登录</el-button>
+            <el-button class="loginBtn" @click="login">登录</el-button>
           </div>
         </el-col>
         <el-col :span="16">
@@ -39,8 +39,6 @@
               active-text-color="#1E4796"
               router
             >
-
-
               <el-menu-item index="/dashboard">
                 <i class="el-icon-s-home"></i>
                 <span slot="title">主页</span>
@@ -78,7 +76,6 @@
                 <span class="itemTitle">题目</span>
               </div>
             </div>
-
 
           </div>
         </el-col>
@@ -156,8 +153,18 @@ export default {
 </script>
 
 <style scoped>
+
+@font-face {
+  font-family: tonjayBold;
+  src: url('../../../lib/font/SweiGospelSansCJKsc-Black.ttf') format('woff');
+}
+
 .home-container {
   height: 100%;
+}
+
+.loginInfoBg {
+  margin-top: 15px;
 }
 
 .el-radio-group {
@@ -171,21 +178,23 @@ export default {
   height: auto;
   /* background: url('https://aiknow.cn/res/python.png') no-repeat 100% 100%; */
   position: relative;;
+  z-index: 9;
+ 
 }
 
 .headerBgImg {
   position: absolute;
   width: 100%;
-  height: 130px;
+  height: 140px;
   object-fit: initial;
   top: 0;
   left: 0;
 }
 
-.el-button {
+/* .el-button {
   background: rgb(253, 155, 64) !important;
   color: #fff;
-}
+} */
 
 .title-style {
   color: #409eff;
@@ -198,7 +207,9 @@ export default {
 .el-dropdown-link {
   cursor: pointer;
   color: #fff;
-  font-size: 24px;
+  font-size: 26px;
+  font-weight: bold;
+  margin-left: 10px;
 }
 .el-icon-arrow-down {
   font-size: 16px;
@@ -214,44 +225,56 @@ export default {
 
 .elMenuItem {
   padding: 0 30px;
-  height: 40px;
-  line-height: 40px;
+  height: 48px;
+  line-height: 48px;
   background-color: none;
   margin-top: 15px;
   color: #fff;
-  font-size: 18px;
-  font-weight: bold;
+  font-size: 26px;
+  font-family: tonjayBold;
+
 }
 
 .elMenuItemSelected {
   padding: 0 30px;
-  height: 40px;
-  line-height: 40px;
+  height: 48px;
+  line-height: 48px;
   background-color: #fff;
   margin-top: 15px;
-  color: #1E4796;
+  color: #275ca7;
   border-radius: 6px;
-  font-size: 18px;
-  font-weight: bold;
+  font-size: 26px;
+  font-family: tonjayBold;
 }
 
 
 .loginBtn {
-  height: 40px;
-  line-height: 40px;
-  background: none !important;
+  height: 48px;
+  background: none;
   border: none;
   color: #fff;
-  font-size: 18px;
+  font-size: 26px;
   font-weight: bold;
-  margin-top: 4px;
+  margin-top: 15px;
 }
+
+.loginBtn:focus .loginBtn:hover {
+  background: #fff;
+  background-color: #fff;
+  color: #275ca7;
+}
+
 
 .footer {
   text-align: center;
   height: 20px;
   line-height: 20px;
   color: rgb(253, 155, 64);
+}
+
+.el-main {
+  padding: 0;
+  padding-top: 2px;
 }
 
 /* .father .child {
@@ -262,6 +285,7 @@ export default {
   display: block;
 } */
 </style>
+
 
 
 

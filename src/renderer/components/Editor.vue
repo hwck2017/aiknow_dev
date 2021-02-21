@@ -2,10 +2,10 @@
   <div>
     <div class="tool-bar">
       <el-row :gutter="10">
-        <el-col :span="21">
+        <el-col>
           <el-dropdown size="medium" @command="fileOperProc">
-            <el-button size="medium">
-              <i class="el-icon-folder-opened"></i>
+            <el-button class="toolBtn" size="medium">
+              <!-- <i class="el-icon-folder-opened"></i> -->
               文件
               <i class="el-icon-arrow-down el-icon--right"></i>
             </el-button>
@@ -16,11 +16,39 @@
               <el-dropdown-item command="saveAs">另存为</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
-          <el-button size="medium" icon="el-icon-s-promotion" @click="run"
+          <el-button class="toolBtn" size="medium" @click="run"
             >运行</el-button
           >
+          <el-dropdown size="medium" @command="setCmdHandle">
+            <el-button class="toolBtn" size="medium">
+              <!-- <i class="el-icon-setting"></i> -->
+              设置
+              <i class="el-icon-arrow-down el-icon--right"></i>
+            </el-button>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item command="frontSize">
+                字体大小
+              </el-dropdown-item>
+              <el-dropdown-item divided command="theme">
+                夜间模式
+                <el-switch
+                  v-model="userOpt.editorTheme"
+                  active-color="#eee"
+                  inactive-color="#13ce66"
+                  active-value="clouds"
+                  inactive-value="monokai"
+                  @change="themeChangeHandle"
+                ></el-switch>
+              </el-dropdown-item>
+              <el-dropdown-item divided command="libs">
+                Python库管理
+              </el-dropdown-item>
+              <el-dropdown-item divided command="help"> 帮助 </el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+
         </el-col>
-        <el-col :span="3">
+        <!-- <el-col :span="3">
           <el-dropdown size="medium" @command="setCmdHandle">
             <el-button size="medium">
               <i class="el-icon-setting"></i>
@@ -48,7 +76,7 @@
               <el-dropdown-item divided command="help"> 帮助 </el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
-        </el-col>
+        </el-col> -->
       </el-row>
     </div>
     <div>
@@ -833,12 +861,58 @@ export default {
   width: 100%;
 }
 
-.tool-bar {
+/* .tool-bar {
   margin: 10px 0;
   width: 99%;
   height: 37px;
   background-color: #eee;
   border: 1px solid #409eff;
   padding: 4px;
+} */
+
+.tool-bar {
+  width: 400px;
+  height: 48px;
+  line-height: 48px;
+  background-color: none;
+  position: fixed;
+  top: 10px;
+  left: 300px;
+  z-index: 10;
+}
+
+.toolBtn {
+  color: #fff;
+  font-size: 26px;
+  font-weight: bold;
+  margin-top: 6px;
+  background: none;
+  border: none;
+}
+
+</style>
+
+<style>
+
+.el-tabs__header {
+  margin: 0 !important;
+  z-index: 11;
+  border-bottom: none !important;
+}
+
+.el-tabs--card>.el-tabs__header .el-tabs__nav {
+  border: none !important;
+}
+
+.el-tabs--card>.el-tabs__header .el-tabs__item.is-active {
+  border-bottom: none !important;
+}
+
+.el-tabs__nav-wrap {
+  margin-bottom: 0 !important;
+}
+
+.el-tabs__new-tab {
+  display: none;
 }
 </style>

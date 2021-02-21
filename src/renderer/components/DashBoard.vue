@@ -77,7 +77,7 @@
           </el-card>
         </div>
       </el-col>
-      <el-col :span="8">
+      <el-col :span="8" style="margin-top: 10px">
         <div>
           <el-row :gutter="10">
             <el-col :span="4">

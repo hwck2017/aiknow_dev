@@ -872,20 +872,20 @@ export default {
 
 .tool-bar {
   width: 400px;
-  height: 48px;
-  line-height: 48px;
+  height: 2.5vw;
+  line-height: 2.5vw;
   background-color: none;
   position: fixed;
-  top: 10px;
-  left: 300px;
+  top: 0.5208vw;
+  left: 15.625vw;
   z-index: 10;
 }
 
 .toolBtn {
   color: #fff;
-  font-size: 26px;
+  font-size: 1.354vw;
   font-weight: bold;
-  margin-top: 6px;
+  margin-top: 0.3125;
   background: none;
   border: none;
 }

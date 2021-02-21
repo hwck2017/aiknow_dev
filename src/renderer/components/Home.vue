@@ -1,21 +1,20 @@
 <template>
   <el-container class="home-container">
-    <el-header style="height: 70px">
+    <el-header style="height: 3.646vw">
       <img class="headerBgImg" src="https://aiknow.cn/res/python.png" alt="">
 
       <el-row :gutter="5" type="flex" justify="space-between">
         <el-col :span="5">
           <div class="loginInfoBg" v-if="$store.state.userInfo.isLogin">
             <el-avatar
-              :size="48"
               :src="circleUrl"
-              style="vertical-align: middle"
+              style="vertical-align: middle; width: 2.5vw; height: 2.5vw"
             ></el-avatar>
             <span>
               <el-dropdown @command="handleCommand">
                 <span class="el-dropdown-link">
                   {{ $store.state.userInfo.nickname }}
-                  <i class="el-icon-arrow-down el-icon--right"></i>
+                  <i class="el-icon-arrow-down el-icon--right" style="fontSize: 1.354vw;"></i>
                 </span>
                 <el-dropdown-menu slot="dropdown">
                   <el-dropdown-item command="profile"
@@ -164,7 +163,7 @@ export default {
 }
 
 .loginInfoBg {
-  margin-top: 15px;
+  margin-top: 0.78125vw;
 }
 
 .el-radio-group {
@@ -179,13 +178,14 @@ export default {
   /* background: url('https://aiknow.cn/res/python.png') no-repeat 100% 100%; */
   position: relative;;
   z-index: 9;
+  /* min-width: 1200px; */
  
 }
 
 .headerBgImg {
   position: absolute;
   width: 100%;
-  height: 140px;
+  height: 7.448vw;
   object-fit: initial;
   top: 0;
   left: 0;
@@ -207,9 +207,9 @@ export default {
 .el-dropdown-link {
   cursor: pointer;
   color: #fff;
-  font-size: 26px;
+  font-size: 1.354vw;
   font-weight: bold;
-  margin-left: 10px;
+  margin-left: 0.5208vw;
 }
 .el-icon-arrow-down {
   font-size: 16px;
@@ -224,38 +224,38 @@ export default {
 }
 
 .elMenuItem {
-  padding: 0 30px;
-  height: 48px;
-  line-height: 48px;
+  padding: 0 1.5625vw;
+  height: 2.5vw;
+  line-height: 2.5vw;
   background-color: none;
-  margin-top: 15px;
+  margin-top: 0.78125vw;
   color: #fff;
-  font-size: 26px;
+  font-size: 1.354vw;
   font-family: tonjayBold;
 
 }
 
 .elMenuItemSelected {
-  padding: 0 30px;
-  height: 48px;
-  line-height: 48px;
+  padding: 0 1.5625vw;
+  height: 2.5vw;
+  line-height: 2.5vw;
   background-color: #fff;
-  margin-top: 15px;
+  margin-top: 0.78125vw;
   color: #275ca7;
   border-radius: 6px;
-  font-size: 26px;
+  font-size: 1.354vw;
   font-family: tonjayBold;
 }
 
 
 .loginBtn {
-  height: 48px;
+  height: 2.5vw;;
   background: none;
   border: none;
   color: #fff;
-  font-size: 26px;
+  font-size: 1.354vw;
   font-weight: bold;
-  margin-top: 15px;
+  margin-top: 0.78125vw;;
 }
 
 .loginBtn:focus .loginBtn:hover {

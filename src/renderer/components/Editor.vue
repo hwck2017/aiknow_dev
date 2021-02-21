@@ -192,19 +192,9 @@
         <el-button type="primary" @click="addLangTab">确 定</el-button>
       </span>
     </el-dialog>
-    <el-dialog title="输出结果" width="80%" :visible.sync="opencmd" top="60vh">
-      <span>
-        <h2>
-          {{ output }}
-        </h2>
-      </span>
-      <!-- <span slot="footer" class="dialog-footer">
-        <el-button @click="opencmd = false">关 闭</el-button>
-      </span> -->
-    </el-dialog>
     <div class="ace-editor" ref="ace"></div>
     <!-- for terminal -->
-    <div ref="terminal" :style="{ width: width, height: height }"></div>
+    <!-- <div ref="terminal" :style="{ width: width, height: height }"></div> -->
   </div>
 </template>
  
@@ -219,7 +209,7 @@ var myEditor = require("../../../lib/editor/toolbar");
 var myFile = require("../../../lib/file");
 var myTab = require("../../../lib/editor/tab");
 var myStorage = require("../../../lib/storage");
-var myRunner = require("../../../lib/runner");
+// var myRunner = require("../../../lib/runner");
 
 const extensions = [
   ["cpp", [{ name: "CPP", extensions: ["cpp"] }]],
@@ -575,7 +565,8 @@ export default {
         console.log("save as ok");
         if (this.needRun) {
           console.log("run: ", tab.suffix, "+", tab.filePath);
-          this.execRun(tab.suffix, tab.filePath);
+          // this.execRun(tab.suffix, tab.filePath);
+          ipcRenderer.send("run", tab.suffix, tab.filePath);
           this.needRun = false;
         }
 
@@ -618,7 +609,8 @@ export default {
           myEditor.setMode(tab.suffix);
           fs.writeFileSync(tab.filePath, myEditor.getSourceCode());
           if (this.needRun) {
-            this.execRun(tab.suffix, tab.filePath);
+            // this.execRun(tab.suffix, tab.filePath);
+            ipcRenderer.send("run", tab.suffix, tab.filePath);
             this.needRun = false;
           }
         }

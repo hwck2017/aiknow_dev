@@ -256,6 +256,8 @@ export default {
   font-size: 1.354vw;
   font-weight: bold;
   margin-top: 0.78125vw;;
+  padding-top: 0px;
+  padding-bottom: 0px;
 }
 
 .loginBtn:focus .loginBtn:hover {

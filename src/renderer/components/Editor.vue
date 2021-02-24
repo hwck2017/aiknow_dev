@@ -868,7 +868,7 @@ export default {
   line-height: 2.5vw;
   background-color: none;
   position: fixed;
-  top: 0.5208vw;
+  top: 0.7408vw;
   left: 15.625vw;
   z-index: 10;
 }

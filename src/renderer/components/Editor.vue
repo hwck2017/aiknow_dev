@@ -45,35 +45,6 @@
             </el-dropdown-menu>
           </el-dropdown>
         </el-col>
-        <!-- <el-col :span="3">
-          <el-dropdown size="medium" @command="setCmdHandle">
-            <el-button size="medium">
-              <i class="el-icon-setting"></i>
-              设置
-              <i class="el-icon-arrow-down el-icon--right"></i>
-            </el-button>
-            <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item command="frontSize">
-                字体大小
-              </el-dropdown-item>
-              <el-dropdown-item divided command="theme">
-                夜间模式
-                <el-switch
-                  v-model="userOpt.editorTheme"
-                  active-color="#eee"
-                  inactive-color="#13ce66"
-                  active-value="clouds"
-                  inactive-value="monokai"
-                  @change="themeChangeHandle"
-                ></el-switch>
-              </el-dropdown-item>
-              <el-dropdown-item divided command="libs">
-                Python库管理
-              </el-dropdown-item>
-              <el-dropdown-item divided command="help"> 帮助 </el-dropdown-item>
-            </el-dropdown-menu>
-          </el-dropdown>
-        </el-col> -->
       </el-row>
     </div>
     <div>
@@ -200,7 +171,8 @@ var fs = require("fs");
 var jschardet = require("jschardet");
 var iconv = require("iconv-lite");
 var { ipcRenderer } = require("electron");
-const { dialog } = require("electron").remote;
+var path = require("path");
+const { dialog, app } = require("electron").remote;
 
 var myEditor = require("../../../lib/editor/toolbar");
 var myFile = require("../../../lib/file");
@@ -348,7 +320,7 @@ export default {
       ptyProcess: null,
       rows: 20,
       cols: 120,
-      cwd: os.homedir(),
+      cwd: os.homedir(), // /var/root
       isInit: false,
       foreground: "rgb(254,239,143)",
       background: "rgb(22,102,47)",
@@ -655,6 +627,70 @@ export default {
       this.needRun = true;
       this.saveFile(false);
     },
+    execRunPy(filePath) {
+      let cmd;
+      let appDir = path.dirname(app.getAppPath());
+
+      if (process.platform === "darwin") {
+        cmd = "python3 " + filePath;
+        this.ptyProcess.write(cmd + "\n");
+      } else if (process.platform === "win32") {
+        let compiler = appDir + "\\Python\\python.exe";
+        cmd = '"' + compiler + '" "' + filePath + '"';
+        this.ptyProcess.write(cmd + "\r\n");
+      } else {
+        // nothing to do
+      }
+    },
+    execRunCpp(filePath) {
+      let cmd;
+      let appDir = path.dirname(app.getAppPath());
+
+      if (process.platform === "darwin") {
+        cmd = "g++ " + filePath + " -o ./a.out; ./a.out";
+        this.ptyProcess.write(cmd + "\n");
+      } else if (process.platform === "win32") {
+        let compiler = appDir + "\\MinGW64\\bin\\g++.exe";
+        let console = appDir + "\\ConsolePauser.exe";
+        cmd = '"' + compiler + '" "' + filePath + '"' + " -o a.out && " + '"' + console + '"' + " a.out";
+        this.ptyProcess.write(cmd + "\r\n");
+      } else {
+        // nothing to do
+      }
+    },
+    execRunC(filePath) {
+      let cmd;
+      let appDir = path.dirname(app.getAppPath());
+
+      if (process.platform === "darwin") {
+        cmd = "gcc " + filePath + " -o ./a.out; ./a.out";
+        this.ptyProcess.write(cmd + "\n");
+      } else if (process.platform === "win32") {
+        let compiler = appDir + "\\MinGW64\\bin\\gcc.exe";
+        let console = appDir + "\\ConsolePauser.exe";
+        cmd = '"' + compiler + '" "' + filePath + '"' + " -o a.out && " + '"' + console + '"' + " a.out";
+        this.ptyProcess.write(cmd + "\r\n");
+      } else {
+        // nothing to do
+      }
+    },
+    execRun(language, filePath) {
+      console.log("exec run, language: ", language, " file path: ", filePath);
+      switch (language) {
+        case "py":
+          this.execRunPy(filePath);
+          break;
+        case "cpp":
+          this.execRunCpp(filePath);
+          break;
+        case "c":
+          this.execRunC(filePath);
+          break;
+        default:
+          //nothing to do
+          break;
+      }
+    },
     keyWatcher() {
       // js监听键盘ctrl + s快捷键保存;
       document.addEventListener("keydown", (e) => {
@@ -735,24 +771,28 @@ export default {
       this.initTerminal();
     },
     initTerminal() {
-      // 判断terminal是否显示，没有显示的话，不做初始化操作（没有显示初始化会卡死）
-      // if (this.$refs.main.offsetParent === null) return;
       if (!this.xterm || !this.ptyProcess) {
         this.isInit = true;
         const shell =
-          process.env[os.platform() === "win32" ? "COMSPEC" : "SHELL"];
+          process.env[
+            os.platform() === "win32" ? process.env.COMSPEC : process.env.SHELL
+          ];
         let env = process.env;
         env["LC_ALL"] = "zh_CN.UTF-8";
         env["LANG"] = "zh_CN.UTF-8";
         env["LC_CTYPE"] = "zh_CN.UTF-8";
+
         this.ptyProcess = pty.spawn(shell, [], {
-          name: "xterm-color",
+          name: "Terminal",
           cols: this.cols,
           rows: this.rows,
-          cwd: this.cwd,
+          cwd: process.env.HOME,
           env: env,
           encoding: "utf8",
+          // uid: 0,
         });
+
+        console.log("cwd: ", this.cwd);
         this.xterm = new Terminal({
           cols: this.cols,
           rows: this.rows,

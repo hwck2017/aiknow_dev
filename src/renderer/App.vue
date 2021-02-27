@@ -35,11 +35,11 @@ export default {
       // });
       ipcRenderer.send("checkForUpdate");
       ipcRenderer.send("common");
-    }
+    },
   },
   mounted() {
     this.Watcher();
-  }
+  },
 };
 </script>
 

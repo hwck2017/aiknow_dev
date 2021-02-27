@@ -82,4 +82,5 @@ export default {
 .el-col-8 {
   width: 100%;
 }
+
 </style>

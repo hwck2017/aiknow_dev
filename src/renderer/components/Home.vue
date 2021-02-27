@@ -1,77 +1,20 @@
 <template>
   <el-container class="home-container">
-    <el-header>
+    <el-header style="height: 3.646vw">
+      <img class="headerBgImg" src="https://aiknow.cn/res/python.png" alt="">
+
       <el-row :gutter="5" type="flex" justify="space-between">
         <el-col :span="5">
-          <div style="display: flex; padding: 5px 0px">
-            <!-- <div v-if="headImgUrl == ''"> -->
-              <img
-                src="https://aiknow.oss-cn-beijing.aliyuncs.com/image/540880fe-1d93-4861-9e28-d158fc5a156d.jpg"
-                style="width: 130px; height: 50px; vertical-align: middle"
-              />
-            <!-- </div>
-            <div v-else>
-              <img
-                :src="headImgUrl"
-                style="width: 130px; height: 40px; vertical-align: middle"
-              />
-            </div> -->
-          </div>
-        </el-col>
-        <el-col :span="16">
-          <div>
-            <el-menu
-              :default-active="$route.path"
-              mode="horizontal"
-              background-color="rgb(253, 155, 64)"
-              text-color="#fff"
-              active-text-color="#409EFF"
-              router
-            >
-              <el-menu-item index="/dashboard">
-                <i class="el-icon-s-home"></i>
-                <span slot="title">主页</span>
-              </el-menu-item>
-              <el-menu-item index="/problems">
-                <i class="el-icon-menu"></i>
-                <span slot="title">题目</span>
-              </el-menu-item>
-              <el-menu-item index="/editor">
-                <i class="el-icon-edit"></i>
-                <span slot="title">编辑器</span>
-              </el-menu-item>
-              <!-- <el-menu-item index="/contest" disabled>
-                <i class="el-icon-s-flag"></i>
-                <span slot="title">比赛</span>
-              </el-menu-item>
-              <el-menu-item index="/groups" disabled>
-                <i class="el-icon-user"></i>
-                <span slot="title">小组</span>
-              </el-menu-item>
-              <el-menu-item index="/ranklist" disabled>
-                <i class="el-icon-trophy"></i>
-                <span slot="title">排行榜</span>
-              </el-menu-item>-->
-            </el-menu>
-          </div>
-        </el-col>
-        <el-col :span="6">
-          <div v-if="$store.state.userInfo.isLogin" style="padding: 15px 20px">
-            <!-- <el-avatar
-              :size="30"
-              :src="$getAvatar($store.state.userInfo.uid)"
-              style="vertical-align:middle;"
-            ></el-avatar>-->
+          <div class="loginInfoBg" v-if="$store.state.userInfo.isLogin">
             <el-avatar
-              :size="35"
               :src="circleUrl"
-              style="vertical-align: middle"
+              style="vertical-align: middle; width: 2.5vw; height: 2.5vw"
             ></el-avatar>
             <span>
               <el-dropdown @command="handleCommand">
                 <span class="el-dropdown-link">
                   {{ $store.state.userInfo.nickname }}
-                  <i class="el-icon-arrow-down el-icon--right"></i>
+                  <i class="el-icon-arrow-down el-icon--right" style="fontSize: 1.354vw;"></i>
                 </span>
                 <el-dropdown-menu slot="dropdown">
                   <el-dropdown-item command="profile"
@@ -82,11 +25,64 @@
               </el-dropdown>
             </span>
           </div>
-          <div v-else style="padding: 10px 0px">
-            <el-button plain @click="login">登录</el-button>
+          <div v-else style="">
+            <el-button class="loginBtn" @click="login">登录</el-button>
           </div>
         </el-col>
+        <el-col :span="16">
+          <div>
+            <!-- <el-menu
+              :default-active="$route.path"
+              mode="horizontal"
+              text-color="#fff"
+              active-text-color="#1E4796"
+              router
+            >
+              <el-menu-item index="/dashboard">
+                <i class="el-icon-s-home"></i>
+                <span slot="title">主页</span>
+              </el-menu-item>
+              <el-menu-item index="/editor">
+                <i class="el-icon-edit"></i>
+                <span slot="title">编辑器</span>
+              </el-menu-item>
+              <el-menu-item index="/problems">
+                <i class="el-icon-menu"></i>
+                <span slot="title">题目</span>
+              </el-menu-item>
+              <el-menu-item index="/contest" disabled>
+                <i class="el-icon-s-flag"></i>
+                <span slot="title">比赛</span>
+              </el-menu-item>
+              <el-menu-item index="/groups" disabled>
+                <i class="el-icon-user"></i>
+                <span slot="title">小组</span>
+              </el-menu-item>
+              <el-menu-item index="/ranklist" disabled>
+                <i class="el-icon-trophy"></i>
+                <span slot="title">排行榜</span>
+              </el-menu-item>
+            </el-menu> -->
+
+            <div class="elMenuBg">
+              <div :class="headerItemSelectedIndex == 0 ? 'elMenuItemSelected' : 'elMenuItem'" @click="jump(0, '/dashboard')">
+                <span class="itemTitle">主页</span>
+              </div>
+              <div :class="headerItemSelectedIndex == 1 ? 'elMenuItemSelected' : 'elMenuItem'" @click="jump(1, '/editor')">
+                <span class="itemTitle">编辑器</span>
+              </div>
+              <div :class="headerItemSelectedIndex == 2 ? 'elMenuItemSelected' : 'elMenuItem'" @click="jump(2, '/problems')">
+                <span class="itemTitle">题目</span>
+              </div>
+            </div>
+
+          </div>
+        </el-col>
+        <el-col :span="6">
+
+        </el-col>
       </el-row>
+
     </el-header>
     <el-container>
       <el-main>
@@ -112,6 +108,7 @@ export default {
       circleUrl:
         "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png",
       headImgUrl: "",
+      headerItemSelectedIndex: 0,
     };
   },
   methods: {
@@ -138,6 +135,11 @@ export default {
       this.headImgUrl = myStorage.getFromLS("headimgurl");
       console.log("headimgurl: ", this.headImgUrl);
     },
+
+    jump(index, path) {
+      this.headerItemSelectedIndex = index;
+      this.$router.push({ path: path });      
+    }
   },
   created() {
     this.getVersion();
@@ -150,8 +152,18 @@ export default {
 </script>
 
 <style scoped>
+
+@font-face {
+  font-family: tonjayBold;
+  src: url('../../../lib/font/SweiGospelSansCJKsc-Black.ttf') format('woff');
+}
+
 .home-container {
   height: 100%;
+}
+
+.loginInfoBg {
+  margin-top: 0.78125vw;
 }
 
 .el-radio-group {
@@ -161,14 +173,28 @@ export default {
 
 .el-header {
   /* background-color: #f11c40; */
-  background-color: rgb(253, 155, 64);
-  height: 70px;
+  /* background-color: rgb(253, 155, 64); */
+  height: auto;
+  /* background: url('https://aiknow.cn/res/python.png') no-repeat 100% 100%; */
+  position: relative;;
+  z-index: 9;
+  /* min-width: 1200px; */
+ 
 }
 
-.el-button {
+.headerBgImg {
+  position: absolute;
+  width: 100%;
+  height: 7.448vw;
+  object-fit: initial;
+  top: 0;
+  left: 0;
+}
+
+/* .el-button {
   background: rgb(253, 155, 64) !important;
   color: #fff;
-}
+} */
 
 .title-style {
   color: #409eff;
@@ -181,21 +207,76 @@ export default {
 .el-dropdown-link {
   cursor: pointer;
   color: #fff;
-  font-size: 24px;
+  font-size: 1.354vw;
+  font-weight: bold;
+  margin-left: 0.5208vw;
 }
 .el-icon-arrow-down {
   font-size: 16px;
 }
 
 .el-menu-item {
-  font-size: 18px !important;
 }
+
+.elMenuBg {
+  display: flex;
+  float: right;
+}
+
+.elMenuItem {
+  padding: 0 1.5625vw;
+  height: 2.5vw;
+  line-height: 2.5vw;
+  background-color: none;
+  margin-top: 0.78125vw;
+  color: #fff;
+  font-size: 1.354vw;
+  font-family: tonjayBold;
+
+}
+
+.elMenuItemSelected {
+  padding: 0 1.5625vw;
+  height: 2.5vw;
+  line-height: 2.5vw;
+  background-color: #fff;
+  margin-top: 0.78125vw;
+  color: #275ca7;
+  border-radius: 6px;
+  font-size: 1.354vw;
+  font-family: tonjayBold;
+}
+
+
+.loginBtn {
+  height: 2.5vw;;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.354vw;
+  font-weight: bold;
+  margin-top: 0.78125vw;;
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+
+.loginBtn:focus .loginBtn:hover {
+  background: #fff;
+  background-color: #fff;
+  color: #275ca7;
+}
+
 
 .footer {
   text-align: center;
   height: 20px;
   line-height: 20px;
   color: rgb(253, 155, 64);
+}
+
+.el-main {
+  padding: 0;
+  padding-top: 2px;
 }
 
 /* .father .child {
@@ -206,6 +287,7 @@ export default {
   display: block;
 } */
 </style>
+
 
 
 

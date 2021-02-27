@@ -2,10 +2,10 @@
   <div>
     <div class="tool-bar">
       <el-row :gutter="10">
-        <el-col :span="21">
+        <el-col>
           <el-dropdown size="medium" @command="fileOperProc">
-            <el-button size="medium">
-              <i class="el-icon-folder-opened"></i>
+            <el-button class="toolBtn" size="medium">
+              <!-- <i class="el-icon-folder-opened"></i> -->
               文件
               <i class="el-icon-arrow-down el-icon--right"></i>
             </el-button>
@@ -16,14 +16,10 @@
               <el-dropdown-item command="saveAs">另存为</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
-          <el-button size="medium" icon="el-icon-s-promotion" @click="run"
-            >运行</el-button
-          >
-        </el-col>
-        <el-col :span="3">
+          <el-button class="toolBtn" size="medium" @click="run">运行</el-button>
           <el-dropdown size="medium" @command="setCmdHandle">
-            <el-button size="medium">
-              <i class="el-icon-setting"></i>
+            <el-button class="toolBtn" size="medium">
+              <!-- <i class="el-icon-setting"></i> -->
               设置
               <i class="el-icon-arrow-down el-icon--right"></i>
             </el-button>
@@ -164,16 +160,6 @@
         <el-button type="primary" @click="addLangTab">确 定</el-button>
       </span>
     </el-dialog>
-    <el-dialog title="输出结果" width="80%" :visible.sync="opencmd" top="60vh">
-      <span>
-        <h2>
-          {{ output }}
-        </h2>
-      </span>
-      <!-- <span slot="footer" class="dialog-footer">
-        <el-button @click="opencmd = false">关 闭</el-button>
-      </span> -->
-    </el-dialog>
     <div class="ace-editor" ref="ace"></div>
     <!-- for terminal -->
     <div ref="terminal" :style="{ width: width, height: height }"></div>
@@ -192,7 +178,6 @@ var myEditor = require("../../../lib/editor/toolbar");
 var myFile = require("../../../lib/file");
 var myTab = require("../../../lib/editor/tab");
 var myStorage = require("../../../lib/storage");
-// var myRunner = require("../../../lib/runner");
 
 const extensions = [
   ["cpp", [{ name: "CPP", extensions: ["cpp"] }]],
@@ -206,7 +191,6 @@ import os from "os";
 import "xterm/dist/xterm.css";
 import * as fit from "xterm/lib/addons/fit/fit";
 import * as attach from "xterm/lib/addons/attach/attach";
-// import {ipcRenderer} from 'electron'
 const pty = require("node-pty");
 Terminal.applyAddon(fit);
 Terminal.applyAddon(attach);
@@ -392,7 +376,6 @@ export default {
     checkSuffixValid(suffix) {
       if (
         suffix == "cpp" ||
-        suffix == "cc" ||
         suffix == "c" ||
         suffix == "py"
       ) {
@@ -549,6 +532,7 @@ export default {
         if (this.needRun) {
           console.log("run: ", tab.suffix, "+", tab.filePath);
           this.execRun(tab.suffix, tab.filePath);
+          // ipcRenderer.send("run", tab.suffix, tab.filePath);
           this.needRun = false;
         }
 
@@ -565,7 +549,16 @@ export default {
           { name: "All Files", extensions: ["*"] },
         ];
       } else {
-        filter = this.extensions.get(tab.suffix);
+        if (tab.suffix.length === 0) {
+          filter = [
+            { name: "CPP", extensions: ["cpp"] },
+            { name: "C", extensions: ["c"] },
+            { name: "Python", extensions: ["py"] },
+            { name: "All Files", extensions: ["*"] },
+          ];
+        } else {
+          filter = this.extensions.get(tab.suffix);
+        }
       }
       var dir = dialog.showSaveDialog(
         {
@@ -592,6 +585,7 @@ export default {
           fs.writeFileSync(tab.filePath, myEditor.getSourceCode());
           if (this.needRun) {
             this.execRun(tab.suffix, tab.filePath);
+            // ipcRenderer.send("run", tab.suffix, tab.filePath);
             this.needRun = false;
           }
         }
@@ -861,12 +855,56 @@ export default {
   width: 100%;
 }
 
-.tool-bar {
+/* .tool-bar {
   margin: 10px 0;
   width: 99%;
   height: 37px;
   background-color: #eee;
   border: 1px solid #409eff;
   padding: 4px;
+} */
+
+.tool-bar {
+  width: 400px;
+  height: 2.5vw;
+  line-height: 2.5vw;
+  background-color: none;
+  position: fixed;
+  top: 0.7408vw;
+  left: 15.625vw;
+  z-index: 10;
+}
+
+.toolBtn {
+  color: #fff;
+  font-size: 1.354vw;
+  font-weight: bold;
+  margin-top: 0.3125;
+  background: none;
+  border: none;
+}
+</style>
+
+<style>
+.el-tabs__header {
+  margin: 0 !important;
+  z-index: 11;
+  border-bottom: none !important;
+}
+
+.el-tabs--card > .el-tabs__header .el-tabs__nav {
+  border: none !important;
+}
+
+.el-tabs--card > .el-tabs__header .el-tabs__item.is-active {
+  border-bottom: none !important;
+}
+
+.el-tabs__nav-wrap {
+  margin-bottom: 0 !important;
+}
+
+.el-tabs__new-tab {
+  display: none;
 }
 </style>

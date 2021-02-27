@@ -633,55 +633,50 @@ export default {
     },
     execRunPy(filePath) {
       let cmd;
-      // let appDir = path.dirname(app.getAppPath());
+      let appDir = path.dirname(app.getAppPath());
 
       if (process.platform === "darwin") {
         cmd = "python3 " + filePath;
+        this.ptyProcess.write(cmd + "\n");
       } else if (process.platform === "win32") {
-        let appDir = "E:\\Program Files\\AiknowEditor";
-        let compiler = appDir + "\\resources\\Python\\python.exe";
-        cmd = compiler + " " + filePath + " -o ./a.out; ./a.out";
+        let compiler = appDir + "\\Python\\python.exe";
+        cmd = '"' + compiler + '" "' + filePath + '"';
+        this.ptyProcess.write(cmd + "\r\n");
       } else {
         // nothing to do
       }
-
-      this.ptyProcess.write(cmd + "\n");
     },
     execRunCpp(filePath) {
       let cmd;
-      // let appDir = path.dirname(app.getAppPath());
+      let appDir = path.dirname(app.getAppPath());
 
       if (process.platform === "darwin") {
         cmd = "g++ " + filePath + " -o ./a.out; ./a.out";
+        this.ptyProcess.write(cmd + "\n");
       } else if (process.platform === "win32") {
-        let appDir = "E:\\Program Files\\AiknowEditor";
-        let compiler = appDir + "\\resources\\MinGW64\\bin\\g++.exe";
-        let console = appDir + "\\resources\\ConsolePauser.exe";
-        cmd =
-          '"' + compiler + '" "' + filePath + '" -o "C:\\Users\\Administrator\\Desktop\\a.out"; ' + '"' + console + '"' + ' "C:\\Users\\Administrator\\Desktop\\a.out"';
+        let compiler = appDir + "\\MinGW64\\bin\\g++.exe";
+        let console = appDir + "\\ConsolePauser.exe";
+        cmd = '"' + compiler + '" "' + filePath + '"' + " -o a.out && " + '"' + console + '"' + " a.out";
+        this.ptyProcess.write(cmd + "\r\n");
       } else {
         // nothing to do
       }
-
-      this.ptyProcess.write(cmd + "\n");
     },
     execRunC(filePath) {
       let cmd;
-      // let appDir = path.dirname(app.getAppPath());
+      let appDir = path.dirname(app.getAppPath());
 
       if (process.platform === "darwin") {
         cmd = "gcc " + filePath + " -o ./a.out; ./a.out";
+        this.ptyProcess.write(cmd + "\n");
       } else if (process.platform === "win32") {
-        let appDir = "E:\\Program Files\\AiknowEditor";
-        let compiler = appDir + "\\resources\\MinGW64\\bin\\gcc.exe";
-        let console = appDir + "\\resources\\ConsolePauser.exe";
-        cmd =
-          compiler + " " + filePath + " -o ./a.out; " + console + " ./a.out";
+        let compiler = appDir + "\\MinGW64\\bin\\gcc.exe";
+        let console = appDir + "\\ConsolePauser.exe";
+        cmd = '"' + compiler + '" "' + filePath + '"' + " -o a.out && " + '"' + console + '"' + " a.out";
+        this.ptyProcess.write(cmd + "\r\n");
       } else {
         // nothing to do
       }
-
-      this.ptyProcess.write(cmd + "\n");
     },
     execRun(language, filePath) {
       console.log("exec run, language: ", language, " file path: ", filePath);
@@ -780,8 +775,6 @@ export default {
       this.initTerminal();
     },
     initTerminal() {
-      // 判断terminal是否显示，没有显示的话，不做初始化操作（没有显示初始化会卡死）
-      // if (this.$refs.main.offsetParent === null) return;
       if (!this.xterm || !this.ptyProcess) {
         this.isInit = true;
         const shell =

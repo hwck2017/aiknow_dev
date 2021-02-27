@@ -16,9 +16,7 @@
               <el-dropdown-item command="saveAs">另存为</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
-          <el-button class="toolBtn" size="medium" @click="run"
-            >运行</el-button
-          >
+          <el-button class="toolBtn" size="medium" @click="run">运行</el-button>
           <el-dropdown size="medium" @command="setCmdHandle">
             <el-button class="toolBtn" size="medium">
               <!-- <i class="el-icon-setting"></i> -->
@@ -46,7 +44,6 @@
               <el-dropdown-item divided command="help"> 帮助 </el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
-
         </el-col>
         <!-- <el-col :span="3">
           <el-dropdown size="medium" @command="setCmdHandle">
@@ -409,7 +406,6 @@ export default {
     checkSuffixValid(suffix) {
       if (
         suffix == "cpp" ||
-        suffix == "cc" ||
         suffix == "c" ||
         suffix == "py"
       ) {
@@ -583,7 +579,16 @@ export default {
           { name: "All Files", extensions: ["*"] },
         ];
       } else {
-        filter = this.extensions.get(tab.suffix);
+        if (tab.suffix.length === 0) {
+          filter = [
+            { name: "CPP", extensions: ["cpp"] },
+            { name: "C", extensions: ["c"] },
+            { name: "Python", extensions: ["py"] },
+            { name: "All Files", extensions: ["*"] },
+          ];
+        } else {
+          filter = this.extensions.get(tab.suffix);
+        }
       }
       var dir = dialog.showSaveDialog(
         {
@@ -650,47 +655,6 @@ export default {
       this.needRun = true;
       this.saveFile(false);
     },
-    execRun(language, filePath) {
-      // console.log("exec run, language: ", language, " file path: ", filePath);
-      // this.opencmd = true;
-      // //编译
-      // let execFile = myRunner.compile(
-      //   language,
-      //   filePath,
-      //   (err, stdout, stderr) => {
-      //     this.resultOut = stdout;
-      //     this.resultErr = stderr;
-      //     if (err !== undefined) this.errno = err.code;
-      //     else this.errno = 0;
-
-      //     if (this.errno !== 0) {
-      //       this.output = this.resultErr;
-      //       console.log("compile result: ", this.output);
-      //       return;
-      //     }
-      //   }
-      // );
-
-      // //运行
-      // myRunner.run(language, execFile, (err, stdout, stderr) => {
-      //   this.resultOut = stdout;
-      //   this.resultErr = stderr;
-      //   if (err !== undefined) this.errno = err.code;
-      //   else this.errno = 0;
-
-      //   console.log("stdout: ", this.resultOut);
-      //   console.log("stderr: ", this.resultErr);
-      //   console.log("errno: ", this.errno);
-      //   if (this.errno !== 0) {
-      //     this.output = this.resultErr;
-      //   } else {
-      //     this.output = this.resultOut;
-      //   }
-
-      //   console.log("run result: ", this.output);
-      // });
-      this.ptyProcess.write("python3 " + filePath + "\n");
-    },
     keyWatcher() {
       // js监听键盘ctrl + s快捷键保存;
       document.addEventListener("keydown", (e) => {
@@ -747,7 +711,7 @@ export default {
 
       this.keyWatcher();
       // for terminal
-      this.initTerminal();
+      // this.initTerminal();
     },
 
     // for terminal
@@ -881,22 +845,20 @@ export default {
   background: none;
   border: none;
 }
-
 </style>
 
 <style>
-
 .el-tabs__header {
   margin: 0 !important;
   z-index: 11;
   border-bottom: none !important;
 }
 
-.el-tabs--card>.el-tabs__header .el-tabs__nav {
+.el-tabs--card > .el-tabs__header .el-tabs__nav {
   border: none !important;
 }
 
-.el-tabs--card>.el-tabs__header .el-tabs__item.is-active {
+.el-tabs--card > .el-tabs__header .el-tabs__item.is-active {
   border-bottom: none !important;
 }
 

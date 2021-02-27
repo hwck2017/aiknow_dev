@@ -162,7 +162,7 @@
     </el-dialog>
     <div class="ace-editor" ref="ace"></div>
     <!-- for terminal -->
-    <!-- <div ref="terminal" :style="{ width: width, height: height }"></div> -->
+    <div ref="terminal" :style="{ width: width, height: height }"></div>
   </div>
 </template>
  
@@ -178,7 +178,6 @@ var myEditor = require("../../../lib/editor/toolbar");
 var myFile = require("../../../lib/file");
 var myTab = require("../../../lib/editor/tab");
 var myStorage = require("../../../lib/storage");
-// var myRunner = require("../../../lib/runner");
 
 const extensions = [
   ["cpp", [{ name: "CPP", extensions: ["cpp"] }]],
@@ -192,7 +191,6 @@ import os from "os";
 import "xterm/dist/xterm.css";
 import * as fit from "xterm/lib/addons/fit/fit";
 import * as attach from "xterm/lib/addons/attach/attach";
-// import {ipcRenderer} from 'electron'
 const pty = require("node-pty");
 Terminal.applyAddon(fit);
 Terminal.applyAddon(attach);
@@ -533,8 +531,8 @@ export default {
         console.log("save as ok");
         if (this.needRun) {
           console.log("run: ", tab.suffix, "+", tab.filePath);
-          // this.execRun(tab.suffix, tab.filePath);
-          ipcRenderer.send("run", tab.suffix, tab.filePath);
+          this.execRun(tab.suffix, tab.filePath);
+          // ipcRenderer.send("run", tab.suffix, tab.filePath);
           this.needRun = false;
         }
 
@@ -586,8 +584,8 @@ export default {
           myEditor.setMode(tab.suffix);
           fs.writeFileSync(tab.filePath, myEditor.getSourceCode());
           if (this.needRun) {
-            // this.execRun(tab.suffix, tab.filePath);
-            ipcRenderer.send("run", tab.suffix, tab.filePath);
+            this.execRun(tab.suffix, tab.filePath);
+            // ipcRenderer.send("run", tab.suffix, tab.filePath);
             this.needRun = false;
           }
         }
@@ -747,7 +745,7 @@ export default {
 
       this.keyWatcher();
       // for terminal
-      // this.initTerminal();
+      this.initTerminal();
     },
 
     // for terminal

@@ -645,9 +645,10 @@ export default {
       let appDir = path.dirname(app.getAppPath());
 
       if (process.platform === "darwin") {
-        cmd = "g++ " + filePath + " -o ./a.out; ./a.out";
+        cmd = "g++ " + filePath + " -o ./a.out && ./a.out";
         this.ptyProcess.write(cmd + "\n");
       } else if (process.platform === "win32") {
+        // appDir = "E:\\Program Files\\AiknowEditor\\resources"
         let compiler = appDir + "\\MinGW64\\bin\\g++.exe";
         let console = appDir + "\\ConsolePauser.exe";
         cmd = '"' + compiler + '" "' + filePath + '"' + " -o a.out && " + '"' + console + '"' + " a.out";
@@ -661,7 +662,7 @@ export default {
       let appDir = path.dirname(app.getAppPath());
 
       if (process.platform === "darwin") {
-        cmd = "gcc " + filePath + " -o ./a.out; ./a.out";
+        cmd = "gcc " + filePath + " -o ./a.out && ./a.out";
         this.ptyProcess.write(cmd + "\n");
       } else if (process.platform === "win32") {
         let compiler = appDir + "\\MinGW64\\bin\\gcc.exe";
@@ -808,8 +809,11 @@ export default {
           this.ptyProcess.write(data);
         });
         this.ptyProcess.on("data", (data) => {
-          console.log("ptyProcess:", JSON.stringify(data), typeof data);
-          this.xterm.write(data);
+          // console.log("ptyProcess:", JSON.stringify(data), typeof data);
+          let errMsg = "error: expected ';' before";
+          let newData = data.replace(errMsg, "错误：在下面语句之前缺少分号");
+          console.log(newData)
+          this.xterm.write(newData);
         });
       }
     },

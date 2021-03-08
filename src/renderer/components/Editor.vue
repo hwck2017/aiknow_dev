@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="warp">
     <div class="tool-bar">
       <el-row :gutter="10">
         <el-col>
@@ -47,7 +47,7 @@
         </el-col>
       </el-row>
     </div>
-    <div>
+    <div class="topTabDiv">
       <el-tabs
         v-model="activeTab"
         type="card"
@@ -160,9 +160,20 @@
         <el-button type="primary" @click="addLangTab">确 定</el-button>
       </span>
     </el-dialog>
-    <div class="ace-editor" ref="ace"></div>
+    <div class="editorDiv" v-bind:style="{ height: editorHeight + 'px' }">
+      <div class="ace-editor" ref="ace"></div>
+      <div class="runBtn" @click="run">
+        <i class="el-icon-caret-right"></i>
+        运行
+      </div>
+    </div>
     <!-- for terminal -->
-    <div ref="terminal" :style="{ width: width, height: height }"></div>
+    <div class="terminalDiv" ref="terminalDiv">
+      <div class="terminalTitle">控制器
+        <i class="el-icon-close" @click="closeTerminal()"></i>
+      </div>
+      <div class="terminal" ref="terminal"></div>
+    </div>
   </div>
 </template>
  
@@ -320,8 +331,13 @@ export default {
       cols: 120,
       cwd: os.homedir(), // /var/root
       isInit: false,
-      foreground: "rgb(254,239,143)",
-      background: "rgb(22,102,47)",
+      // foreground: "rgb(254,239,143)",
+      // background: "rgb(22,102,47)",
+      foreground: "#fff",
+      background: "#414449",
+
+      isShowTerminal: false,
+      editorHeight: document.documentElement.clientHeight - (0.03646 * document.documentElement.clientWidth) - 40 - 40,
     };
   },
   methods: {
@@ -622,6 +638,8 @@ export default {
     },
     // 本地测试运行
     run() {
+      this.isShowTerminal = true;
+      this.isShowTerminalHandle();
       this.needRun = true;
       this.saveFile(false);
     },
@@ -812,7 +830,25 @@ export default {
           this.xterm.write(data);
         });
       }
+
+      this.isShowTerminalHandle();
     },
+
+    isShowTerminalHandle() {
+      if (this.isShowTerminal) {
+        this.$refs.terminalDiv.style.display = 'block'
+        this.editorHeight = (document.documentElement.clientHeight - (0.03646 * document.documentElement.clientWidth) - 40 - 40 - 340)
+      }else {
+        this.$refs.terminalDiv.style.display = 'none'
+        this.editorHeight = (document.documentElement.clientHeight - (0.03646 * document.documentElement.clientWidth) - 40 - 40)
+      }
+    },
+
+    closeTerminal() {
+      this.isShowTerminal = false;
+      this.isShowTerminalHandle();
+    },
+
     execute(cmd) {
       this.ptyProcess.write(cmd + "\n");
     },
@@ -851,8 +887,93 @@ export default {
 </script>
 
 <style scoped>
+.editorDiv {
+  position: relative;
+}
+
 .ace-editor {
   width: 100%;
+  margin-top: 40px;
+  /* height:  calc(100vh - 3.646vw - 40px - 40px)  !important; */
+  overflow-y: visible;
+  height: 100% !important;
+}
+
+.runBtn {
+  position: absolute;
+  bottom: 20px;
+  right: 35px;
+  background: #275ca7;
+  color: #fff;
+  width: 100px;
+  height: 40px;
+  border: none;
+  border-radius: 22px;
+  font-size: 16px;
+  padding: 0;
+  line-height: 40px;
+  text-align: center;
+  display: flex;
+}
+
+.el-icon-caret-right {
+  color: #fff;
+  font-size: 26px;
+    margin-left: 12px;
+    margin-right: 8px;
+  margin-top: 7px;
+}
+
+/* .runBtn:hover {
+  color: #275ca7;
+  background: #fff;
+}
+
+.runBtn:hover .el-icon-caret-right {
+  color: #275ca7;
+} */
+
+.topTabDiv {
+  position: absolute;
+  top: 3.646vw;
+  left: 0;
+}
+
+.terminalDiv {
+  position: absolute;
+  bottom: 40px;
+  left: 0;
+  width: 100%;
+  height: 340px;
+  z-index: 9;
+  background: #414449;
+}
+
+.terminalTitle {
+  position: relative;
+  width: 100%;
+  height: 30px;
+  line-height: 30px;
+  background: #3a3c40;
+  color: #fff;
+    padding-left: 20px;
+    font-size: 14px;
+}
+
+.terminal {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  padding: 4px 20px;
+}
+
+.el-icon-close {
+  color: #fff;
+  float: right;
+  margin-right: 35px;
+  line-height: 30px;
+  font-size: 20px;
+  cursor: pointer;
 }
 
 /* .tool-bar {
@@ -907,4 +1028,23 @@ export default {
 .el-tabs__new-tab {
   display: none;
 }
+
+.xterm-viewport {
+  /* background-color: #414449 !important; */
+}
+
+.xterm-cursor-layer {
+  /* background-color: #414449 !important; */
+}
+
+.xterm .xterm-screen canvas {
+  /* background-color: #414449 !important;
+  z-index: 4 !important; */
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 5px;
+  background-color: #666;
+}
+
 </style>

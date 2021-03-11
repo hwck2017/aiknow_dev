@@ -337,10 +337,25 @@ export default {
       background: "#414449",
 
       isShowTerminal: false,
+      tempScreenWidth: 0,
       editorHeight: document.documentElement.clientHeight - (0.03646 * document.documentElement.clientWidth) - 40 - 40,
+      screenWidth: document.documentElement.clientHeight,
     };
   },
+
+  // watch: {
+  //     screenWidth(val) {
+  //         this.screenWidth = val;
+  //         console.log("this.screenWidth",this.screenWidth)
+  //     }
+
+  // },
+
   methods: {
+　　changeFixed(){
+      this.isShowTerminalHandle();
+　　},
+
     setCmdHandle(cmd) {
       console.log("set command: ", cmd);
       switch (cmd) {
@@ -878,7 +893,21 @@ export default {
   mounted() {
     this.init();
     this.promptUpdate();
+
+    let _this = this;
+    _this.changeFixed()
+    window.onresize = () => {
+      return (() => {
+       _this.changeFixed()
+      })()
+    }
+
   },
+
+  destroyed(){
+    window.onresize = null;
+  },
+
   computed: {
     width() {
       return this.cols * 9 + 20 + "px";
@@ -1031,6 +1060,14 @@ export default {
 
 .el-tabs__new-tab {
   display: none;
+}
+
+.ace_gutter {
+  height: 1e+06px !important;
+}
+
+.ace_scroller {
+  overflow: initial;
 }
 
 .xterm-viewport {

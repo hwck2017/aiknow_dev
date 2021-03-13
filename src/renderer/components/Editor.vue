@@ -168,12 +168,15 @@
       </div>
     </div>
     <!-- for terminal -->
-    <div class="terminalDiv" ref="terminalDiv">
-      <div class="terminalTitle">控制器
-        <i class="el-icon-close" @click="closeTerminal()"></i>
-      </div>
-      <div class="terminal" ref="terminal"></div>
+    <div class="terminalDiv" ref="terminalDiv" :style="{height : terminalHeight + 'px'}">
+      <VueDragResize :isActive="true" :isDraggable="false" v-on:resizing="resizeHandle" axis="x" :w="terminalWidth" :h="terminalHeight" :sticks="['tm']">
+        <div class="terminalTitle">控制器
+          <i class="el-icon-close" @click="closeTerminal()"></i>
+        </div>
+        <div class="terminal" ref="terminal" :style="{height : (terminalHeight - 30) + 'px', width: terminalWidth + 'px'}"></div>
+      </VueDragResize>
     </div>
+
   </div>
 </template>
  
@@ -202,6 +205,9 @@ import os from "os";
 import "xterm/dist/xterm.css";
 import * as fit from "xterm/lib/addons/fit/fit";
 import * as attach from "xterm/lib/addons/attach/attach";
+import VueDragResize from 'vue-drag-resize';
+
+
 const pty = require("node-pty");
 Terminal.applyAddon(fit);
 Terminal.applyAddon(attach);
@@ -209,6 +215,11 @@ Terminal.applyAddon(attach);
 const extMap = new Map(extensions);
 
 export default {
+
+  components: {
+      VueDragResize
+  },
+
   data() {
     return {
       clickHelp: false,
@@ -339,7 +350,11 @@ export default {
       isShowTerminal: false,
       tempScreenWidth: 0,
       editorHeight: document.documentElement.clientHeight - (0.03646 * document.documentElement.clientWidth) - 40 - 40,
-      screenWidth: document.documentElement.clientHeight,
+      screenHeight: document.documentElement.clientHeight,
+      screenWidth: document.documentElement.clientWidth,
+
+      terminalWidth: document.documentElement.clientWidth,
+      terminalHeight: 340,
     };
   },
 
@@ -354,7 +369,20 @@ export default {
   methods: {
 　　changeFixed(){
       this.isShowTerminalHandle();
+
 　　},
+    resizeHandle(newRect) { 
+      console.log (newRect)
+      // console.log (newRect);
+      // this.vw = newRect.width;
+      this.terminalHeight = newRect.height;
+      this.editorHeight = this.editorHeight + newRect.top
+      // this.top = newRect.top;
+      // this.left = newRect.left;
+      // document.getElementsByClassName("xterm-screen")[0].style.height=this.terminalHeight+'px';
+      this.xterm.fit();
+      this.xterm.scrollToTop();
+    },
 
     setCmdHandle(cmd) {
       console.log("set command: ", cmd);
@@ -857,6 +885,8 @@ export default {
       if (this.isShowTerminal) {
         this.$refs.terminalDiv.style.display = 'block'
         this.editorHeight = (document.documentElement.clientHeight - (0.03646 * document.documentElement.clientWidth) - 40 - 40 - 340)
+        this.xterm.fit();
+        this.xterm.scrollToTop();
       }else {
         this.$refs.terminalDiv.style.display = 'none'
         this.editorHeight = (document.documentElement.clientHeight - (0.03646 * document.documentElement.clientWidth) - 40 - 40)
@@ -1083,9 +1113,17 @@ export default {
   z-index: 4 !important; */
 }
 
+.xterm .xterm-screen {
+  /* height: var(--terminalHeight) !important; */
+}
+
 ::-webkit-scrollbar-thumb {
   border-radius: 5px;
   background-color: #666;
+}
+
+.vdr, .vdr.active:before {
+  top: 0 !important;
 }
 
 </style>

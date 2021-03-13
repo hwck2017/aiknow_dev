@@ -5,6 +5,10 @@ import App from './App'
 import router from './router'
 import store from './store'
 
+import VueDragResize from 'vue-drag-resize'
+
+Vue.component('vue-drag-resize', VueDragResize)
+
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 Vue.http = Vue.prototype.$http = axios
 Vue.config.productionTip = false

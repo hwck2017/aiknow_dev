@@ -90,12 +90,13 @@
     "element-ui": "^2.13.0",
     "iconv-lite": "^0.5.1",
     "jschardet": "^2.2.1",
+    "node-pty": "^0.8.1",
     "vue": "^2.5.16",
+    "vue-drag-resize": "^1.4.2",
     "vue-electron": "^1.0.6",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1",
     "vuex-electron": "^1.0.0",
-    "node-pty": "^0.8.1",
     "xterm": "^3.12.0"
   },
   "devDependencies": {

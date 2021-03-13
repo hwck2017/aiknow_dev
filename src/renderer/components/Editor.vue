@@ -735,6 +735,7 @@ export default {
       }
     },
     execRun(language, filePath) {
+      this.xterm.clear()
       console.log("exec run, language: ", language, " file path: ", filePath);
       switch (language) {
         case "py":

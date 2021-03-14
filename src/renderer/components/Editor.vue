@@ -233,16 +233,16 @@ export default {
           desc: "openpyxl是用于读写Excel 2010文档的Python库",
           status: false,
         },
-        {
-          name: "pygame",
-          desc: "pygame是用于开发2D游戏的python库",
-          status: false,
-        },
-        {
-          name: "pgzero",
-          desc: "pygame Zero是无需模板的游戏开发python库",
-          status: false,
-        },
+        // {
+        //   name: "pygame",
+        //   desc: "pygame是用于开发2D游戏的python库",
+        //   status: false,
+        // },
+        // {
+        //   name: "pgzero",
+        //   desc: "pygame Zero是无需模板的游戏开发python库",
+        //   status: false,
+        // },
         {
           name: "PyPDF2",
           desc:
@@ -270,12 +270,12 @@ export default {
             "pandas是用于数据挖掘和数据分析，同时也提供数据清洗功能的python库，它的使用基础是Numpy",
           status: false,
         },
-        {
-          name: "numpy",
-          desc:
-            "numpy是python的一个扩展程序库，支持大量的维度数组与矩阵运算，此外也针对数组运算提供大量的数学函数库",
-          status: false,
-        },
+        // {
+        //   name: "numpy",
+        //   desc:
+        //     "numpy是python的一个扩展程序库，支持大量的维度数组与矩阵运算，此外也针对数组运算提供大量的数学函数库",
+        //   status: false,
+        // },
         {
           name: "wordcloud",
           desc: "wordcloud是基于python的词云展示第三方库",
@@ -565,7 +565,7 @@ export default {
             this.$message.success("不支持该文件类型");
             suffix = "cpp";
           }
-          tab = myTab.setTab(fileName, data, path, true, suffix);
+          tab = myTab.setTab(fileName, data, path, myTab.TAB_STATUS.SAVED, suffix);
           this.addTab(tab);
           myEditor.setMode(suffix);
           myEditor.setSourceCode(data);
@@ -579,13 +579,13 @@ export default {
         // tab全部被删除, 但编辑器中还有内容
         console.log("tab noexist");
         // TODO: 文件后缀填什么
-        tab = myTab.setTab("", code, "", false, "cpp");
+        tab = myTab.setTab("", code, "", myTab.TAB_STATUS.NOT_SAVE, "cpp");
         this.addTab(tab);
       }
 
       // 非save_as情况下 如果已经保存 则直接保存 不需要询问保存路径
       console.log("tab is saved: ", tab.isSave);
-      if (saveAs === false && tab.isSave) {
+      if (saveAs === false && tab.isSave === myTab.TAB_STATUS.SAVED) {
         fs.writeFileSync(tab.filePath, code);
         console.log("save as ok");
         if (this.needRun) {
@@ -595,6 +595,10 @@ export default {
           this.needRun = false;
         }
 
+        return;
+      }
+
+      if (tab.isSave === myTab.TAB_STATUS.SAVING) {
         return;
       }
 
@@ -619,22 +623,27 @@ export default {
           filter = this.extensions.get(tab.suffix);
         }
       }
-      var dir = dialog.showSaveDialog(
+
+      tab.isSave = myTab.TAB_STATUS.SAVING
+
+      dialog.showSaveDialog(
         {
           defaultPath: "main",
           filters: filter,
         },
         (rsp) => {
-          if (rsp === undefined || rsp === null) {
-            return this.$message.warning("请选择文件保存路径");
-          }
-
           let tab = myTab.findTabByName(this.activeTab);
           if (tab === undefined) {
             tab = myTab.initTab();
             this.addTab(tab);
           }
-          tab.isSave = true;
+
+          if (rsp === undefined || rsp === null) {
+            tab.isSave = myTab.TAB_STATUS.NOT_SAVE
+            return this.$message.warning("请选择文件保存路径");
+          }
+
+          tab.isSave = myTab.TAB_STATUS.SAVED;
           tab.filePath = rsp;
           tab.title = myFile.getFileName(rsp);
           tab.content = myEditor.getSourceCode();

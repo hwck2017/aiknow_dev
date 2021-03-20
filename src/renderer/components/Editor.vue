@@ -161,7 +161,7 @@
       </span>
     </el-dialog>
     <div class="editorDiv" v-bind:style="{ height: editorHeight + 'px' }">
-      <div class="ace-editor" ref="ace"></div>
+      <div class="ace-editor" ref="ace" v-on:keyup.enter="checkHeight"></div>
       <div class="runBtn" @click="run">
         <i class="el-icon-caret-right"></i>
         运行
@@ -169,7 +169,7 @@
     </div>
     <!-- for terminal -->
     <div class="terminalDiv" ref="terminalDiv" :style="{height : terminalHeight + 'px'}">
-      <VueDragResize :isActive="true" :isDraggable="false" v-on:resizing="resizeHandle" axis="x" :w="terminalWidth" :h="terminalHeight" :sticks="['tm']">
+      <VueDragResize :isActive="true" :isDraggable="false" v-on:resizing="resizeHandle" v-on:resizestop="resizeOver" axis="x" :w="terminalWidth" :h="terminalHeight" :sticks="['tm']">
         <div class="terminalTitle">控制器
           <i class="el-icon-close" @click="closeTerminal()"></i>
         </div>
@@ -349,12 +349,16 @@ export default {
 
       isShowTerminal: false,
       tempScreenWidth: 0,
-      editorHeight: document.documentElement.clientHeight - (0.03646 * document.documentElement.clientWidth) - 40 - 40,
+      editorHeight: document.documentElement.clientHeight - (0.03646 * document.documentElement.clientWidth) - 40,
       screenHeight: document.documentElement.clientHeight,
       screenWidth: document.documentElement.clientWidth,
 
       terminalWidth: document.documentElement.clientWidth,
       terminalHeight: 340,
+      editorHeightVar: document.documentElement.clientHeight - (0.03646 * document.documentElement.clientWidth) - 40 + 'px',
+      tempTop: 0,
+      editorMaxHeight: 0,
+      lineHeight: 0,
     };
   },
 
@@ -370,18 +374,77 @@ export default {
 　　changeFixed(){
       this.isShowTerminalHandle();
 
+      this.checkHeight();
 　　},
+
+
+
+    checkHeight() {
+      let aceLines = document.getElementsByClassName('ace_line');
+      this.lineHeight = aceLines.length*27 + 200;
+
+      let ace_gutter = document.getElementsByClassName('ace_gutter')[0];
+      let ace_content = document.getElementsByClassName('ace_content')[0];
+      var ace_scroller = document.getElementsByClassName('ace_scroller')[0];
+      var ace_printmarginlayer = document.getElementsByClassName('ace_print-margin-layer')[0];
+      var ace_markerlayerone = document.getElementsByClassName('ace_marker-layer')[0];
+      var ace_markerlayertwo = document.getElementsByClassName('ace_marker-layer')[1];
+      var ace_textlayer = document.getElementsByClassName('ace_text-layer')[0];
+      var ace_cursorlayer = document.getElementsByClassName('ace_cursor-layer')[0];
+      
+      if (ace_gutter.clientHeight < this.lineHeight) {
+        ace_gutter.style.height = this.lineHeight+'px';
+        ace_content.style.height = this.lineHeight+'px';
+        ace_scroller.style.height = this.lineHeight+'px'
+
+        ace_printmarginlayer.style.height = this.lineHeight+'px';
+        ace_markerlayerone.style.height = this.lineHeight+'px';
+        ace_markerlayertwo.style.height = this.lineHeight+'px';
+        ace_textlayer.style.height = this.lineHeight+'px';
+        ace_cursorlayer.style.height = this.lineHeight+'px';
+
+
+      }else {
+        ace_gutter.style.height = ace_gutter.clientHeight+'px';
+        ace_content.style.height = ace_gutter.clientHeight+'px !important';
+        ace_scroller.style.height = ace_gutter.clientHeight+'px'
+
+        ace_printmarginlayer.style.height = ace_gutter.clientHeight+'px';
+        ace_markerlayerone.style.height = ace_gutter.clientHeight+'px';
+        ace_markerlayertwo.style.height = ace_gutter.clientHeight+'px';
+        ace_textlayer.style.height = ace_gutter.clientHeight+'px';
+        ace_cursorlayer.style.height = ace_gutter.clientHeight+'px';
+      }
+
+      console.log ('lineHeight: ', ace_gutter.style.height)
+    },
+
     resizeHandle(newRect) { 
-      console.log (newRect)
+      // console.log (newRect)
       // console.log (newRect);
       // this.vw = newRect.width;
       this.terminalHeight = newRect.height;
-      this.editorHeight = this.editorHeight + newRect.top
+      this.terminalHeightVar = this.terminalHeight
+
+      if (this.tempTop > newRect.top) {
+        this.editorHeight = this.editorHeight - (this.tempTop - newRect.top)
+      }else {
+        this.editorHeight = this.editorHeight + (newRect.top - this.tempTop)
+      }
+      this.editorHeightVar = this.editorHeight + 'px'
+
+      // console.log ('editorHeight:' , this.editorHeight)
+
+      this.tempTop = newRect.top;
       // this.top = newRect.top;
       // this.left = newRect.left;
       // document.getElementsByClassName("xterm-screen")[0].style.height=this.terminalHeight+'px';
       this.xterm.fit();
       this.xterm.scrollToTop();
+    },
+
+    resizeOver(newRect) {
+
     },
 
     setCmdHandle(cmd) {
@@ -894,12 +957,16 @@ export default {
     isShowTerminalHandle() {
       if (this.isShowTerminal) {
         this.$refs.terminalDiv.style.display = 'block'
-        this.editorHeight = (document.documentElement.clientHeight - (0.03646 * document.documentElement.clientWidth) - 40 - 40 - 340)
+        this.editorHeight = (document.documentElement.clientHeight - (0.03646 * document.documentElement.clientWidth) - 40 - this.terminalHeight)
+        this.editorHeightVar = this.editorHeight + 'px';
+        this.terminalWidth = document.documentElement.clientWidth;
         this.xterm.fit();
         this.xterm.scrollToTop();
       }else {
         this.$refs.terminalDiv.style.display = 'none'
-        this.editorHeight = (document.documentElement.clientHeight - (0.03646 * document.documentElement.clientWidth) - 40 - 40)
+        this.editorHeight = (document.documentElement.clientHeight - (0.03646 * document.documentElement.clientWidth) - 40)
+        this.editorHeightVar = this.editorHeight + 'px';
+        this.terminalWidth = document.documentElement.clientWidth;
       }
     },
 
@@ -1014,7 +1081,8 @@ export default {
 
 .terminalDiv {
   position: absolute;
-  bottom: 40px;
+  /* bottom: 40px; */
+  bottom: 0;
   left: 0;
   width: 100%;
   height: 340px;
@@ -1037,7 +1105,7 @@ export default {
   position: relative;
   width: 100%;
   height: 320px;
-  padding: 4px 20px;
+  padding: 0 20px;
 }
 
 .el-icon-close {
@@ -1102,12 +1170,19 @@ export default {
   display: none;
 }
 
-.ace_gutter {
-  height: 1e+06px !important;
+.ace_hidpi .ace_gutter-layer, .ace_hidpi .ace_gutter {
+  /* height: var(--editorHeightVar) !important; */
+  height: 120%;
+}
+
+.ace_hidpi .ace_text-layer, .ace_hidpi .ace_content {
+  /* height: var(--editorHeightVar) !important; */
+  height: 100%;
+  display: contents;
 }
 
 .ace_scroller {
-  overflow: initial;
+  overflow: visible;
 }
 
 .xterm-viewport {
@@ -1134,6 +1209,23 @@ export default {
 
 .vdr, .vdr.active:before {
   top: 0 !important;
+}
+
+.vdr.active:before {
+  outline: 1px dashed #3a3c40;
+}
+
+.vdr-stick {
+  background: #3a3c40;
+  border: none;
+  width: 100% !important;
+  height: 2px !important;
+  top: 0 !important;
+  margin-left: 0 !important;
+}
+
+.vdr-stick-bm, .vdr-stick-tm {
+  left: 0;
 }
 
 </style>

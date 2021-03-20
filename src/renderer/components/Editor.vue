@@ -170,7 +170,7 @@
     <!-- for terminal -->
     <div class="terminalDiv" ref="terminalDiv" :style="{height : terminalHeight + 'px'}">
       <VueDragResize :isActive="true" :isDraggable="false" v-on:resizing="resizeHandle" v-on:resizestop="resizeOver" axis="x" :w="terminalWidth" :h="terminalHeight" :sticks="['tm']">
-        <div class="terminalTitle">控制器
+        <div class="terminalTitle">控制台
           <i class="el-icon-close" @click="closeTerminal()"></i>
         </div>
         <div class="terminal" ref="terminal" :style="{height : (terminalHeight - 30) + 'px', width: terminalWidth + 'px'}"></div>
@@ -342,8 +342,6 @@ export default {
       cols: 120,
       cwd: os.homedir(), // /var/root
       isInit: false,
-      // foreground: "rgb(254,239,143)",
-      // background: "rgb(22,102,47)",
       foreground: "#fff",
       background: "#414449",
 

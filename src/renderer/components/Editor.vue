@@ -156,7 +156,7 @@
         <el-radio label="py" border>PYTHON</el-radio>
       </el-radio-group>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="addLangTab">取 消</el-button>
+        <el-button @click="selectLang = false">取 消</el-button>
         <el-button type="primary" @click="addLangTab">确 定</el-button>
       </span>
     </el-dialog>

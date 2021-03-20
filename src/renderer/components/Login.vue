@@ -50,7 +50,7 @@
           </el-input>
         </el-form-item>
         <!-- 记住密码 -->
-        <div class="item">
+        <div v-if="loginMode === 'passwd'" class="item">
           <label>记住密码</label>
           <input type="checkbox" v-model="loginInfo.remember" />
         </div>

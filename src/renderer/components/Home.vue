@@ -88,7 +88,7 @@
       <el-main>
         <router-view></router-view>
       </el-main>
-      <el-footer height="40px">
+      <el-footer height="40px" v-if="false">
         <div class="footer">
           2019-2021 &copy; 爱知部落<br />version {{ version }}
         </div>

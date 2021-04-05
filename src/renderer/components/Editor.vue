@@ -1025,6 +1025,11 @@ export default {
 </script>
 
 <style scoped>
+
+* {
+  box-sizing: border-box
+}
+
 .editorDiv {
   position: relative;
 }
@@ -1095,7 +1100,7 @@ export default {
   line-height: 30px;
   background: #3a3c40;
   color: #fff;
-    padding-left: 20px;
+    padding-left: 16px;
     font-size: 14px;
 }
 
@@ -1103,7 +1108,8 @@ export default {
   position: relative;
   width: 100%;
   height: 320px;
-  padding: 0 0 0 20px;
+  padding-left: 16px;
+  box-sizing: border-box
 }
 
 .el-icon-close {

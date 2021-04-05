@@ -80,17 +80,17 @@ function runExec(lang, fullPath) {
 
   var compiler, output, proc;
   if (process.platform === 'win32') {
-    if (lang === "cpp") {
+    if (lang === "CPP") {
       compiler = exePath + "\\win32\\run_cpp.bat";
       output = fileName.substring(0, fileName.indexOf(".")) + ".exe";
       console.log("output file name: %s", output);
       proc = spawn('cmd', ['/c', 'start', 'call', compiler, fullPath, output])
-    } else if (lang === "c") {
+    } else if (lang === "C") {
       compiler = exePath + "\\win32\\run_c.bat";
       output = fileName.substring(0, fileName.indexOf(".")) + ".exe";
       console.log("output file name: %s", output);
       proc = spawn('cmd', ['/c', 'start', 'call', compiler, fullPath, output])
-    } else if (lang === "py") {
+    } else if (lang === "PYTHON") {
       compiler = exePath + "\\win32\\run_py.bat";
       proc = spawn('cmd', ['/c', 'start', 'call', compiler, fullPath])
     } else {

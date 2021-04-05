@@ -153,7 +153,7 @@ export default {
       if (!this.canClick) return;
       this.canClick = false;
       const { data: res } = await this.$http.post(
-        "https://aiknow.cn/study/sms",
+        "https://aiknow.cn/study/sms?end=c_plus_client",
         {
           phone: this.loginInfo.phoneNumber,
         }

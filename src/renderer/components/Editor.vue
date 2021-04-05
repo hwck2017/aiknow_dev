@@ -1007,6 +1007,23 @@ export default {
       })()
     }
 
+
+    var agent = navigator.userAgent.toLowerCase();
+    var isMac = /macintosh|mac os x/i.test(navigator.userAgent);
+    // if (agent.indexOf("win32") >= 0 || agent.indexOf("wow32") >= 0) {
+    //   alert("这是windows32位系统");
+    //   }
+    // if (agent.indexOf("win64") >= 0 || agent.indexOf("wow64") >= 0) {
+    //   alert("这是windows64位系统");
+    // }
+    if(isMac){
+      // alert("这是mac系统");
+      let ace_cursor = document.getElementsByClassName('ace_cursor')[0];
+      ace_cursor.style.marginLeft = '-4px';
+    }
+
+
+
   },
 
   destroyed(){
@@ -1232,8 +1249,8 @@ export default {
   left: 0;
 }
 
-.ace_cursor {
+/* .ace_cursor {
   margin-left: -4px !important;
-}
+} */
 
 </style>

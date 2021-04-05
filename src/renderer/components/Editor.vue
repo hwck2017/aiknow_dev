@@ -168,15 +168,35 @@
       </div>
     </div>
     <!-- for terminal -->
-    <div class="terminalDiv" ref="terminalDiv" :style="{height : terminalHeight + 'px'}">
-      <VueDragResize :isActive="true" :isDraggable="false" v-on:resizing="resizeHandle" v-on:resizestop="resizeOver" axis="x" :w="terminalWidth" :h="terminalHeight" :sticks="['tm']">
-        <div class="terminalTitle">控制台
+    <div
+      class="terminalDiv"
+      ref="terminalDiv"
+      :style="{ height: terminalHeight + 'px' }"
+    >
+      <VueDragResize
+        :isActive="true"
+        :isDraggable="false"
+        v-on:resizing="resizeHandle"
+        v-on:resizestop="resizeOver"
+        axis="x"
+        :w="terminalWidth"
+        :h="terminalHeight"
+        :sticks="['tm']"
+      >
+        <div class="terminalTitle">
+          控制台
           <i class="el-icon-close" @click="closeTerminal()"></i>
         </div>
-        <div class="terminal" ref="terminal" :style="{height : (terminalHeight - 30) + 'px', width: terminalWidth + 'px'}"></div>
+        <div
+          class="terminal"
+          ref="terminal"
+          :style="{
+            height: terminalHeight - 30 + 'px',
+            width: terminalWidth + 'px',
+          }"
+        ></div>
       </VueDragResize>
     </div>
-
   </div>
 </template>
  
@@ -205,8 +225,7 @@ import os from "os";
 import "xterm/dist/xterm.css";
 import * as fit from "xterm/lib/addons/fit/fit";
 import * as attach from "xterm/lib/addons/attach/attach";
-import VueDragResize from 'vue-drag-resize';
-
+import VueDragResize from "vue-drag-resize";
 
 const pty = require("node-pty");
 Terminal.applyAddon(fit);
@@ -215,9 +234,8 @@ Terminal.applyAddon(attach);
 const extMap = new Map(extensions);
 
 export default {
-
   components: {
-      VueDragResize
+    VueDragResize,
   },
 
   data() {
@@ -347,13 +365,20 @@ export default {
 
       isShowTerminal: false,
       tempScreenWidth: 0,
-      editorHeight: document.documentElement.clientHeight - (0.03646 * document.documentElement.clientWidth) - 40,
+      editorHeight:
+        document.documentElement.clientHeight -
+        0.03646 * document.documentElement.clientWidth -
+        40,
       screenHeight: document.documentElement.clientHeight,
       screenWidth: document.documentElement.clientWidth,
 
       terminalWidth: document.documentElement.clientWidth,
       terminalHeight: 340,
-      editorHeightVar: document.documentElement.clientHeight - (0.03646 * document.documentElement.clientWidth) - 40 + 'px',
+      editorHeightVar:
+        document.documentElement.clientHeight -
+        0.03646 * document.documentElement.clientWidth -
+        40 +
+        "px",
       tempTop: 0,
       editorMaxHeight: 0,
       lineHeight: 0,
@@ -369,67 +394,71 @@ export default {
   // },
 
   methods: {
-　　changeFixed(){
+    changeFixed() {
       this.isShowTerminalHandle();
 
       this.checkHeight();
-　　},
-
-
-
-    checkHeight() {
-      let aceLines = document.getElementsByClassName('ace_line');
-      this.lineHeight = aceLines.length*27 + 200;
-
-      let ace_gutter = document.getElementsByClassName('ace_gutter')[0];
-      let ace_content = document.getElementsByClassName('ace_content')[0];
-      var ace_scroller = document.getElementsByClassName('ace_scroller')[0];
-      var ace_printmarginlayer = document.getElementsByClassName('ace_print-margin-layer')[0];
-      var ace_markerlayerone = document.getElementsByClassName('ace_marker-layer')[0];
-      var ace_markerlayertwo = document.getElementsByClassName('ace_marker-layer')[1];
-      var ace_textlayer = document.getElementsByClassName('ace_text-layer')[0];
-      var ace_cursorlayer = document.getElementsByClassName('ace_cursor-layer')[0];
-      
-      if (ace_gutter.clientHeight < this.lineHeight) {
-        ace_gutter.style.height = this.lineHeight+'px';
-        ace_content.style.height = this.lineHeight+'px';
-        ace_scroller.style.height = this.lineHeight+'px'
-
-        ace_printmarginlayer.style.height = this.lineHeight+'px';
-        ace_markerlayerone.style.height = this.lineHeight+'px';
-        ace_markerlayertwo.style.height = this.lineHeight+'px';
-        ace_textlayer.style.height = this.lineHeight+'px';
-        ace_cursorlayer.style.height = this.lineHeight+'px';
-
-
-      }else {
-        ace_gutter.style.height = ace_gutter.clientHeight+'px';
-        ace_content.style.height = ace_gutter.clientHeight+'px !important';
-        ace_scroller.style.height = ace_gutter.clientHeight+'px'
-
-        ace_printmarginlayer.style.height = ace_gutter.clientHeight+'px';
-        ace_markerlayerone.style.height = ace_gutter.clientHeight+'px';
-        ace_markerlayertwo.style.height = ace_gutter.clientHeight+'px';
-        ace_textlayer.style.height = ace_gutter.clientHeight+'px';
-        ace_cursorlayer.style.height = ace_gutter.clientHeight+'px';
-      }
-
-      console.log ('lineHeight: ', ace_gutter.style.height)
     },
 
-    resizeHandle(newRect) { 
+    checkHeight() {
+      let aceLines = document.getElementsByClassName("ace_line");
+      this.lineHeight = aceLines.length * 27 + 200;
+
+      let ace_gutter = document.getElementsByClassName("ace_gutter")[0];
+      let ace_content = document.getElementsByClassName("ace_content")[0];
+      var ace_scroller = document.getElementsByClassName("ace_scroller")[0];
+      var ace_printmarginlayer = document.getElementsByClassName(
+        "ace_print-margin-layer"
+      )[0];
+      var ace_markerlayerone = document.getElementsByClassName(
+        "ace_marker-layer"
+      )[0];
+      var ace_markerlayertwo = document.getElementsByClassName(
+        "ace_marker-layer"
+      )[1];
+      var ace_textlayer = document.getElementsByClassName("ace_text-layer")[0];
+      var ace_cursorlayer = document.getElementsByClassName(
+        "ace_cursor-layer"
+      )[0];
+
+      if (ace_gutter.clientHeight < this.lineHeight) {
+        ace_gutter.style.height = this.lineHeight + "px";
+        ace_content.style.height = this.lineHeight + "px";
+        ace_scroller.style.height = this.lineHeight + "px";
+
+        ace_printmarginlayer.style.height = this.lineHeight + "px";
+        ace_markerlayerone.style.height = this.lineHeight + "px";
+        ace_markerlayertwo.style.height = this.lineHeight + "px";
+        ace_textlayer.style.height = this.lineHeight + "px";
+        ace_cursorlayer.style.height = this.lineHeight + "px";
+      } else {
+        ace_gutter.style.height = ace_gutter.clientHeight + "px";
+        ace_content.style.height = ace_gutter.clientHeight + "px !important";
+        ace_scroller.style.height = ace_gutter.clientHeight + "px";
+
+        ace_printmarginlayer.style.height = ace_gutter.clientHeight + "px";
+        ace_markerlayerone.style.height = ace_gutter.clientHeight + "px";
+        ace_markerlayertwo.style.height = ace_gutter.clientHeight + "px";
+        ace_textlayer.style.height = ace_gutter.clientHeight + "px";
+        ace_cursorlayer.style.height = ace_gutter.clientHeight + "px";
+      }
+
+      console.log("lineHeight: ", ace_gutter.style.height);
+    },
+
+    resizeHandle(newRect) {
       // console.log (newRect)
       // console.log (newRect);
       // this.vw = newRect.width;
       this.terminalHeight = newRect.height;
-      this.terminalHeightVar = this.terminalHeight
+      this.terminalHeightVar = this.terminalHeight;
 
       if (this.tempTop > newRect.top) {
-        this.editorHeight = this.editorHeight - (this.tempTop - newRect.top)
-      }else {
-        this.editorHeight = this.editorHeight + (newRect.top - this.tempTop)
+        this.editorHeight = this.editorHeight - (this.tempTop - newRect.top);
+      } else {
+        this.editorHeight = this.editorHeight + (newRect.top - this.tempTop);
       }
-      this.editorHeightVar = this.editorHeight + 'px'
+      this.editorHeightVar = this.editorHeight + "px";
 
       // console.log ('editorHeight:' , this.editorHeight)
 
@@ -441,9 +470,7 @@ export default {
       this.xterm.scrollToTop();
     },
 
-    resizeOver(newRect) {
-
-    },
+    resizeOver(newRect) {},
 
     setCmdHandle(cmd) {
       console.log("set command: ", cmd);
@@ -494,11 +521,7 @@ export default {
     },
     setupProcess() {},
     checkSuffixValid(suffix) {
-      if (
-        suffix == "cpp" ||
-        suffix == "c" ||
-        suffix == "py"
-      ) {
+      if (suffix == "cpp" || suffix == "c" || suffix == "py") {
         return true;
       } else {
         console.log("invalid file name suffix: ", suffix);
@@ -626,7 +649,13 @@ export default {
             this.$message.success("不支持该文件类型");
             suffix = "cpp";
           }
-          tab = myTab.setTab(fileName, data, path, myTab.TAB_STATUS.SAVED, suffix);
+          tab = myTab.setTab(
+            fileName,
+            data,
+            path,
+            myTab.TAB_STATUS.SAVED,
+            suffix
+          );
           this.addTab(tab);
           myEditor.setMode(suffix);
           myEditor.setSourceCode(data);
@@ -685,7 +714,7 @@ export default {
         }
       }
 
-      tab.isSave = myTab.TAB_STATUS.SAVING
+      tab.isSave = myTab.TAB_STATUS.SAVING;
 
       dialog.showSaveDialog(
         {
@@ -700,7 +729,7 @@ export default {
           }
 
           if (rsp === undefined || rsp === null) {
-            tab.isSave = myTab.TAB_STATUS.NOT_SAVE
+            tab.isSave = myTab.TAB_STATUS.NOT_SAVE;
             return this.$message.warning("请选择文件保存路径");
           }
 
@@ -779,10 +808,11 @@ export default {
         cmd = "g++ " + filePath + " -o ./a.out && ./a.out";
         this.ptyProcess.write(cmd + "\n");
       } else if (process.platform === "win32") {
-        // appDir = "E:\\Program Files\\AiknowEditor\\resources"
+        // appDir = "E:\\Program Files\\AiknowEditor\\resources";
         let compiler = appDir + "\\MinGW64\\bin\\g++.exe";
-        let console = appDir + "\\ConsolePauser.exe";
-        cmd = '"' + compiler + '" "' + filePath + '"' + " -o a.out && " + '"' + console + '"' + " a.out";
+        // let console = appDir + "\\ConsolePauser.exe";
+        // cmd = '"' + compiler + '" "' + filePath + '"' + " -o a.out && " + '"' + console + '"' + " a.out";
+        cmd = '"' + compiler + '" "' + filePath + '"' + " -o a.out && a.out";
         this.ptyProcess.write(cmd + "\r\n");
       } else {
         // nothing to do
@@ -797,15 +827,16 @@ export default {
         this.ptyProcess.write(cmd + "\n");
       } else if (process.platform === "win32") {
         let compiler = appDir + "\\MinGW64\\bin\\gcc.exe";
-        let console = appDir + "\\ConsolePauser.exe";
-        cmd = '"' + compiler + '" "' + filePath + '"' + " -o a.out && " + '"' + console + '"' + " a.out";
+        // let console = appDir + "\\ConsolePauser.exe";
+        // cmd = '"' + compiler + '" "' + filePath + '"' + " -o a.out && " + '"' + console + '"' + " a.out";
+        cmd = '"' + compiler + '" "' + filePath + '"' + " -o a.out && a.out";
         this.ptyProcess.write(cmd + "\r\n");
       } else {
         // nothing to do
       }
     },
     execRun(language, filePath) {
-      this.xterm.clear()
+      this.xterm.clear();
       console.log("exec run, language: ", language, " file path: ", filePath);
       switch (language) {
         case "py":
@@ -826,7 +857,7 @@ export default {
       // js监听键盘ctrl + s快捷键保存;
       document.addEventListener("keydown", (e) => {
         if (
-          e.keyCode == 83 &&
+          e.key === "s" &&
           (navigator.platform.match("Mac") ? e.metaKey : e.ctrlKey)
         ) {
           e.preventDefault();
@@ -944,7 +975,7 @@ export default {
           // console.log("ptyProcess:", JSON.stringify(data), typeof data);
           let errMsg = "error: expected ';' before";
           let newData = data.replace(errMsg, "错误：在下面语句之前缺少分号");
-          console.log(newData)
+          console.log(newData);
           this.xterm.write(newData);
         });
       }
@@ -954,16 +985,23 @@ export default {
 
     isShowTerminalHandle() {
       if (this.isShowTerminal) {
-        this.$refs.terminalDiv.style.display = 'block'
-        this.editorHeight = (document.documentElement.clientHeight - (0.03646 * document.documentElement.clientWidth) - 40 - this.terminalHeight)
-        this.editorHeightVar = this.editorHeight + 'px';
+        this.$refs.terminalDiv.style.display = "block";
+        this.editorHeight =
+          document.documentElement.clientHeight -
+          0.03646 * document.documentElement.clientWidth -
+          40 -
+          this.terminalHeight;
+        this.editorHeightVar = this.editorHeight + "px";
         this.terminalWidth = document.documentElement.clientWidth;
         this.xterm.fit();
         this.xterm.scrollToTop();
-      }else {
-        this.$refs.terminalDiv.style.display = 'none'
-        this.editorHeight = (document.documentElement.clientHeight - (0.03646 * document.documentElement.clientWidth) - 40)
-        this.editorHeightVar = this.editorHeight + 'px';
+      } else {
+        this.$refs.terminalDiv.style.display = "none";
+        this.editorHeight =
+          document.documentElement.clientHeight -
+          0.03646 * document.documentElement.clientWidth -
+          40;
+        this.editorHeightVar = this.editorHeight + "px";
         this.terminalWidth = document.documentElement.clientWidth;
       }
     },
@@ -1000,16 +1038,15 @@ export default {
     this.promptUpdate();
 
     let _this = this;
-    _this.changeFixed()
+    _this.changeFixed();
     window.onresize = () => {
       return (() => {
-       _this.changeFixed()
-      })()
-    }
-
+        _this.changeFixed();
+      })();
+    };
   },
 
-  destroyed(){
+  destroyed() {
     window.onresize = null;
   },
 
@@ -1057,8 +1094,8 @@ export default {
 .el-icon-caret-right {
   color: #fff;
   font-size: 26px;
-    margin-left: 12px;
-    margin-right: 8px;
+  margin-left: 12px;
+  margin-right: 8px;
   margin-top: 7px;
 }
 
@@ -1095,8 +1132,8 @@ export default {
   line-height: 30px;
   background: #3a3c40;
   color: #fff;
-    padding-left: 20px;
-    font-size: 14px;
+  padding-left: 20px;
+  font-size: 14px;
 }
 
 .terminal {
@@ -1168,12 +1205,14 @@ export default {
   display: none;
 }
 
-.ace_hidpi .ace_gutter-layer, .ace_hidpi .ace_gutter {
+.ace_hidpi .ace_gutter-layer,
+.ace_hidpi .ace_gutter {
   /* height: var(--editorHeightVar) !important; */
   height: 120%;
 }
 
-.ace_hidpi .ace_text-layer, .ace_hidpi .ace_content {
+.ace_hidpi .ace_text-layer,
+.ace_hidpi .ace_content {
   /* height: var(--editorHeightVar) !important; */
   height: 100%;
   display: contents;
@@ -1205,7 +1244,8 @@ export default {
   background-color: #666;
 }
 
-.vdr, .vdr.active:before {
+.vdr,
+.vdr.active:before {
   top: 0 !important;
 }
 
@@ -1222,8 +1262,12 @@ export default {
   margin-left: 0 !important;
 }
 
-.vdr-stick-bm, .vdr-stick-tm {
+.vdr-stick-bm,
+.vdr-stick-tm {
   left: 0;
 }
 
+/* .ace_cursor {
+  margin-left: -4px !important;
+} */
 </style>

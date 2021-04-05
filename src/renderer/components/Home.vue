@@ -277,6 +277,7 @@ export default {
 .el-main {
   padding: 0;
   padding-top: 2px;
+  overflow: hide;
 }
 
 /* .father .child {

@@ -1096,7 +1096,7 @@ export default {
   position: relative;
   width: 100%;
   height: 320px;
-  padding: 0 20px;
+  padding: 0 0 0 20px;
 }
 
 .el-icon-close {
@@ -1217,6 +1217,10 @@ export default {
 
 .vdr-stick-bm, .vdr-stick-tm {
   left: 0;
+}
+
+.ace_cursor {
+  margin-left: -4px !important;
 }
 
 </style>

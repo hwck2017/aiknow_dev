@@ -352,6 +352,7 @@ export default {
       resultErr: "",
       resultOut: "",
       errno: 0,
+      restoreTimer: 0,
 
       // for terminal
       xterm: null,
@@ -384,22 +385,11 @@ export default {
       lineHeight: 0,
     };
   },
-
-  // watch: {
-  //     screenWidth(val) {
-  //         this.screenWidth = val;
-  //         console.log("this.screenWidth",this.screenWidth)
-  //     }
-
-  // },
-
   methods: {
     changeFixed() {
       this.isShowTerminalHandle();
-
       this.checkHeight();
     },
-
     checkHeight() {
       let aceLines = document.getElementsByClassName("ace_line");
       this.lineHeight = aceLines.length * 27 + 200;
@@ -445,7 +435,6 @@ export default {
 
       console.log("lineHeight: ", ace_gutter.style.height);
     },
-
     resizeHandle(newRect) {
       // console.log (newRect)
       // console.log (newRect);
@@ -469,9 +458,7 @@ export default {
       this.xterm.fit();
       this.xterm.scrollToTop();
     },
-
     resizeOver(newRect) {},
-
     setCmdHandle(cmd) {
       console.log("set command: ", cmd);
       switch (cmd) {
@@ -664,7 +651,10 @@ export default {
     },
     saveFile(saveAs) {
       let code = myEditor.getSourceCode();
+      console.log("save --> active tab idx: ", this.activeTab);
       let tab = myTab.findTabByName(this.activeTab);
+      console.log("save --> curr tab: ", tab);
+
       if (tab === undefined) {
         // tab全部被删除, 但编辑器中还有内容
         console.log("tab noexist");
@@ -674,20 +664,19 @@ export default {
       }
 
       // 非save_as情况下 如果已经保存 则直接保存 不需要询问保存路径
-      console.log("tab is saved: ", tab.isSave);
+      console.log("tab save status: ", tab.isSave);
       if (saveAs === false && tab.isSave === myTab.TAB_STATUS.SAVED) {
         fs.writeFileSync(tab.filePath, code);
-        console.log("save as ok");
         if (this.needRun) {
           console.log("run: ", tab.suffix, "+", tab.filePath);
           this.execRun(tab.suffix, tab.filePath);
-          // ipcRenderer.send("run", tab.suffix, tab.filePath);
           this.needRun = false;
         }
 
         return;
       }
 
+      // 防止重复保存触发多次弹框
       if (tab.isSave === myTab.TAB_STATUS.SAVING) {
         return;
       }
@@ -722,11 +711,11 @@ export default {
           filters: filter,
         },
         (rsp) => {
-          let tab = myTab.findTabByName(this.activeTab);
-          if (tab === undefined) {
-            tab = myTab.initTab();
-            this.addTab(tab);
-          }
+          // let tab = myTab.findTabByName(this.activeTab);
+          // if (tab === undefined) {
+          //   tab = myTab.initTab();
+          //   this.addTab(tab);
+          // }
 
           if (rsp === undefined || rsp === null) {
             tab.isSave = myTab.TAB_STATUS.NOT_SAVE;
@@ -743,7 +732,6 @@ export default {
           fs.writeFileSync(tab.filePath, myEditor.getSourceCode());
           if (this.needRun) {
             this.execRun(tab.suffix, tab.filePath);
-            // ipcRenderer.send("run", tab.suffix, tab.filePath);
             this.needRun = false;
           }
         }
@@ -768,15 +756,31 @@ export default {
     },
     // 保存编辑器内容到本地
     storeData() {
-      let code = myEditor.getSourceCode();
-      //内容为空或者未发生改变则不保存
-      if (code === "" || code === myStorage.getFromSS("codeEditor")) return;
+      var code = myEditor.getSourceCode();
 
-      myStorage.storeToSS("codeEditor", code);
+      // console.log(this.activeTab);
+      var curTab = myTab.findTabByName(this.activeTab);
+      // console.log("curr tab: ", curTab);
+      if (curTab == undefined) {
+        console.log("curr tab undefined!");
+        return;
+      }
+
+      //内容为空或者未发生改变则不保存
+      if (code === "" || code === curTab.content) {
+        return;
+      }
+
+      if (curTab.isSave !== myTab.TAB_STATUS.SAVED) {
+        // console.log("save code to curr tab");
+        curTab.content = code;
+      }
     },
     readFromStorage() {
-      let code = myStorage.getFromSS("codeEditor");
-      if (code) myEditor.setSourceCode(code);
+      // let code = myStorage.getFromSS("codeEditor");
+      // console.log("code: ", code);
+      var curTab = myTab.findTabByName(this.activeTab);
+      if (curTab) myEditor.setSourceCode(curTab.content);
     },
     // 本地测试运行
     run() {
@@ -793,7 +797,9 @@ export default {
         cmd = "python3 " + filePath;
         this.ptyProcess.write(cmd + "\n");
       } else if (process.platform === "win32") {
-        let compiler = appDir + "\\Python\\python.exe";
+        // let compiler = appDir + "\\Python\\python.exe";
+        // cmd = '"' + compiler + '" "' + filePath + '"';
+        let compiler = appDir + "\\win32\\run_py.bat";
         cmd = '"' + compiler + '" "' + filePath + '"';
         this.ptyProcess.write(cmd + "\r\n");
       } else {
@@ -809,10 +815,13 @@ export default {
         this.ptyProcess.write(cmd + "\n");
       } else if (process.platform === "win32") {
         // appDir = "E:\\Program Files\\AiknowEditor\\resources";
-        let compiler = appDir + "\\MinGW64\\bin\\g++.exe";
-        // let console = appDir + "\\ConsolePauser.exe";
-        // cmd = '"' + compiler + '" "' + filePath + '"' + " -o a.out && " + '"' + console + '"' + " a.out";
-        cmd = '"' + compiler + '" "' + filePath + '"' + " -o a.out && a.out";
+        // let compiler = appDir + "\\MinGW64\\bin\\g++.exe";
+        // cmd = '"' + compiler + '" "' + filePath + '"' + " -o a.out && a.out";
+
+        let fileName = myFile.getFileName(filePath);
+        let output = fileName.substring(0, fileName.indexOf(".")) + ".exe";
+        let compiler = appDir + "\\win32\\run_cpp.bat";
+        cmd = '"' + compiler + '" "' + filePath + '" ' + output;
         this.ptyProcess.write(cmd + "\r\n");
       } else {
         // nothing to do
@@ -826,10 +835,13 @@ export default {
         cmd = "gcc " + filePath + " -o ./a.out && ./a.out";
         this.ptyProcess.write(cmd + "\n");
       } else if (process.platform === "win32") {
-        let compiler = appDir + "\\MinGW64\\bin\\gcc.exe";
-        // let console = appDir + "\\ConsolePauser.exe";
-        // cmd = '"' + compiler + '" "' + filePath + '"' + " -o a.out && " + '"' + console + '"' + " a.out";
-        cmd = '"' + compiler + '" "' + filePath + '"' + " -o a.out && a.out";
+        // let compiler = appDir + "\\MinGW64\\bin\\gcc.exe";
+        // cmd = '"' + compiler + '" "' + filePath + '"' + " -o a.out && a.out";
+
+        let fileName = myFile.getFileName(filePath);
+        let output = fileName.substring(0, fileName.indexOf(".")) + ".exe";
+        let compiler = appDir + "\\win32\\run_c.bat";
+        cmd = '"' + compiler + '" "' + filePath + '" ' + output;
         this.ptyProcess.write(cmd + "\r\n");
       } else {
         // nothing to do
@@ -854,11 +866,10 @@ export default {
       }
     },
     keyWatcher() {
-      // js监听键盘ctrl + s快捷键保存;
       document.addEventListener("keydown", (e) => {
         if (
-          e.key === "s" &&
-          (navigator.platform.match("Mac") ? e.metaKey : e.ctrlKey)
+          (e.key === "s" || e.key === "S") &&
+          (process.platform === "darwin" ? e.metaKey : e.ctrlKey)
         ) {
           e.preventDefault();
           console.log(e);
@@ -911,27 +922,7 @@ export default {
       // for terminal
       this.initTerminal();
     },
-
     // for terminal
-    handleResize() {
-      this.$nextTick(() => {
-        let rect = this.$refs.main.getBoundingClientRect();
-        console.log(rect.width, rect.height, "resize");
-        this.resizeBySize(rect.width < 200 ? 200 : rect.width, rect.height);
-      });
-    },
-    reinit(options = {}) {
-      if (this.xterm || this.ptyProcess) {
-        this.xterm.destroy();
-        this.ptyProcess.destroy();
-        this.xterm = null;
-        this.ptyProcess = null;
-      }
-      this.cwd = options.cwd || this.cwd;
-      this.rows = options.rows || this.rows;
-      this.cols = options.cols || this.cols;
-      this.initTerminal();
-    },
     initTerminal() {
       if (!this.xterm || !this.ptyProcess) {
         this.isInit = true;
@@ -951,7 +942,6 @@ export default {
           cwd: process.env.HOME,
           env: env,
           encoding: "utf8",
-          // uid: 0,
         });
 
         console.log("cwd: ", this.cwd);
@@ -967,22 +957,21 @@ export default {
         });
         this.xterm.open(this.$refs.terminal);
         this.xterm.fit();
-        this.xterm.on("data", (data) => {
+        this.xterm.onData((data) => {
           console.log("xterm:", JSON.stringify(data));
           this.ptyProcess.write(data);
         });
         this.ptyProcess.on("data", (data) => {
-          // console.log("ptyProcess:", JSON.stringify(data), typeof data);
-          let errMsg = "error: expected ';' before";
-          let newData = data.replace(errMsg, "错误：在下面语句之前缺少分号");
-          console.log(newData);
-          this.xterm.write(newData);
+          console.log("ptyProcess:", JSON.stringify(data), typeof data);
+          // let errMsg = "error: expected ';' before";
+          // let newData = data.replace(errMsg, "错误：在下面语句之前缺少分号");
+          // console.log(newData);
+          this.xterm.write(data);
         });
       }
 
       this.isShowTerminalHandle();
     },
-
     isShowTerminalHandle() {
       if (this.isShowTerminal) {
         this.$refs.terminalDiv.style.display = "block";
@@ -1005,33 +994,13 @@ export default {
         this.terminalWidth = document.documentElement.clientWidth;
       }
     },
-
     closeTerminal() {
       this.isShowTerminal = false;
       this.isShowTerminalHandle();
     },
-
-    execute(cmd) {
-      this.ptyProcess.write(cmd + "\n");
-    },
-    resize(cols, rows) {
-      this.cols = cols;
-      this.rows = rows;
-      this.xterm.resize(cols, rows);
-      this.ptyProcess.resize(cols, rows);
-    },
-    resizeBySize(width, height) {
-      let cols = Math.floor((width - 20) / 9);
-      let rows = Math.floor(height / 17);
-      this.resize(cols, rows);
-    },
-    resizeHeight(height) {
-      let rows = Math.floor(height / 17);
-      this.resize(this.cols, rows);
-    },
   },
   created() {
-    setInterval(this.storeData, 1000);
+    this.restoreTimer = setInterval(this.storeData, 1000);
   },
   mounted() {
     this.init();
@@ -1044,10 +1013,26 @@ export default {
         _this.changeFixed();
       })();
     };
+
+    var agent = navigator.userAgent.toLowerCase();
+    var isMac = /macintosh|mac os x/i.test(navigator.userAgent);
+    // if (agent.indexOf("win32") >= 0 || agent.indexOf("wow32") >= 0) {
+    //   alert("这是windows32位系统");
+    //   }
+    // if (agent.indexOf("win64") >= 0 || agent.indexOf("wow64") >= 0) {
+    //   alert("这是windows64位系统");
+    // }
+    if (isMac) {
+      // alert("这是mac系统");
+      let ace_cursor = document.getElementsByClassName("ace_cursor")[0];
+      ace_cursor.style.marginLeft = "-4px";
+    }
   },
 
   destroyed() {
     window.onresize = null;
+    // console.log("clear timer")
+    clearInterval(this.restoreTimer);
   },
 
   computed: {
@@ -1062,6 +1047,10 @@ export default {
 </script>
 
 <style scoped>
+* {
+  box-sizing: border-box;
+}
+
 .editorDiv {
   position: relative;
 }
@@ -1140,7 +1129,8 @@ export default {
   position: relative;
   width: 100%;
   height: 320px;
-  padding: 0 20px;
+  padding-left: 16px;
+  box-sizing: border-box;
 }
 
 .el-icon-close {
@@ -1222,23 +1212,6 @@ export default {
   overflow: visible;
 }
 
-.xterm-viewport {
-  /* background-color: #414449 !important; */
-}
-
-.xterm-cursor-layer {
-  /* background-color: #414449 !important; */
-}
-
-.xterm .xterm-screen canvas {
-  /* background-color: #414449 !important;
-  z-index: 4 !important; */
-}
-
-.xterm .xterm-screen {
-  /* height: var(--terminalHeight) !important; */
-}
-
 ::-webkit-scrollbar-thumb {
   border-radius: 5px;
   background-color: #666;
@@ -1266,8 +1239,4 @@ export default {
 .vdr-stick-tm {
   left: 0;
 }
-
-/* .ace_cursor {
-  margin-left: -4px !important;
-} */
 </style>

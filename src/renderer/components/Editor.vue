@@ -845,9 +845,9 @@ export default {
         myEditor.setMode(this.userOpt.languageOpt);
         myEditor.setFontSize(this.userOpt.fontSize);
         myEditor.setTheme(this.userOpt.editorTheme);
+        // myEditor.setSelectionStyle('text');
       }
       console.log(this.userOpt);
-
       let libs = myStorage.getFromLS("libs");
       if (libs) {
         // 版本升级后lib增加时，需要将新增的和原来的融合起来
@@ -1019,6 +1019,7 @@ export default {
     if(isMac){
       // alert("这是mac系统");
       let ace_cursor = document.getElementsByClassName('ace_cursor')[0];
+      debugger
       ace_cursor.style.marginLeft = '-4px';
     }
 
@@ -1247,6 +1248,14 @@ export default {
 
 .vdr-stick-bm, .vdr-stick-tm {
   left: 0;
+}
+
+.ace_layer {
+  opacity: 0.5
+}
+
+.ace_selection {
+  left: 0 !important;
 }
 
 /* .ace_cursor {

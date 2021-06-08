@@ -174,10 +174,12 @@
             :key="index"
             class="box-card"
           >
-            <div class="fileName">
-              {{ item.name }}
+            <div @dblclick="downloadFile(item.sha1)">
+              <div class="fileName">
+                {{ item.name }}
+              </div>
+              <div class="time">上传时间: {{ item.upload_at }}</div>
             </div>
-            <div class="time">上传时间: {{ item.upload_at }}</div>
           </el-card>
         </el-col>
       </el-row>
@@ -268,7 +270,24 @@ export default {
 
       openCloudDisk: false,
       cloudDiskDomain: "http://127.0.0.1:12345",
-      cloudFiles: [],
+      cloudFiles: [
+        // just for test
+        {
+          name: "test",
+          sha1: "40bd001563085fc35165329ea1ff5c5ecbdbbeef",
+          upload_at: "2021-06-06 08:40:11",
+        },
+        {
+          name: "test1",
+          sha1: "40bd001563085fc35165329ea1ff5c5ecbdbbeef",
+          upload_at: "2021-06-06 09:40:11",
+        },
+        {
+          name: "test2",
+          sha1: "40bd001563085fc35165329ea1ff5c5ecbdbbeef",
+          upload_at: "2021-06-06 10:40:11",
+        },
+      ],
       libInstalling: false,
       opencmd: false,
       libs: [
@@ -801,16 +820,41 @@ export default {
       var fileData = {
         name: tab.title,
         content: tab.content,
+        type: this.userOpt.languageOpt,
       };
 
       this.$http.post(url, fileData).then((res) => {
         console.log("result of upload file ", fileData.name, " is ", res.data);
         if (res.data.err_code !== 0)
           return this.$message.error(res.data.err_msg);
-          
+
         tab.title = res.data.data.name;
         tab.sha1 = res.data.data.sha1;
         return this.$message.success("上传成功");
+      });
+    },
+    downloadFile(sha1) {
+      console.log("sha1: ", sha1);
+      let url = this.cloudDiskDomain + "/apis/aiknow/dev/files?sha1=" + sha1;
+      this.$http.get(url).then((res) => {
+        if (res.data.err_code !== 0)
+          return this.$message.error(res.data.err_msg);
+        let fileInfo = res.data.data;
+        console.log("file info: ", fileInfo);
+        let tab = myTab.setTab(
+          fileInfo.name,
+          fileInfo.content,
+          "",
+          myTab.TAB_STATUS.SAVE,
+          fileInfo.type,
+          fileInfo.sha1
+        );
+        this.addTab(tab);
+
+        myEditor.setMode(fileInfo.type);
+        myEditor.setSourceCode(fileInfo.content);
+
+        this.openCloudDisk = false;
       });
     },
     fileOperProc(cmd) {

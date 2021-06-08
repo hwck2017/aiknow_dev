@@ -14,6 +14,12 @@
               <el-dropdown-item command="open">打开</el-dropdown-item>
               <el-dropdown-item command="save">保存</el-dropdown-item>
               <el-dropdown-item command="saveAs">另存为</el-dropdown-item>
+              <el-dropdown-item command="openCloudDisk"
+                >打开云端</el-dropdown-item
+              >
+              <el-dropdown-item command="uploadCloudDisk"
+                >上传到云端</el-dropdown-item
+              >
             </el-dropdown-menu>
           </el-dropdown>
           <el-button class="toolBtn" size="medium" @click="run">运行</el-button>
@@ -160,6 +166,22 @@
         <el-button type="primary" @click="addLangTab">确 定</el-button>
       </span>
     </el-dialog>
+    <el-dialog title="打开文件" width="70%" :visible.sync="openCloudDisk">
+      <el-row>
+        <el-col :span="5">
+          <el-card
+            v-for="(item, index) in cloudFiles"
+            :key="index"
+            class="box-card"
+          >
+            <div class="fileName">
+              {{ item.name }}
+            </div>
+            <div class="time">上传时间: {{ item.upload_at }}</div>
+          </el-card>
+        </el-col>
+      </el-row>
+    </el-dialog>
     <div class="editorDiv" v-bind:style="{ height: editorHeight + 'px' }">
       <div class="ace-editor" ref="ace" v-on:keyup.enter="checkHeight"></div>
       <div class="runBtn" @click="run">
@@ -243,6 +265,10 @@ export default {
       clickHelp: false,
       setSize: false,
       selectLang: false,
+
+      openCloudDisk: false,
+      cloudDiskDomain: "http://127.0.0.1:12345",
+      cloudFiles: [],
       libInstalling: false,
       opencmd: false,
       libs: [
@@ -641,7 +667,8 @@ export default {
             data,
             path,
             myTab.TAB_STATUS.SAVED,
-            suffix
+            suffix,
+            ""
           );
           this.addTab(tab);
           myEditor.setMode(suffix);
@@ -659,7 +686,7 @@ export default {
         // tab全部被删除, 但编辑器中还有内容
         console.log("tab noexist");
         // TODO: 文件后缀填什么
-        tab = myTab.setTab("", code, "", myTab.TAB_STATUS.NOT_SAVE, "cpp");
+        tab = myTab.setTab("", code, "", myTab.TAB_STATUS.NOT_SAVE, "cpp", "");
         this.addTab(tab);
       }
 
@@ -737,6 +764,55 @@ export default {
         }
       );
     },
+    ListFileMetadata() {
+      if (!this.$store.state.userInfo.isLogin) {
+        return this.$message.warning("请先登入");
+      }
+
+      let url = this.cloudDiskDomain + "/apis/aiknow/dev/files/meta";
+      this.$http.get(url).then((res) => {
+        if (res.data.err_code !== 0)
+          return this.$message.error(res.data.err_msg);
+        console.log("cloud files: ", res.data.data);
+        this.cloudFiles = res.data.data;
+      });
+
+      this.openCloudDisk = true;
+    },
+    uploadFile() {
+      let code = myEditor.getSourceCode();
+      console.log("save --> active tab idx: ", this.activeTab);
+      let tab = myTab.findTabByName(this.activeTab);
+      console.log("save --> curr tab: ", tab);
+
+      if (tab === undefined) {
+        // tab全部被删除, 但编辑器中还有内容
+        console.log("tab noexist");
+        // TODO: 文件后缀填什么
+        tab = myTab.setTab("", code, "", myTab.TAB_STATUS.NOT_SAVE, "cpp", "");
+        this.addTab(tab);
+      }
+
+      if (!this.$store.state.userInfo.isLogin) {
+        return this.$message.warning("请先登入");
+      }
+
+      var url = this.cloudDiskDomain + "/apis/aiknow/dev/files";
+      var fileData = {
+        name: tab.title,
+        content: tab.content,
+      };
+
+      this.$http.post(url, fileData).then((res) => {
+        console.log("result of upload file ", fileData.name, " is ", res.data);
+        if (res.data.err_code !== 0)
+          return this.$message.error(res.data.err_msg);
+          
+        tab.title = res.data.data.name;
+        tab.sha1 = res.data.data.sha1;
+        return this.$message.success("上传成功");
+      });
+    },
     fileOperProc(cmd) {
       console.log(cmd);
       switch (cmd) {
@@ -751,6 +827,12 @@ export default {
           break;
         case "saveAs":
           this.saveFile(true);
+          break;
+        case "openCloudDisk":
+          this.ListFileMetadata();
+          break;
+        case "uploadCloudDisk":
+          this.uploadFile();
           break;
       }
     },
@@ -1240,4 +1322,14 @@ export default {
   left: 0;
 }
 
+.time {
+  font-size: 13px;
+  color: rgb(153, 153, 153);
+}
+
+.fileName {
+  padding-bottom: 14px;
+  font-size: 20px;
+  color: rgb(17, 31, 226);
+}
 </style>

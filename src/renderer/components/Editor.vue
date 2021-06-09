@@ -67,6 +67,7 @@
           :key="item.name"
           :label="item.title"
           :name="item.name"
+          @dblclick="tabEdit(item)"
         ></el-tab-pane>
       </el-tabs>
     </div>
@@ -168,7 +169,7 @@
     </el-dialog>
     <el-dialog title="打开文件" width="70%" :visible.sync="openCloudDisk">
       <el-row>
-        <el-col :span="5">
+        <el-col class="fileListDiv">
           <el-card
             v-for="(item, index) in cloudFiles"
             :key="index"
@@ -281,6 +282,16 @@ export default {
           name: "test1",
           sha1: "40bd001563085fc35165329ea1ff5c5ecbdbbeef",
           upload_at: "2021-06-06 09:40:11",
+        },
+        {
+          name: "test2",
+          sha1: "40bd001563085fc35165329ea1ff5c5ecbdbbeef",
+          upload_at: "2021-06-06 10:40:11",
+        },
+        {
+          name: "test2",
+          sha1: "40bd001563085fc35165329ea1ff5c5ecbdbbeef",
+          upload_at: "2021-06-06 10:40:11",
         },
         {
           name: "test2",
@@ -434,6 +445,9 @@ export default {
     changeFixed() {
       this.isShowTerminalHandle();
       this.checkHeight();
+    },
+    tabEdit() {
+      console.log ('双击');
     },
     checkHeight() {
       let aceLines = document.getElementsByClassName("ace_line");
@@ -1296,6 +1310,19 @@ export default {
   background: none;
   border: none;
 }
+
+.fileListDiv {
+  display: flex;
+  flex-wrap: wrap;
+}
+  .fileListDiv .box-card {
+    width: 23.5%;
+    margin-right: 2%;
+  }
+
+  .fileListDiv .box-card:nth-child(4n) {
+    margin-right: 0;
+  }
 </style>
 
 <style>

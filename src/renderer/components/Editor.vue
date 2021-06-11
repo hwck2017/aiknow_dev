@@ -167,6 +167,13 @@
         <el-button type="primary" @click="addLangTab">确 定</el-button>
       </span>
     </el-dialog>
+    <el-dialog title="文件另存为" width="40%" :visible.sync="fileUploadEnable">
+      <el-input v-model="fileRename" placeholder="请输入文件名称"></el-input>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="fileUploadEnable = false">取 消</el-button>
+        <el-button type="primary" @click="uploadFile">确 定</el-button>
+      </span>
+    </el-dialog>
     <el-dialog title="打开文件" width="70%" :visible.sync="openCloudDisk">
       <el-row>
         <el-col class="fileListDiv">
@@ -270,35 +277,10 @@ export default {
       selectLang: false,
 
       openCloudDisk: false,
-      cloudDiskDomain: "http://127.0.0.1:12345",
-      cloudFiles: [
-        // just for test
-        {
-          name: "test",
-          sha1: "40bd001563085fc35165329ea1ff5c5ecbdbbeef",
-          upload_at: "2021-06-06 08:40:11",
-        },
-        {
-          name: "test1",
-          sha1: "40bd001563085fc35165329ea1ff5c5ecbdbbeef",
-          upload_at: "2021-06-06 09:40:11",
-        },
-        {
-          name: "test2",
-          sha1: "40bd001563085fc35165329ea1ff5c5ecbdbbeef",
-          upload_at: "2021-06-06 10:40:11",
-        },
-        {
-          name: "test2",
-          sha1: "40bd001563085fc35165329ea1ff5c5ecbdbbeef",
-          upload_at: "2021-06-06 10:40:11",
-        },
-        {
-          name: "test2",
-          sha1: "40bd001563085fc35165329ea1ff5c5ecbdbbeef",
-          upload_at: "2021-06-06 10:40:11",
-        },
-      ],
+      fileUploadEnable: false,
+      fileRename: "",
+      cloudDiskDomain: "http://39.99.33.209:12345",
+      cloudFiles: [],
       libInstalling: false,
       opencmd: false,
       libs: [
@@ -447,7 +429,7 @@ export default {
       this.checkHeight();
     },
     tabEdit() {
-      console.log ('双击');
+      console.log("双击");
     },
     checkHeight() {
       let aceLines = document.getElementsByClassName("ace_line");
@@ -726,7 +708,8 @@ export default {
       // 非save_as情况下 如果已经保存 则直接保存 不需要询问保存路径
       console.log("tab save status: ", tab.isSave);
       if (saveAs === false && tab.isSave === myTab.TAB_STATUS.SAVED) {
-        fs.writeFileSync(tab.filePath, code);
+        // TODO: 如何处理本地存储及云上存储?
+        if (tab.sha1 === "") fs.writeFileSync(tab.filePath, code);
         if (this.needRun) {
           console.log("run: ", tab.suffix, "+", tab.filePath);
           this.execRun(tab.suffix, tab.filePath);
@@ -826,26 +809,54 @@ export default {
         this.addTab(tab);
       }
 
-      if (!this.$store.state.userInfo.isLogin) {
-        return this.$message.warning("请先登入");
-      }
-
-      var url = this.cloudDiskDomain + "/apis/aiknow/dev/files";
+      tab.title = this.fileRename;
       var fileData = {
         name: tab.title,
         content: tab.content,
-        type: this.userOpt.languageOpt,
+        type: tab.suffix,
       };
 
-      this.$http.post(url, fileData).then((res) => {
-        console.log("result of upload file ", fileData.name, " is ", res.data);
-        if (res.data.err_code !== 0)
-          return this.$message.error(res.data.err_msg);
+      this.fileUploadEnable = false;
+      if (tab.sha1 !== "") {
+        console.log("update code file: ", tab.title);
+        var url =
+          this.cloudDiskDomain + "/apis/aiknow/dev/files?sha1=" + tab.sha1;
+        this.$http.put(url, fileData).then((res) => {
+          console.log(
+            "result of update file ",
+            fileData.name,
+            " is ",
+            res.data
+          );
+          if (res.data.err_code !== 0) {
+            return this.$message.error(res.data.err_msg);
+          }
 
-        tab.title = res.data.data.name;
-        tab.sha1 = res.data.data.sha1;
-        return this.$message.success("上传成功");
-      });
+          tab.title = res.data.data.name;
+          tab.sha1 = res.data.data.sha1;
+          tab.isSave = myTab.TAB_STATUS.SAVED;
+          return this.$message.success("上传成功");
+        });
+      } else {
+        console.log("add code file: ", tab.title);
+        var url = this.cloudDiskDomain + "/apis/aiknow/dev/files";
+        this.$http.post(url, fileData).then((res) => {
+          console.log(
+            "result of upload file ",
+            fileData.name,
+            " is ",
+            res.data
+          );
+          if (res.data.err_code !== 0) {
+            return this.$message.error(res.data.err_msg);
+          }
+
+          tab.title = res.data.data.name;
+          tab.sha1 = res.data.data.sha1;
+          tab.isSave = myTab.TAB_STATUS.SAVED;
+          return this.$message.success("上传成功");
+        });
+      }
     },
     downloadFile(sha1) {
       console.log("sha1: ", sha1);
@@ -859,7 +870,7 @@ export default {
           fileInfo.name,
           fileInfo.content,
           "",
-          myTab.TAB_STATUS.SAVE,
+          myTab.TAB_STATUS.SAVED,
           fileInfo.type,
           fileInfo.sha1
         );
@@ -890,7 +901,17 @@ export default {
           this.ListFileMetadata();
           break;
         case "uploadCloudDisk":
-          this.uploadFile();
+          // this.uploadFile();
+          if (!this.$store.state.userInfo.isLogin) {
+            return this.$message.warning("请先登入");
+          }
+
+          this.fileUploadEnable = true;
+          let curTab = myTab.findTabByName(this.activeTab);
+          if (curTab !== undefined) {
+            this.fileRename = curTab.title;
+          }
+
           break;
       }
     },
@@ -1315,14 +1336,14 @@ export default {
   display: flex;
   flex-wrap: wrap;
 }
-  .fileListDiv .box-card {
-    width: 23.5%;
-    margin-right: 2%;
-  }
+.fileListDiv .box-card {
+  width: 23.5%;
+  margin-right: 2%;
+}
 
-  .fileListDiv .box-card:nth-child(4n) {
-    margin-right: 0;
-  }
+.fileListDiv .box-card:nth-child(4n) {
+  margin-right: 0;
+}
 </style>
 
 <style>

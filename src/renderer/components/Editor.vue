@@ -14,11 +14,14 @@
               <el-dropdown-item command="open">打开</el-dropdown-item>
               <el-dropdown-item command="save">保存</el-dropdown-item>
               <el-dropdown-item command="saveAs">另存为</el-dropdown-item>
-              <el-dropdown-item command="openCloudDisk"
-                >打开云端</el-dropdown-item
+              <el-dropdown-item command="openFilesFromCloudDisk"
+                >打开云端文件</el-dropdown-item
               >
-              <el-dropdown-item command="uploadCloudDisk"
-                >上传到云端</el-dropdown-item
+              <el-dropdown-item command="saveFileToCloudDisk"
+                >保存到云端</el-dropdown-item
+              >
+              <el-dropdown-item command="saveAsFileToCloudDisk"
+                >云端另存为</el-dropdown-item
               >
             </el-dropdown-menu>
           </el-dropdown>
@@ -167,11 +170,17 @@
         <el-button type="primary" @click="addLangTab">确 定</el-button>
       </span>
     </el-dialog>
-    <el-dialog title="文件另存为" width="40%" :visible.sync="fileUploadEnable">
-      <el-input v-model="fileRename" placeholder="请输入文件名称"></el-input>
+    <el-dialog title="文件保存为" width="40%" :visible.sync="fileUploadEnable">
+      <el-input v-model="fileRename" placeholder="请输入文件名称">
+        <el-select v-model="fileSuffix" slot="append" placeholder="请选择">
+          <el-option label=".cpp" value="1"></el-option>
+          <el-option label=".c" value="2"></el-option>
+          <el-option label=".py" value="3"></el-option>
+        </el-select>
+      </el-input>
       <span slot="footer" class="dialog-footer">
         <el-button @click="fileUploadEnable = false">取 消</el-button>
-        <el-button type="primary" @click="uploadFile">确 定</el-button>
+        <el-button type="primary" @click="uploadFile(false)">确 定</el-button>
       </span>
     </el-dialog>
     <el-dialog title="打开文件" width="70%" :visible.sync="openCloudDisk">
@@ -182,7 +191,7 @@
             :key="index"
             class="box-card"
           >
-            <div @dblclick="downloadFile(item.sha1)">
+            <div @click="downloadFile(item.sha1)">
               <div class="fileName">
                 {{ item.name }}
               </div>
@@ -191,6 +200,22 @@
           </el-card>
         </el-col>
       </el-row>
+    </el-dialog>
+    <el-dialog width="30%" :visible.sync="fileExisted">
+      <span>
+        <h3>文件 {{ fileRename }}{{ fileSuffix }} 已存在，是否覆盖？</h3>
+      </span>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="fileExisted = false">取 消</el-button>
+        <el-button
+          type="primary"
+          @click="
+            uploadFile(true);
+            fileExisted = false;
+          "
+          >覆 盖</el-button
+        >
+      </span>
     </el-dialog>
     <div class="editorDiv" v-bind:style="{ height: editorHeight + 'px' }">
       <div class="ace-editor" ref="ace" v-on:keyup.enter="checkHeight"></div>
@@ -278,8 +303,15 @@ export default {
 
       openCloudDisk: false,
       fileUploadEnable: false,
+      //文件在云端已存在，打开提示框提示用户是否覆盖
+      fileExisted: false,
+      //文件保存到云端前用户修改的名字
       fileRename: "",
-      cloudDiskDomain: "http://39.99.33.209:12345",
+      //文件保存到云端前用户修改的后缀
+      fileSuffix: ".py",
+
+      cloudDiskDomain: "http://test.aiknow.cn:12345",
+      // cloudDiskDomain: "http://127.0.0.1:12345",
       cloudFiles: [],
       libInstalling: false,
       opencmd: false,
@@ -301,8 +333,7 @@ export default {
         // },
         {
           name: "PyPDF2",
-          desc:
-            "PyPDF2是用于处理pdf文件的python库, 它提供了读、写、分割、合并、文件转换等多种操作",
+          desc: "PyPDF2是用于处理pdf文件的python库, 它提供了读、写、分割、合并、文件转换等多种操作",
           status: false,
         },
         {
@@ -322,8 +353,7 @@ export default {
         },
         {
           name: "pandas",
-          desc:
-            "pandas是用于数据挖掘和数据分析，同时也提供数据清洗功能的python库，它的使用基础是Numpy",
+          desc: "pandas是用于数据挖掘和数据分析，同时也提供数据清洗功能的python库，它的使用基础是Numpy",
           status: false,
         },
         // {
@@ -344,14 +374,12 @@ export default {
         },
         {
           name: "pillow",
-          desc:
-            "pillow是基于Python的图像处理工具包，它提供了基本的图像处理功能",
+          desc: "pillow是基于Python的图像处理工具包，它提供了基本的图像处理功能",
           status: false,
         },
         {
           name: "pyautogui",
-          desc:
-            "pyautogui是纯Python的GUI自动化工具，使用pyautogui可以用程序自动控制鼠标和键盘操作",
+          desc: "pyautogui是纯Python的GUI自动化工具，使用pyautogui可以用程序自动控制鼠标和键盘操作",
           status: false,
         },
         {
@@ -361,14 +389,12 @@ export default {
         },
         {
           name: "pytesseract",
-          desc:
-            "tesseract是python的光学字符识别（OCR）工具，可识别并读取嵌入图像中的文本。",
+          desc: "tesseract是python的光学字符识别（OCR）工具，可识别并读取嵌入图像中的文本。",
           status: false,
         },
         {
           name: "shutil",
-          desc:
-            "shutil提供了许多关于文件和文件集合的高级操作，特别提供了支持文件复制和删除的功能",
+          desc: "shutil提供了许多关于文件和文件集合的高级操作，特别提供了支持文件复制和删除的功能",
           status: false,
         },
       ],
@@ -441,16 +467,13 @@ export default {
       var ace_printmarginlayer = document.getElementsByClassName(
         "ace_print-margin-layer"
       )[0];
-      var ace_markerlayerone = document.getElementsByClassName(
-        "ace_marker-layer"
-      )[0];
-      var ace_markerlayertwo = document.getElementsByClassName(
-        "ace_marker-layer"
-      )[1];
+      var ace_markerlayerone =
+        document.getElementsByClassName("ace_marker-layer")[0];
+      var ace_markerlayertwo =
+        document.getElementsByClassName("ace_marker-layer")[1];
       var ace_textlayer = document.getElementsByClassName("ace_text-layer")[0];
-      var ace_cursorlayer = document.getElementsByClassName(
-        "ace_cursor-layer"
-      )[0];
+      var ace_cursorlayer =
+        document.getElementsByClassName("ace_cursor-layer")[0];
 
       if (ace_gutter.clientHeight < this.lineHeight) {
         ace_gutter.style.height = this.lineHeight + "px";
@@ -683,6 +706,8 @@ export default {
             path,
             myTab.TAB_STATUS.SAVED,
             suffix,
+            "",
+            myTab.TAB_STATUS.NOT_SAVE,
             ""
           );
           this.addTab(tab);
@@ -701,7 +726,16 @@ export default {
         // tab全部被删除, 但编辑器中还有内容
         console.log("tab noexist");
         // TODO: 文件后缀填什么
-        tab = myTab.setTab("", code, "", myTab.TAB_STATUS.NOT_SAVE, "cpp", "");
+        tab = myTab.setTab(
+          "",
+          code,
+          "",
+          myTab.TAB_STATUS.NOT_SAVE,
+          "cpp",
+          "",
+          myTab.TAB_STATUS.NOT_SAVE,
+          ""
+        );
         this.addTab(tab);
       }
 
@@ -709,11 +743,13 @@ export default {
       console.log("tab save status: ", tab.isSave);
       if (saveAs === false && tab.isSave === myTab.TAB_STATUS.SAVED) {
         // TODO: 如何处理本地存储及云上存储?
-        if (tab.sha1 === "") fs.writeFileSync(tab.filePath, code);
+        fs.writeFileSync(tab.filePath, code);
         if (this.needRun) {
           console.log("run: ", tab.suffix, "+", tab.filePath);
           this.execRun(tab.suffix, tab.filePath);
           this.needRun = false;
+        } else {
+          return this.$message.success("保存文件成功");
         }
 
         return;
@@ -726,7 +762,15 @@ export default {
 
       var filter;
       //另存为 可改变文件格式, 需要支持全部文件类型选择
-      if (saveAs) {
+      // if (saveAs) {
+      //   filter = [
+      //     { name: "CPP", extensions: ["cpp"] },
+      //     { name: "C", extensions: ["c"] },
+      //     { name: "Python", extensions: ["py"] },
+      //     { name: "All Files", extensions: ["*"] },
+      //   ];
+      // } else {
+      if (tab.suffix.length === 0) {
         filter = [
           { name: "CPP", extensions: ["cpp"] },
           { name: "C", extensions: ["c"] },
@@ -734,23 +778,19 @@ export default {
           { name: "All Files", extensions: ["*"] },
         ];
       } else {
-        if (tab.suffix.length === 0) {
-          filter = [
-            { name: "CPP", extensions: ["cpp"] },
-            { name: "C", extensions: ["c"] },
-            { name: "Python", extensions: ["py"] },
-            { name: "All Files", extensions: ["*"] },
-          ];
-        } else {
-          filter = this.extensions.get(tab.suffix);
-        }
+        filter = this.extensions.get(tab.suffix);
       }
+      // }
 
       tab.isSave = myTab.TAB_STATUS.SAVING;
+      let defaultName = myFile.getFileNameWithoutSuffix(tab.title);
+      if (defaultName === "") {
+        defaultName = "main";
+      }
 
       dialog.showSaveDialog(
         {
-          defaultPath: "main",
+          defaultPath: defaultName,
           filters: filter,
         },
         (rsp) => {
@@ -776,6 +816,8 @@ export default {
           if (this.needRun) {
             this.execRun(tab.suffix, tab.filePath);
             this.needRun = false;
+          } else {
+            return this.$message.success("保存文件成功");
           }
         }
       );
@@ -791,11 +833,14 @@ export default {
           return this.$message.error(res.data.err_msg);
         console.log("cloud files: ", res.data.data);
         this.cloudFiles = res.data.data;
+        this.cloudFiles.sort(function (a, b) {
+          return a.upload_at < b.upload_at ? 1 : -1;
+        });
       });
 
       this.openCloudDisk = true;
     },
-    uploadFile() {
+    uploadFile(force) {
       let code = myEditor.getSourceCode();
       console.log("save --> active tab idx: ", this.activeTab);
       let tab = myTab.findTabByName(this.activeTab);
@@ -805,19 +850,30 @@ export default {
         // tab全部被删除, 但编辑器中还有内容
         console.log("tab noexist");
         // TODO: 文件后缀填什么
-        tab = myTab.setTab("", code, "", myTab.TAB_STATUS.NOT_SAVE, "cpp", "");
+        tab = myTab.setTab(
+          "",
+          code,
+          "",
+          myTab.TAB_STATUS.NOT_SAVE,
+          "cpp",
+          "",
+          myTab.TAB_STATUS.NOT_SAVE,
+          ""
+        );
         this.addTab(tab);
       }
 
-      tab.title = this.fileRename;
+      tab.title = this.fileRename + this.fileSuffix;
       var fileData = {
         name: tab.title,
-        content: tab.content,
+        content: code,
         type: tab.suffix,
+        force: force,
       };
 
       this.fileUploadEnable = false;
-      if (tab.sha1 !== "") {
+      // 文件云端更新
+      if (tab.cloudIsSave === myTab.TAB_STATUS.SAVED) {
         console.log("update code file: ", tab.title);
         var url =
           this.cloudDiskDomain + "/apis/aiknow/dev/files?sha1=" + tab.sha1;
@@ -829,15 +885,23 @@ export default {
             res.data
           );
           if (res.data.err_code !== 0) {
-            return this.$message.error(res.data.err_msg);
+            // 文件在云端已存在
+            if (res.data.err_code === -100) {
+              this.fileExisted = true;
+              return;
+            }
+
+            return this.$message.error("保存文件失败: ", res.data.err_msg);
           }
 
           tab.title = res.data.data.name;
+          tab.content = code;
           tab.sha1 = res.data.data.sha1;
-          tab.isSave = myTab.TAB_STATUS.SAVED;
-          return this.$message.success("上传成功");
+          tab.cloudIsSave = myTab.TAB_STATUS.SAVED;
+          return this.$message.success("保存文件成功");
         });
       } else {
+        // 文件保存到云端
         console.log("add code file: ", tab.title);
         var url = this.cloudDiskDomain + "/apis/aiknow/dev/files";
         this.$http.post(url, fileData).then((res) => {
@@ -848,13 +912,19 @@ export default {
             res.data
           );
           if (res.data.err_code !== 0) {
+            // 文件在云端已存在
+            if (res.data.err_code === -100) {
+              this.fileExisted = true;
+              return;
+            }
             return this.$message.error(res.data.err_msg);
           }
 
           tab.title = res.data.data.name;
+          tab.content = code;
           tab.sha1 = res.data.data.sha1;
-          tab.isSave = myTab.TAB_STATUS.SAVED;
-          return this.$message.success("上传成功");
+          tab.cloudIsSave = myTab.TAB_STATUS.SAVED;
+          return this.$message.success("保存文件成功");
         });
       }
     },
@@ -870,8 +940,10 @@ export default {
           fileInfo.name,
           fileInfo.content,
           "",
-          myTab.TAB_STATUS.SAVED,
+          myTab.TAB_STATUS.NOT_SAVE,
           fileInfo.type,
+          fileInfo.name,
+          myTab.TAB_STATUS.SAVED,
           fileInfo.sha1
         );
         this.addTab(tab);
@@ -897,23 +969,35 @@ export default {
         case "saveAs":
           this.saveFile(true);
           break;
-        case "openCloudDisk":
+        case "openFilesFromCloudDisk":
           this.ListFileMetadata();
           break;
-        case "uploadCloudDisk":
-          // this.uploadFile();
-          if (!this.$store.state.userInfo.isLogin) {
-            return this.$message.warning("请先登入");
-          }
-
-          this.fileUploadEnable = true;
-          let curTab = myTab.findTabByName(this.activeTab);
-          if (curTab !== undefined) {
-            this.fileRename = curTab.title;
-          }
-
+        case "saveFileToCloudDisk":
+          this.renameBeforeUpload(false);
+          break;
+        case "saveAsFileToCloudDisk":
+          this.renameBeforeUpload(true);
           break;
       }
+    },
+    renameBeforeUpload(saveAs) {
+      if (!this.$store.state.userInfo.isLogin) {
+        return this.$message.warning("请先登入");
+      }
+
+      let curTab = myTab.findTabByName(this.activeTab);
+      if (curTab !== undefined) {
+        this.fileRename = myFile.getFileNameWithoutSuffix(curTab.title);
+        this.fileSuffix = "." + curTab.suffix;
+        // 文件已保存过, 且不另存为, 则直接保存到云端
+        // TODO: 做过本地保存和云端保存, 但保存的文件名不一样, 如何处理
+        if (curTab.cloudIsSave === myTab.TAB_STATUS.SAVED && saveAs === false) {
+          this.uploadFile(true);
+          return;
+        }
+      }
+
+      this.fileUploadEnable = true;
     },
     // 保存编辑器内容到本地
     storeData() {
@@ -1339,6 +1423,7 @@ export default {
 .fileListDiv .box-card {
   width: 23.5%;
   margin-right: 2%;
+  cursor: pointer;
 }
 
 .fileListDiv .box-card:nth-child(4n) {
@@ -1367,6 +1452,10 @@ export default {
 
 .el-tabs__new-tab {
   display: none;
+}
+
+.el-select .el-input {
+  width: 100px;
 }
 
 .ace_hidpi .ace_gutter-layer,

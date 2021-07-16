@@ -1402,7 +1402,7 @@ export default {
   line-height: 2.5vw;
   background-color: none;
   position: fixed;
-  top: 0.7408vw;
+  top: 0.4vw;
   left: 15.625vw;
   z-index: 10;
 }
@@ -1411,7 +1411,6 @@ export default {
   color: #fff;
   font-size: 1.354vw;
   font-weight: bold;
-  margin-top: 0.3125;
   background: none;
   border: none;
 }

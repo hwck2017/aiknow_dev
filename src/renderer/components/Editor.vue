@@ -170,7 +170,12 @@
         <el-button type="primary" @click="addLangTab">确 定</el-button>
       </span>
     </el-dialog>
-    <el-dialog title="文件保存为" width="40%" :visible.sync="fileUploadEnable">
+    <el-dialog
+      v-if="needSaveAs == false"
+      title="文件保存为"
+      width="40%"
+      :visible.sync="fileUploadEnable"
+    >
       <el-input v-model="fileRename" placeholder="请输入文件名称">
         <el-select v-model="fileSuffix" slot="append" placeholder="请选择">
           <el-option label=".cpp" value="1"></el-option>
@@ -180,7 +185,29 @@
       </el-input>
       <span slot="footer" class="dialog-footer">
         <el-button @click="fileUploadEnable = false">取 消</el-button>
-        <el-button type="primary" @click="uploadFile(false)">确 定</el-button>
+        <el-button type="primary" @click="uploadFile(false, false)"
+          >确 定</el-button
+        >
+      </span>
+    </el-dialog>
+    <el-dialog
+      v-if="needSaveAs == true"
+      title="文件另存为"
+      width="40%"
+      :visible.sync="fileUploadEnable"
+    >
+      <el-input v-model="fileRename" placeholder="请输入文件名称">
+        <el-select v-model="fileSuffix" slot="append" placeholder="请选择">
+          <el-option label=".cpp" value="1"></el-option>
+          <el-option label=".c" value="2"></el-option>
+          <el-option label=".py" value="3"></el-option>
+        </el-select>
+      </el-input>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="fileUploadEnable = false">取 消</el-button>
+        <el-button type="primary" @click="uploadFile(false, true)"
+          >确 定</el-button
+        >
       </span>
     </el-dialog>
     <el-dialog title="打开文件" width="70%" :visible.sync="openCloudDisk">
@@ -210,7 +237,7 @@
         <el-button
           type="primary"
           @click="
-            uploadFile(true);
+            uploadFile(true, needSaveAs);
             fileExisted = false;
           "
           >覆 盖</el-button
@@ -309,6 +336,7 @@ export default {
       fileRename: "",
       //文件保存到云端前用户修改的后缀
       fileSuffix: ".py",
+      needSaveAs: false,
 
       cloudDiskDomain: "http://test.aiknow.cn:12345",
       // cloudDiskDomain: "http://127.0.0.1:12345",
@@ -840,7 +868,7 @@ export default {
 
       this.openCloudDisk = true;
     },
-    uploadFile(force) {
+    uploadFile(force, saveAs) {
       let code = myEditor.getSourceCode();
       console.log("save --> active tab idx: ", this.activeTab);
       let tab = myTab.findTabByName(this.activeTab);
@@ -863,9 +891,9 @@ export default {
         this.addTab(tab);
       }
 
-      tab.title = this.fileRename + this.fileSuffix;
+      // tab.title = this.fileRename + this.fileSuffix;
       var fileData = {
-        name: tab.title,
+        name: this.fileRename + this.fileSuffix,
         content: code,
         type: tab.suffix,
         force: force,
@@ -873,7 +901,7 @@ export default {
 
       this.fileUploadEnable = false;
       // 文件云端更新
-      if (tab.cloudIsSave === myTab.TAB_STATUS.SAVED) {
+      if (tab.cloudIsSave === myTab.TAB_STATUS.SAVED && !saveAs) {
         console.log("update code file: ", tab.title);
         var url =
           this.cloudDiskDomain + "/apis/aiknow/dev/files?sha1=" + tab.sha1;
@@ -985,6 +1013,7 @@ export default {
         return this.$message.warning("请先登入");
       }
 
+      this.needSaveAs = saveAs;
       let curTab = myTab.findTabByName(this.activeTab);
       if (curTab !== undefined) {
         this.fileRename = myFile.getFileNameWithoutSuffix(curTab.title);
@@ -992,7 +1021,7 @@ export default {
         // 文件已保存过, 且不另存为, 则直接保存到云端
         // TODO: 做过本地保存和云端保存, 但保存的文件名不一样, 如何处理
         if (curTab.cloudIsSave === myTab.TAB_STATUS.SAVED && saveAs === false) {
-          this.uploadFile(true);
+          this.uploadFile(true, false);
           return;
         }
       }

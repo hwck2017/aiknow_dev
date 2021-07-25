@@ -26,7 +26,7 @@
             </span>
           </div>
           <div v-else style="">
-            <el-button class="loginBtn" @click="login">登录</el-button>
+            <el-button class="loginBtn" size="medium" @click="login">登录</el-button>
           </div>
         </el-col>
         <el-col :span="16">
@@ -65,15 +65,18 @@
             </el-menu> -->
 
             <div class="elMenuBg">
-              <div :class="headerItemSelectedIndex == 0 ? 'elMenuItemSelected' : 'elMenuItem'" @click="jump(0, '/dashboard')">
-                <span class="itemTitle">主页</span>
-              </div>
-              <div :class="headerItemSelectedIndex == 1 ? 'elMenuItemSelected' : 'elMenuItem'" @click="jump(1, '/editor')">
-                <span class="itemTitle">编辑器</span>
-              </div>
-              <div :class="headerItemSelectedIndex == 2 ? 'elMenuItemSelected' : 'elMenuItem'" @click="jump(2, '/problems')">
-                <span class="itemTitle">题目</span>
-              </div>
+              <el-button :class="headerItemSelectedIndex == 0 ? 'elMenuItemSelected' : 'elMenuItem'" size="medium"  @click="jump(0, '/dashboard')">
+                <!-- <span class="itemTitle">主页</span> -->
+                主页
+              </el-button>
+              <el-button :class="headerItemSelectedIndex == 1 ? 'elMenuItemSelected' : 'elMenuItem'" size="medium" @click="jump(1, '/editor')">
+                <!-- <span class="itemTitle">编辑器</span> -->
+                编辑器
+              </el-button>
+              <el-button :class="headerItemSelectedIndex == 2 ? 'elMenuItemSelected' : 'elMenuItem'" size="medium" @click="jump(2, '/problems')">
+                <!-- <span class="itemTitle">题目</span> -->
+                题目
+              </el-button>
             </div>
 
           </div>
@@ -224,23 +227,17 @@ export default {
 }
 
 .elMenuItem {
-  padding: 0 1.5625vw;
-  height: 2.5vw;
-  line-height: 2.5vw;
-  background-color: none;
-  margin-top: 0.78125vw;
+  background: none;
+  margin-top: 0.4vw;
   color: #fff;
   font-size: 1.354vw;
   font-family: tonjayBold;
-
+  border: none;
 }
 
 .elMenuItemSelected {
-  padding: 0 1.5625vw;
-  height: 2.5vw;
-  line-height: 2.5vw;
-  background-color: #fff;
-  margin-top: 0.78125vw;
+  background: #fff;
+  margin-top: 0.4vw;
   color: #275ca7;
   border-radius: 6px;
   font-size: 1.354vw;
@@ -249,7 +246,7 @@ export default {
 
 
 .loginBtn {
-  height: 2.5vw;;
+  /* height: 2.5vw;
   background: none;
   border: none;
   color: #fff;
@@ -257,7 +254,13 @@ export default {
   font-weight: bold;
   margin-top: 0.78125vw;;
   padding-top: 0px;
-  padding-bottom: 0px;
+  padding-bottom: 0px; */
+  color: #fff;
+  font-size: 1.354vw;
+  font-weight: tonjayBold;
+  margin-top: 0.4vw;  
+  background: none;
+  border: none;
 }
 
 .loginBtn:focus .loginBtn:hover {

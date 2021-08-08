@@ -230,7 +230,7 @@
     </el-dialog>
     <el-dialog width="30%" :visible.sync="fileExisted">
       <span>
-        <h3>文件 {{ fileRename }}{{ fileSuffix }} 已存在，是否覆盖？</h3>
+        <h3>文件 {{ fileRename }}{{ fileSuffix }} 已存在，是否替换？</h3>
       </span>
       <span slot="footer" class="dialog-footer">
         <el-button @click="fileExisted = false">取 消</el-button>
@@ -240,7 +240,7 @@
             uploadFile(true, needSaveAs);
             fileExisted = false;
           "
-          >覆 盖</el-button
+          >替 换</el-button
         >
       </span>
     </el-dialog>
@@ -338,8 +338,9 @@ export default {
       fileSuffix: ".py",
       needSaveAs: false,
 
-      cloudDiskDomain: "http://test.aiknow.cn:12345",
+      // cloudDiskDomain: "http://test.aiknow.cn:12345",
       // cloudDiskDomain: "http://127.0.0.1:12345",
+      cloudDiskDomain: "http://39.104.89.120:12345",
       cloudFiles: [],
       libInstalling: false,
       opencmd: false,
